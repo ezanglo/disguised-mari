@@ -1,15 +1,18 @@
 /* eslint-disable no-case-declarations */
 const { MessageEmbed } = require('discord.js');
 
-module.exports = (client, int) => {
+module.exports = async (client, int) => {
 
     try {
 
-    if (!int.isButton()) return;
+        if (!int.isButton()) return;
 
         const queue = player.getQueue(int.guildId);
+        
+        const args = int.customId.split('_');
+        const customId = args.shift();
 
-        switch (int.customId) {
+        switch (customId) {
             case 'saveTrack': 
                 if (!queue || !queue.playing) return int.reply({ content: `No music currently playing... try again ? ❌`, ephemeral: true, components: [] });
 
@@ -61,9 +64,59 @@ module.exports = (client, int) => {
                     return int.channel.send({ embeds: [embed], ephemeral: true});
                 }
             break;
+            case 'SKILL':
+                const author = args.shift();
+                if(author != int.member.user.id){
+                    return int.reply({ content: `You don't have access to this interaction ${int.member}... ❌`, ephemeral: true });
+                }
+
+                const heroId = args.shift();
+                await api.get('Hero/' + heroId + 
+                    '?nested[Upgrades][fields]=Id,Name,Code' +
+                    '&nested[Skills][fields]=Id,Name,Code,Image,SP,Description,Cooldown,UpgradeTypeRead,CreatedAt,UpdatedAt')
+                .then((response) => {
+                    const hero = response.data;
+                    const cmd = client.commands.get('skill')
+                    const skill = cmd.getHeroSkill(hero, args, author)
+                    return int.update({
+                        embeds: [skill.embed],
+                        components: skill.components ? [skill.components]: []
+                    })
+                })
+                .catch(e => {
+                    int.reply({ content: `An Error has occured ${int.member}... try again ? ❌`, ephemeral: true });
+                });
+                
+            break;
+            case 'TRAIT':
+                const traitAuthor = args.shift();
+                if(traitAuthor != int.member.user.id){
+                    return int.reply({ content: `You don't have access to this interaction ${int.member}... ❌`, ephemeral: true });
+                }
+
+                const traitHeroId = args.shift();
+                await api.get('Hero/' + traitHeroId + 
+                    '?nested[Upgrades][fields]=Id,Name,Code'+
+                    '&nested[Skills][fields]=Code,Image,UpgradeTypeRead' +
+                    '&nested[Traits][fields]=Id,Code,UpgradeTypeRead,ContentTypeRead,Config')
+                .then(async response => {
+                    const hero = response.data;
+                    const cmd = client.commands.get('trait')
+                    const trait = await cmd.getHeroTrait(hero, args, traitAuthor);
+                    return int.update({
+                        embeds: [trait.embed],
+                        files: trait.attachment ? [trait.attachment]: [],
+                        components: trait.components ? [trait.components]: []
+                    })
+                })
+                .catch(e => {
+                    int.reply({ content: `An Error has occured ${int.member}... try again ? ❌`, ephemeral: true });
+                });
+                
+            break;
         }
     }
     catch(e){
-        int.reply(`An Error has occured ${int.member}... try again ? ❌`);
+        int.reply({ content: `An Error has occured ${int.member}... try again ? ❌`, ephemeral: true });
     }
 };

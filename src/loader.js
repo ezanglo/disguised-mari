@@ -16,14 +16,49 @@ for (const file of events) {
 
 console.log(`Loading commands...`);
 
-readdirSync('./commands/music').forEach(file => {
-    if(file.endsWith('.js')){
-        const command = require(`../commands/music/${file}`);
-        console.log(`-> Loaded command ${command.name.toLowerCase()}`);
-        client.commands.set(command.name.toLowerCase(), command);
-        delete require.cache[require.resolve(`../commands/music/${file}`)];
+// readdirSync('./commands/guide-chase').forEach(file => {
+//     if(file.endsWith('.js')){
+//         const command = require(`../commands/guide-chase/${file}`);
+//         console.log(`-> Loaded command ${command.name.toLowerCase()}`);
+//         client.commands.set(command.name.toLowerCase(), command);
+//         delete require.cache[require.resolve(`../commands/guide-chase/${file}`)];
+//     }
+// });
+
+api.get('Hero?limit=100&fields=Id,Code').then((response) => {
+    if(response.status == 200){
+        client.heroes = response.data.list
+        // client.heroes.forEach(hero => {
+        //     console.log(`-> Loaded command ${hero.Code.toLowerCase()}`);
+        //     client.commands.set(hero.Code.toLowerCase(), require(`../commands/guide-chase/hero`))
+        // });
     }
 });
+
+
+api.get('TraitType').then((response) => {
+    if(response.status == 200){
+        client.traitTypes = response.data.list
+    }
+})
+
+readdirSync('./commands/guide-chase').forEach(file => {
+    if(file.endsWith('.js')){
+        const command = require(`../commands/guide-chase/${file}`);
+        console.log(`-> Loaded command ${command.name.toLowerCase()}`);
+        client.commands.set(command.name.toLowerCase(), command);
+        delete require.cache[require.resolve(`../commands/guide-chase/${file}`)];
+    }
+});
+
+// readdirSync('./commands/music').forEach(file => {
+//     if(file.endsWith('.js')){
+//         const command = require(`../commands/music/${file}`);
+//         console.log(`-> Loaded command ${command.name.toLowerCase()}`);
+//         client.commands.set(command.name.toLowerCase(), command);
+//         delete require.cache[require.resolve(`../commands/music/${file}`)];
+//     }
+// });
 
 // readdirSync('./commands/').forEach(dirs => {
 //     const commands = readdirSync(`./commands/${dirs}`).filter(files => files.endsWith('.js'));

@@ -51,7 +51,9 @@ client.on('interactionCreate', async interaction => {
             case 'gibaway':
             case 'Grimoire':
                 await interaction.guild.members.fetch();
-                const users = interaction.guild.roles.cache.find(r => r.name === roleName).members.map(m => {
+                const gibawayRole = interaction.guild.roles.cache.find(x => x.name === 'gibaway');
+
+                let users = interaction.guild.roles.cache.find(r => r.name === roleName).members.map(m => {
                     const avatar_url = m.user.displayAvatarURL()
                     return {
                         id: m.user.id,
@@ -60,9 +62,13 @@ client.on('interactionCreate', async interaction => {
                         avatar: m.user.avatar,
                         tag: m.user.tag,
                         nickname: (m.nickname) ? m.nickname: m.user.username,
-                        avatar_url: avatar_url
+                        avatar_url: avatar_url,
+                        gibaway: m._roles.includes(gibawayRole.id)
                     }
                 });
+
+                users = users.filter(user => user.gibaway);
+
                 await clearCollection('gibaway');
                 await setCollection('gibaway', users)
                 await interaction.reply(`${users.length} user(s) eligeble for gibaway (ROLE: ${roleName})`);

@@ -3,6 +3,7 @@ const { token } = require('./config.json');
 module.exports = {
     app: {
         px: '!',
+        gc: '?',
         token: token,
         playing: 'with your feelings'
     },
