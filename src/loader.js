@@ -36,7 +36,7 @@ api.get('Hero?limit=100&fields=Id,Code').then((response) => {
 });
 
 
-api.get('TraitType').then((response) => {
+api.get('TraitType?limit=100').then((response) => {
     if(response.status == 200){
         client.traitTypes = response.data.list
     }
