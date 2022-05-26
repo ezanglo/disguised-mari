@@ -51,6 +51,9 @@ module.exports = {
             const hero = response.data;
 
             const refreshImage = (args[args.length - 1] == '--refresh')
+            if(refreshImage){
+                args.pop()
+            }
 
             const result = await this.getHeroTrait(hero, args, message.author.id, refreshImage);
             if(!result){
