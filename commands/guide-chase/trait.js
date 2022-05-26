@@ -94,8 +94,6 @@ module.exports = {
             a.UpgradeTypeRead.OrderBy.localeCompare(b.UpgradeTypeRead.OrderBy),
         )
 
-        console.log(hero.Traits.map(x => { return x.Code}))
-
         let traitCommands = [hero.Code];
         if(isContentTypeTrait){
             traitCommands.push(args[0].toLowerCase());
