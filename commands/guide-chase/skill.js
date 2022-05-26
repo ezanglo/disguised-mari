@@ -11,7 +11,9 @@ module.exports = {
 
         if (!args[0]) return message.channel.send(`Hero name is required ${message.author}... try again ? ❌`);
         
-        if (!args[1]) return message.channel.send(`Skill is required ${message.author}... try again ? ❌`);
+        if (!args[1]){
+            args.push('base');
+        }
 
         const heroCode = args.shift();
 
@@ -27,59 +29,51 @@ module.exports = {
 
         await api.get('Hero/' + selectedHero.Id + 
             '?nested[Upgrades][fields]=Id,Name,Code'+
-            '&nested[Skills][fields]=Id,Name,Code,Image,SP,Description,Cooldown,UpgradeTypeRead,CreatedAt,UpdatedAt')
+            '&nested[Skills][fields]=Id,Name,Code,Image,SP,Description,Cooldown,UpgradeTypeRead,SkillTypeRead,CreatedAt,UpdatedAt')
         .then(async (response) => {
             const hero = response.data;
 
-            const skillCodes = ['s1', 's2', 'passive', 'cs', 'special'];
-            if(skillCodes.includes(args[0]))
-            {
-                const skill = this.getHeroSkill(hero, args, message.author.id)
-                if(!skill) {
-                    return message.channel.send({ embeds: [
-                        new MessageEmbed({
-                            color: 'RED',
-                            description: `Skill not found ${message.author}... try again ? ❌`
-                        })
-                    ]});
-                }
-
-                return message.channel.send({
-                    embeds: [skill.embed],
-                    components: skill.components ? [skill.components]: []
-                })
+            const skill = this.getHeroSkill(hero, args, message.author.id)
+            if(!skill) {
+                return message.channel.send({ embeds: [
+                    new MessageEmbed({
+                        color: 'RED',
+                        description: `Skill not found ${message.author}... try again ? ❌`
+                    })
+                ]});
             }
+
+            return message.channel.send({
+                embeds: [skill.embed],
+                components: skill.components ? [skill.components]: []
+            })
         })
         .catch(e => {
             message.channel.send(`An Error has occured ${message.author}... try again ? ❌`);
+            client.errorLog(e, message);
         });
     },
     getHeroSkill(hero, args, author)
     {
         const embed = new MessageEmbed();
+        embed.setColor(hero.Color);
 
-        const skills = hero.Skills.map(skill => {
-            let cmd = skill.Code;
-            if(skill.UpgradeTypeRead){
-                cmd += ` ${skill.UpgradeTypeRead.Code}`;
-            }
-            return {
-                ...skill,
-                cmd: cmd
-            }
-        })
+        const isSkill = ['s1', 's2', 'pass', 'cs', 'ss'].includes(args[0].toLowerCase());
+        const isUpgradeType = ['base', 'lb', 'si'].includes(args[0].toLowerCase());
+        
+        hero.Skills.sort((a, b) => (a.SkillTypeRead.OrderBy > b.SkillTypeRead.OrderBy) || (a.UpgradeTypeRead.OrderBy > b.UpgradeTypeRead.OrderBy) ? 1 : -1)
 
-        if(hero.Color){
-            embed.setColor(hero.Color);
+        let skillCommands = [hero.Code];
+        if(isSkill){
+            skillCommands.push(args[0].toLowerCase());
+            skillCommands.push(args[1] ? args[1].toLowerCase() : (hero.Skills.length > 0) ? hero.Skills[0].UpgradeTypeRead.Code : 'base');
+        }
+        else if(isUpgradeType){
+            skillCommands.push(args[1] ? args[1].toLowerCase() : (hero.Skills.length > 0) ? hero.Skills[0].SkillTypeRead.Code : 's1');
+            skillCommands.push(args[0].toLowerCase());
         }
 
-        const skillCommands = [
-            args[0].toLowerCase(),
-            args[1] ? args[1].toLowerCase() : 'base'
-        ];
-
-
-        let skill = skills.find(x => x.cmd == skillCommands.join(' '));
+        let skill = hero.Skills.find(x => x.Code == skillCommands.join('.'));
         if(skill){
             let authorLabel = skill.Name;
             if(skill.SP){
@@ -87,6 +81,47 @@ module.exports = {
             }
             embed.setThumbnail(skill.Image);
             embed.setAuthor(authorLabel);
+
+            const row = new MessageActionRow();
+
+            if(isSkill){
+                hero.Skills.forEach(s => {
+                    if(args[0] == s.SkillTypeRead.Code){
+                        const isCurrentSkill = (s.UpgradeTypeRead.Code == skill.UpgradeTypeRead.Code);
+                        row.addComponents(new MessageButton({
+                            label: s.UpgradeTypeRead.Name,
+                            customId: [
+                                'SKILL',
+                                author,
+                                hero.Id,
+                                s.SkillTypeRead.Code,
+                                s.UpgradeTypeRead.Code
+                            ].join('_'),
+                            style: isCurrentSkill ? 'SECONDARY' : 'PRIMARY',
+                            disabled: isCurrentSkill
+                        }))
+                    }
+                });
+            }
+            else if(isUpgradeType){
+                hero.Skills.forEach(s => {
+                    if(args[0] == s.UpgradeTypeRead.Code){
+                        const isCurrentSkill = (s.SkillTypeRead.Code == skill.SkillTypeRead.Code);
+                        row.addComponents(new MessageButton({
+                            label: s.SkillTypeRead.Name,
+                            customId: [
+                                'SKILL',
+                                author,
+                                hero.Id,
+                                s.UpgradeTypeRead.Code,
+                                s.SkillTypeRead.Code
+                            ].join('_'),
+                            style: isCurrentSkill ? 'SECONDARY' : 'PRIMARY',
+                            disabled: isCurrentSkill
+                        }))
+                    }
+                })
+            }
 
             if(skill.UpgradeTypeRead){
                 embed.addField('Upgrade Type', skill.UpgradeTypeRead.Name, true)
@@ -114,28 +149,6 @@ module.exports = {
             let skillDate = (skill.UpdatedAt) ? skill.UpdatedAt : skill.CreatedAt;
 
             embed.setFooter(`Last updated ${new Date(skillDate).toLocaleDateString()}`);
-
-            const row = new MessageActionRow();
-
-            const upgradeSkills = hero.Skills.sort((a, b) => (a.UpgradeTypeRead.OrderBy > b.UpgradeTypeRead.OrderBy) ? 1 : -1)
-
-            upgradeSkills.forEach(s => {
-                if(args[0] == s.Code){
-                    const isCurrentSkill = (s.UpgradeTypeRead.Code == skill.UpgradeTypeRead.Code);
-                    row.addComponents(new MessageButton({
-                        label: s.UpgradeTypeRead.Name,
-                        customId: [
-                            'SKILL',
-                            author,
-                            hero.Id,
-                            s.Code,
-                            s.UpgradeTypeRead.Code
-                        ].join('_'),
-                        style: isCurrentSkill ? 'SECONDARY' : 'PRIMARY',
-                        disabled: isCurrentSkill
-                    }))
-                }
-            });
 
             return {
                 embed: embed,

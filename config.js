@@ -5,7 +5,9 @@ module.exports = {
         px: '!',
         gc: '?',
         token: token,
-        playing: 'with your feelings'
+        playing: 'with your feelings',
+        debug_mode: true,
+        error_log_channel: '979175534363832340'
     },
 
     opt: {

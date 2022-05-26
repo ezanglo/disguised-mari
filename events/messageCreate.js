@@ -34,33 +34,50 @@ module.exports = (client, message) => {
         // //     //     console.log(e);
         // //     // });
 
-        //     api.get('Hero?limit=100&fields=Id,Code,Upgrades,Traits,Contents').then(async (response) => {
+        //     api.get('Hero?limit=100&nested[Skills][fields]=Id,Name,Code,Image,SP,Description,Cooldown,UpgradeTypeRead,CreatedAt,UpdatedAt').then(async (response) => {
         //         if(response.status == 200){
         //             const heroes = response.data.list
+        //             const skillConfig = { s1: 1, s2: 2, pass: 3, cs: 4, ss: 5}
         //             for(const hero of heroes) {
-        //                 // for(const trait of hero.Traits){
-        //                 //     if(trait.nc_16ql__upgrade_type_id == 6){
-        //                 //         let traitCode = trait.Code.split('.');
-        //                 //         traitCode = [traitCode[0], traitCode[1], 'lvl'].join('.');
-        //                 //         const response = await api.patch('HeroTrait/' + trait.Id, {
-        //                 //             Code: traitCode,
-        //                 //             nc_16ql__upgrade_type_id: 9,
-        //                 //             Config: {
-        //                 //                 crit: 5,
-        //                 //                 cdr: 5
-        //                 //             }
-        //                 //         })
-        //                 //     }
+        //                 for(const skill of hero.Skills){
+        //                     // let skillCode = skill.Code.split('.');
+        //                     // if(skillCode[1] == 'passive'){
+        //                     //     skillCode = [hero.Code, 'pass', skill.UpgradeTypeRead.Code].join('.');
+        //                     //     const response = await api.patch('HeroSkill/' + skill.Id, {
+        //                     //         Code: skillCode,
+        //                     //         nc_16ql__skill_type_id: 3
+        //                     //     })
+        //                     // }
+        //                     // else if(skillCode[1] == 'special'){
+        //                     //     skillCode = [hero.Code, 'ss', skill.UpgradeTypeRead.Code].join('.');
+        //                     //     const response = await api.patch('HeroSkill/' + skill.Id, {
+        //                     //         Code: skillCode,
+        //                     //         nc_16ql__skill_type_id: 5
+        //                     //     })
+        //                     // }
 
-        //                 //     if(trait.nc_16ql__upgrade_type_id == 2){
-        //                 //         let traitCode = trait.Code.split('.');
-        //                 //         traitCode = [traitCode[0], traitCode[1], 'trans'].join('.');
-        //                 //         const response = await api.patch('HeroTrait/' + trait.Id, {
-        //                 //             Code: traitCode,
-        //                 //             nc_16ql__upgrade_type_id: 8
-        //                 //         })
-        //                 //     }
-        //                 // }
+        //                     // if(trait.nc_16ql__upgrade_type_id == 6){
+        //                     //     let traitCode = trait.Code.split('.');
+        //                     //     traitCode = [traitCode[0], traitCode[1], 'lvl'].join('.');
+        //                     //     const response = await api.patch('HeroTrait/' + trait.Id, {
+        //                     //         Code: traitCode,
+        //                     //         nc_16ql__upgrade_type_id: 9,
+        //                     //         Config: {
+        //                     //             crit: 5,
+        //                     //             cdr: 5
+        //                     //         }
+        //                     //     })
+        //                     // }
+
+        //                     // if(trait.nc_16ql__upgrade_type_id == 2){
+        //                     //     let traitCode = trait.Code.split('.');
+        //                     //     traitCode = [traitCode[0], traitCode[1], 'trans'].join('.');
+        //                     //     const response = await api.patch('HeroTrait/' + trait.Id, {
+        //                     //         Code: traitCode,
+        //                     //         nc_16ql__upgrade_type_id: 8
+        //                     //     })
+        //                     // }
+        //                 }
         //                 // for(const content of hero.Contents){
         //                 //     for(const upgrade of hero.Upgrades){
         //                 //         const traitCode = `${hero.Code}.${content.Code}.${upgrade.Code}`

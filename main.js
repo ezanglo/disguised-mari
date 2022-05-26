@@ -1,5 +1,5 @@
 const { Player } = require('discord-player');
-const { Client, Intents } = require('discord.js');
+const { Client, Intents, MessageEmbed } = require('discord.js');
 const  axios  = require('axios');
 const { api } = require('./config.json');
 
@@ -27,3 +27,22 @@ require('./src/loader');
 require('./src/events.js');
 
 client.login(client.config.app.token);
+
+client.errorLog = (e, message) => {
+    if(client.config.app.debug_mode){
+        const channel = client.channels.cache.get(client.config.app.error_log_channel)
+        const embed = new MessageEmbed({
+            color: 'RED'
+        })
+        embed.setAuthor(`❌ An error has occured`)
+        embed.setThumbnail(client.user.displayAvatarURL({ size: 1024, dynamic: true }))
+        embed.addField('User', `${message.author}`, true)
+        embed.addField('Channel', `${message.channel}`, true)
+        embed.addField('Command', `\`${message.content}\``, true)
+        embed.addField('Stack Trace', '```' + e.stack + '```')
+        
+        channel.send({
+            embeds: [embed]
+        });
+    }
+}

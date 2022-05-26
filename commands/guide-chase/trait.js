@@ -45,7 +45,7 @@ module.exports = {
 
         await api.get('Hero/' + selectedHero.Id + 
             '?nested[Upgrades][fields]=Id,Name,Code'+
-            '&nested[Skills][fields]=Code,Image,UpgradeTypeRead' +
+            '&nested[Skills][fields]=Code,Image,UpgradeTypeRead,SkillTypeRead' +
             '&nested[Traits][fields]=Id,Code,UpgradeTypeRead,ContentTypeRead,Config,Image')
         .then(async (response) => {
             const hero = response.data;
@@ -75,6 +75,7 @@ module.exports = {
         })
         .catch(e => {
             message.channel.send(`An Error has occured ${message.author}... try again ? ❌`);
+            client.errorLog(e, message);
         });
     },
     async getHeroTrait(hero, args, author, refreshImage)
@@ -82,15 +83,11 @@ module.exports = {
         const embed = new MessageEmbed();
         embed.setColor(hero.Color);
 
-        const traits = hero.Traits.map(trait => {
-            let cmd = trait.ContentTypeRead.Code;
-            if(trait.UpgradeTypeRead) cmd += ` ${trait.UpgradeTypeRead.Code}`;
-            return { ...trait, cmd: cmd }
-        })
-
         const isContentTypeTrait = this.getDefaultContent(args[0].toLowerCase());
         const isUpgradeTypeTrait = ['lvl', 'cs', 'si', 'trans'].includes(args[0].toLowerCase());
 
+        hero.Traits.sort((a, b) => (a.ContentTypeRead.Id > b.ContentTypeRead.Id) || (a.UpgradeTypeRead.OrderBy > b.UpgradeTypeRead.OrderBy) ? 1 : -1)
+        
         let traitCommands = [hero.Code];
         if(isContentTypeTrait){
             traitCommands.push(args[0].toLowerCase());
@@ -101,7 +98,7 @@ module.exports = {
             traitCommands.push(args[0].toLowerCase());
         }
 
-        let trait = traits.find(x => x.Code == traitCommands.join('.'));
+        let trait = hero.Traits.find(x => x.Code == traitCommands.join('.'));
         if(trait)
         {
             embed.setAuthor(`${hero.DisplayName} | ${trait.UpgradeTypeRead.Name} Traits | ${trait.ContentTypeRead.Name}`, hero.Image);
@@ -109,8 +106,7 @@ module.exports = {
             const row = new MessageActionRow();
 
             if(isContentTypeTrait){
-                const traitUpgradeTypes = hero.Traits.sort((a, b) => (a.UpgradeTypeRead.OrderBy > b.UpgradeTypeRead.OrderBy) ? 1 : -1)
-                for(const t of traitUpgradeTypes){
+                for(const t of hero.Traits){
                     if(args[0] == t.ContentTypeRead.Code){
                         const isCurrentTrait = (t.UpgradeTypeRead.Code == trait.UpgradeTypeRead.Code);
                         row.addComponents(new MessageButton({
@@ -129,8 +125,7 @@ module.exports = {
                 }
             }
             else if (isUpgradeTypeTrait){
-                const traitContentTypes = hero.Traits.sort((a, b) => (a.ContentTypeRead.Id > b.ContentTypeRead.Id) ? 1 : -1)
-                for(const t of traitContentTypes){
+                for(const t of hero.Traits){
                     if(args[0] == t.UpgradeTypeRead.Code){
                         const isCurrentTrait = (t.ContentTypeRead.Code == trait.ContentTypeRead.Code);
                         row.addComponents(new MessageButton({
@@ -267,7 +262,7 @@ module.exports = {
                             if(rowTrait && trait.Config[rowTrait]){
                                 let traitConfig = client.traitTypes.find(x => x.Code == rowTrait)
                                 if(['csr', 'csl'].includes(rowTrait)){
-                                    traitConfig = hero.Skills.find(x => x.Code == 'cs' && x.UpgradeTypeRead.Code == 'base')
+                                    traitConfig = hero.Skills.find(x => x.Code == `${hero.Code}.cs.base`)
                                 }
                                 if(traitConfig){
                                     const traitImage = await loadImage(traitConfig.Image);
@@ -414,6 +409,7 @@ module.exports = {
         })
         .catch(e => {
             message.channel.send(`An Error has occured ${message.author}... try again ? ❌`);
+            client.errorLog(e, message);
         });
     },
     addWaterMark(ctx, canvas){

@@ -73,7 +73,7 @@ module.exports = async (client, int) => {
                 const heroId = args.shift();
                 await api.get('Hero/' + heroId + 
                     '?nested[Upgrades][fields]=Id,Name,Code' +
-                    '&nested[Skills][fields]=Id,Name,Code,Image,SP,Description,Cooldown,UpgradeTypeRead,CreatedAt,UpdatedAt')
+                    '&nested[Skills][fields]=Id,Name,Code,Image,SP,Description,Cooldown,UpgradeTypeRead,SkillTypeRead,CreatedAt,UpdatedAt,OrderBy')
                 .then((response) => {
                     const hero = response.data;
                     const cmd = client.commands.get('skill')
@@ -85,6 +85,11 @@ module.exports = async (client, int) => {
                 })
                 .catch(e => {
                     int.reply({ content: `An Error has occured ${int.member}... try again ? ❌`, ephemeral: true });
+                    client.errorLog(e, {
+                        author: int.member,
+                        channel: int.channel,
+                        content: `Interaction: ${customId}`
+                    });
                 });
                 
             break;
@@ -97,8 +102,8 @@ module.exports = async (client, int) => {
                 const traitHeroId = args.shift();
                 await api.get('Hero/' + traitHeroId + 
                     '?nested[Upgrades][fields]=Id,Name,Code'+
-                    '&nested[Skills][fields]=Code,Image,UpgradeTypeRead' +
-                    '&nested[Traits][fields]=Id,Code,UpgradeTypeRead,ContentTypeRead,Config')
+                    '&nested[Skills][fields]=Code,Image,UpgradeTypeRead,SkillTypeRead' +
+                    '&nested[Traits][fields]=Id,Code,UpgradeTypeRead,ContentTypeRead,Config,OrderBy')
                 .then(async response => {
                     const hero = response.data;
                     const cmd = client.commands.get('trait')
@@ -111,6 +116,11 @@ module.exports = async (client, int) => {
                 })
                 .catch(e => {
                     int.reply({ content: `An Error has occured ${int.member}... try again ? ❌`, ephemeral: true });
+                    client.errorLog(e, {
+                        author: int.member,
+                        channel: int.channel,
+                        content: `Interaction: ${customId}`
+                    });
                 });
                 
             break;
@@ -118,5 +128,10 @@ module.exports = async (client, int) => {
     }
     catch(e){
         int.reply({ content: `An Error has occured ${int.member}... try again ? ❌`, ephemeral: true });
+        client.errorLog(e, {
+            author: int.member,
+            channel: int.channel,
+            content: `Interaction`
+        });
     }
 };
