@@ -61,7 +61,10 @@ module.exports = {
         const isSkill = ['s1', 's2', 'pass', 'cs', 'ss'].includes(args[0].toLowerCase());
         const isUpgradeType = ['base', 'lb', 'si'].includes(args[0].toLowerCase());
         
-        hero.Skills.sort((a, b) => (a.SkillTypeRead.OrderBy > b.SkillTypeRead.OrderBy) || (a.UpgradeTypeRead.OrderBy > b.UpgradeTypeRead.OrderBy) ? 1 : -1)
+        hero.Skills.sort((a, b) => 
+            a.SkillTypeRead.OrderBy - b.SkillTypeRead.OrderBy ||
+            a.UpgradeTypeRead.OrderBy.localeCompare(b.UpgradeTypeRead.OrderBy),
+        )
 
         let skillCommands = [hero.Code];
         if(isSkill){

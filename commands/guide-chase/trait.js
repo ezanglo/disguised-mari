@@ -89,8 +89,13 @@ module.exports = {
         const isContentTypeTrait = this.getDefaultContent(args[0].toLowerCase());
         const isUpgradeTypeTrait = ['lvl', 'cs', 'si', 'trans'].includes(args[0].toLowerCase());
 
-        hero.Traits.sort((a, b) => (a.ContentTypeRead.Id > b.ContentTypeRead.Id) || (a.UpgradeTypeRead.OrderBy > b.UpgradeTypeRead.OrderBy) ? 1 : -1)
-        
+        hero.Traits.sort((a, b) => 
+            a.ContentTypeRead.Id - b.ContentTypeRead.Id ||
+            a.UpgradeTypeRead.OrderBy.localeCompare(b.UpgradeTypeRead.OrderBy),
+        )
+
+        console.log(hero.Traits.map(x => { return x.Code}))
+
         let traitCommands = [hero.Code];
         if(isContentTypeTrait){
             traitCommands.push(args[0].toLowerCase());
