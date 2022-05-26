@@ -24,9 +24,10 @@ jobs:
         script: |
           export NVM_DIR=~/.nvm
           source ~/.nvm/nvm.sh
-          nvm use lts
+          nvm use --lts
           cd ~/disguised-mari
           git pull origin main
           npm install --production
           pm2 delete all
+          pm2 -h
           pm2 start main.js --name "disguised-mari"
