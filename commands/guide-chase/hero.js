@@ -1,4 +1,4 @@
-const { MessageEmbed } = require('discord.js');
+const { MessageEmbed, MessageButton, MessageActionRow } = require('discord.js');
 
 module.exports = {
     name: 'hero',
@@ -8,8 +8,12 @@ module.exports = {
 
     async execute(client, message, args) {
 
-        const selectedHero = client.heroes.find(x => x.Code == args[0]);
-        if(!selectedHero){
+        if (!args[0]) return message.channel.send(`Hero name is required ${message.author}... try again ? ❌`);
+        
+        const heroCode = args.shift();
+
+        let selectedHero = client.heroes.filter(x => x.Code.startsWith(heroCode.toLowerCase()));
+        if(selectedHero.length == 0){
             return message.channel.send({ embeds: [
                 new MessageEmbed({
                     color: 'RED',
@@ -17,6 +21,16 @@ module.exports = {
                 })
             ]});
         }
+        else if (selectedHero.length > 1){
+            return message.channel.send({ 
+                embeds: [new MessageEmbed({
+                    color: 'RED',
+                    description: `Multiple heroes found!\nplease select: [${selectedHero.map(x => {return x.Code}).join(',')}]`
+                })],
+            });
+        }
+
+        selectedHero = selectedHero.shift();
 
         await api.get('Hero/' + selectedHero.Id)
         .then(async (response) => {

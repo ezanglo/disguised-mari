@@ -128,9 +128,10 @@ module.exports = (client, message) => {
             }
         }
 
-        message.channel.sendTyping();
-        
-        if (cmd) cmd.execute(client, message, args);
+        if (cmd) {
+            message.channel.sendTyping();
+            cmd.execute(client, message, args);
+        }
     }
     catch(e){
         message.channel.send(`An Error has occured ${message.author}... try again ? ❌`);

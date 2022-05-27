@@ -17,8 +17,8 @@ module.exports = {
 
         const heroCode = args.shift();
 
-        const selectedHero = client.heroes.find(x => x.Code == heroCode);
-        if(!selectedHero){
+        let selectedHero = client.heroes.filter(x => x.Code.startsWith(heroCode.toLowerCase()));
+        if(selectedHero.length == 0){
             return message.channel.send({ embeds: [
                 new MessageEmbed({
                     color: 'RED',
@@ -26,6 +26,30 @@ module.exports = {
                 })
             ]});
         }
+        else if (selectedHero.length > 1){
+            
+            const row = new MessageActionRow();
+
+            for(const hero of selectedHero){
+                row.addComponents(new MessageButton({
+                    label: hero.Code,
+                    customId: ['SKILL',message.author.id,hero.Id,args[0],args[1]].join('_'),
+                    style: 'PRIMARY'
+                }))
+            }
+
+            const embed = new MessageEmbed({
+                color: 'RED',
+                description: `Multiple heroes found! please select:`
+            });
+
+            return message.channel.send({ 
+                embeds: [embed], 
+                components: [row]
+            });
+        }
+
+        selectedHero = selectedHero.shift();
 
         await api.get('Hero/' + selectedHero.Id + 
             '?nested[Upgrades][fields]=Id,Name,Code'+
