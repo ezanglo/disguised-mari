@@ -1,4 +1,4 @@
-const { MessageEmbed, MessageButton, MessageActionRow, MessageAttachment } = require('discord.js');
+const { MessageEmbed, MessageButton, MessageActionRow, MessageAttachment, MessageSelectMenu } = require('discord.js');
 const { createCanvas, loadImage } = require('canvas')
 
 module.exports = {
@@ -94,7 +94,7 @@ module.exports = {
             const reply = await message.channel.send({
                 embeds: [result.embed],
                 files: result.attachment ? [result.attachment]: [],
-                components: result.components ? [result.components]: []
+                components: result.components ? result.components: []
             })
 
             const traitImageUrl = reply.embeds[0].image.url;
@@ -130,6 +130,10 @@ module.exports = {
             traitCommands.push(args[0].toLowerCase());
         }
 
+        if(traitCommands.includes('si')){
+            traitCommands.push(args[2] ? args[2].toLowerCase(): 'mem')
+        }
+
         let trait = hero.Traits.find(x => x.Code == traitCommands.join('.'));
         if(trait)
         {
@@ -137,19 +141,23 @@ module.exports = {
             
             const row = new MessageActionRow();
 
+            const traitButtons = [
+                ...new Map(hero.Traits.map((item) => [item["ContentTypeRead"]['Code']+item["UpgradeTypeRead"]['Code'], item])).values(),
+            ];
+
+            let traitCustomId;
+
             if(isContentTypeTrait){
-                for(const t of hero.Traits){
+                for(const t of traitButtons){
                     if(args[0] == t.ContentTypeRead.Code){
                         const isCurrentTrait = (t.UpgradeTypeRead.Code == trait.UpgradeTypeRead.Code);
+                        const customId = ['TRAIT', author, hero.Id, t.ContentTypeRead.Code, t.UpgradeTypeRead.Code];
+                        if(isCurrentTrait){
+                            traitCustomId = customId
+                        }
                         row.addComponents(new MessageButton({
                             label: t.UpgradeTypeRead.Name,
-                            customId: [
-                                'TRAIT',
-                                author,
-                                hero.Id,
-                                t.ContentTypeRead.Code,
-                                t.UpgradeTypeRead.Code
-                            ].join('_'),
+                            customId: customId.join('_'),
                             style: isCurrentTrait ? 'SECONDARY' : 'PRIMARY',
                             disabled: isCurrentTrait
                         }))
@@ -157,18 +165,16 @@ module.exports = {
                 }
             }
             else if (isUpgradeTypeTrait){
-                for(const t of hero.Traits){
+                for(const t of traitButtons){
                     if(args[0] == t.UpgradeTypeRead.Code){
                         const isCurrentTrait = (t.ContentTypeRead.Code == trait.ContentTypeRead.Code);
+                        const customId = ['TRAIT', author, hero.Id, t.UpgradeTypeRead.Code, t.ContentTypeRead.Code];
+                        if(isCurrentTrait){
+                            traitCustomId = customId
+                        }
                         row.addComponents(new MessageButton({
                             label: t.ContentTypeRead.Name,
-                            customId: [
-                                'TRAIT',
-                                author,
-                                hero.Id,
-                                t.UpgradeTypeRead.Code,
-                                t.ContentTypeRead.Code
-                            ].join('_'),
+                            customId: customId.join('_'),
                             style: isCurrentTrait ? 'SECONDARY' : 'PRIMARY',
                             disabled: isCurrentTrait
                         }))
@@ -178,13 +184,20 @@ module.exports = {
             
             if(trait.Image && !refreshImage){
                 embed.setImage(trait.Image)
+
+                const rows = [];
+                if(trait.UpgradeTypeRead.Code == 'si'){
+                    rows.push(this.getSoulImprintCoresMenu(traitCustomId, traitCommands[traitCommands.length - 1]))
+                }
+
+                rows.push(row);
+
                 return {
                     embed: embed,
-                    components: row,
+                    components: rows,
                     trait: trait
                 }
             }
-
 
             switch(trait.UpgradeTypeRead.Code)
             {
@@ -256,7 +269,7 @@ module.exports = {
                     return {
                         embed: embed,
                         attachment: attachment,
-                        components: row,
+                        components: [row],
                         trait: trait
                     }
                 }
@@ -330,7 +343,7 @@ module.exports = {
                     return {
                         embed: embed,
                         attachment: attachment,
-                        components: row,
+                        components: [row],
                         trait: trait
                     }
                 }
@@ -398,7 +411,123 @@ module.exports = {
                     return {
                         embed: embed,
                         attachment: attachment,
-                        components: row,
+                        components: [row],
+                        trait: trait
+                    }
+                }
+                case 'si': {
+
+                    const core = traitCommands[traitCommands.length - 1];
+
+                    const core_config = {
+                        mem: {
+                            image: 'https://media.discordapp.net/attachments/966833373865713774/982124942646706236/memory_core_gray.png',
+                            top: 40,
+                            topInc: 160,
+                            left: 60,
+                            leftInc: 160,
+                            traits: [
+                                ['bh', null, 'cdd', 'pi'],
+                                [null, 'sa', null, null],
+                                [null, null, 'sb', 'ht1'],
+                                [null, null, 'pm', null],
+                                ['mem', 'ht2', null, null]
+                            ]
+                        },
+                        body: {
+                            image: 'https://media.discordapp.net/attachments/966833373865713774/982124942957105192/body_core_gray.png',
+                            top: 40,
+                            topInc: 160,
+                            left: 240,
+                            leftInc: 160,
+                            traits: [
+                                ['uw', 'ed', null, 'pbb'],
+                                [null, null, 'ac', null],
+                                ['bt', 'ml', null, null],
+                                [null, 'am', null,null],
+                                [null, null, 'ht2', 'body']
+                            ]
+                        },
+                        soul: {
+                            image: 'https://media.discordapp.net/attachments/966833373865713774/982124943271665694/soul_core_gray.png',
+                            top: 207,
+                            topInc: 160,
+                            left: 59,
+                            leftInc: 160,
+                            traits: [
+                                [null, 'hc1', null, 'ht2', null],
+                                ['ccw', null, null, 'sb', 'res'],
+                                [null, null, 'ac', null, 'cs'],
+                                ['hc2', null, null, null, 'soul']
+                            ]
+                        }
+                    }
+
+                    let selectedCore = core_config[core];
+                    
+                    if(!selectedCore){
+                        selectedCore = core_config.mem
+                    }
+
+                    const offset = 0;
+                    const canvas = createCanvas(883, 910 + offset)
+                    const ctx = canvas.getContext('2d')
+            
+                    const bg = await loadImage(selectedCore.image);
+
+                    ctx.drawImage(bg, 0, 0, canvas.width, canvas.height - offset)
+                    
+                    ctx.font = 'italic bold 36px Arial';
+                    ctx.fillStyle = 'white';
+                    ctx.textAlign = "end";
+                    ctx.fillText(`${hero.DisplayName} | ${trait.UpgradeTypeRead.Name} Traits | ${trait.ContentTypeRead.Name}`, canvas.width - 20, canvas.height - 30);
+
+                    this.addWaterMark(ctx, canvas, -70);
+
+                    const height = 100;
+                    const width = 100;
+
+                    let top = selectedCore.top;
+                    for(const rowTraits of selectedCore.traits){
+                        let left = selectedCore.left;
+                        for(const rowTrait of rowTraits){
+                            if(rowTrait && trait.Config[rowTrait]){
+                                let traitConfig = client.traitTypes.find(x => x.Code == `${core}.${rowTrait}` || x.Code == core)
+                                if(traitConfig){
+                                    const traitImage = await loadImage(traitConfig.Image);
+                                    ctx.drawImage(traitImage, left, top, width, height)
+                                    
+                                    const heightOffset = height / 3
+                                    ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+                                    ctx.beginPath()
+                                    ctx.moveTo(left + width, top + heightOffset)
+                                    ctx.lineTo(left + heightOffset, top + height + 1)
+                                    ctx.lineTo(left + width, top + height + 1)
+                                    ctx.lineTo(left + width, top + heightOffset)
+                                    ctx.fill()
+                                    ctx.closePath()
+
+                                    ctx.textAlign = "end";
+                                    ctx.fillStyle = 'white';
+                                    ctx.strokeStyle = 'black';
+                                    ctx.font = 'italic bold 40px Arial';
+                                    ctx.fillText(trait.Config[rowTrait], (left + width) - 5, (top + height) - 5);
+                                    ctx.strokeText(trait.Config[rowTrait], (left + width) - 5, (top + height) - 5);
+                                }
+                            }
+                            left+= selectedCore.leftInc;
+                        }
+                        top+= selectedCore.topInc;
+                    }
+
+                    const fileName = `${hero.Code}-${trait.UpgradeTypeRead.Code}-${trait.ContentTypeRead.Code}.png`
+                    const attachment = new MessageAttachment(canvas.toBuffer('image/png'), fileName);
+                    embed.setImage('attachment://' + fileName)
+
+                    return {
+                        embed: embed,
+                        attachment: attachment,
+                        components: [this.getSoulImprintCoresMenu(traitCustomId, core), row],
                         trait: trait
                     }
                 }
@@ -419,7 +548,11 @@ module.exports = {
                 const data = response.data;
                 if(data.pageInfo.totalRows > 0){
                     const trait = data.list[0];
-                    const configMap = this.getConfigMap(trait.UpgradeTypeRead.Code);
+                    let configMap = this.getConfigMap(trait.UpgradeTypeRead.Code);
+                    if(trait.UpgradeTypeRead.Code == 'si'){
+                        const code = traitCode.split('.');
+                        configMap = configMap[code[code.length - 1]]
+                    }
 
                     let config = [];
                     for(const c of traitConfig){
@@ -444,12 +577,12 @@ module.exports = {
             client.errorLog(e, message);
         });
     },
-    addWaterMark(ctx, canvas){
+    addWaterMark(ctx, canvas, heightOffset){
         ctx.save()
         ctx.textAlign = "center";
         ctx.font = 'italic bold 200px Arial';
         ctx.fillStyle = 'rgba(256, 256, 256, 0.1)';
-        ctx.fillText('GUIDE\nCHASE', canvas.width / 2, canvas.height/2)
+        ctx.fillText('GUIDE\nCHASE', canvas.width / 2, (canvas.height/2) + heightOffset)
         ctx.restore()
     },
     getConfigMap(upgradeType){
@@ -478,6 +611,30 @@ module.exports = {
                     ['cs', 'si']
                 ]
             }
+            case 'si': {
+                return {
+                    mem: [
+                        ['bh', 'cdd', 'pi'],
+                        ['sa'],
+                        ['sb', 'ht1'],
+                        ['pm'],
+                        ['mem', 'ht2']
+                    ],
+                    body: [
+                        ['uw', 'ed', 'pbb'],
+                        ['ac'],
+                        ['bt', 'ml'],
+                        ['am'],
+                        ['ht2', 'body']
+                    ],
+                    soul: [
+                        ['hc1', 'ht2'],
+                        ['ccw', 'sb', 'res'],
+                        ['ac', 'cs'],
+                        ['hc2', 'soul']
+                    ]
+                }
+            }
         }
     },
     getDefaultContent(content){
@@ -499,4 +656,33 @@ module.exports = {
         }
         
     },
+    getSoulImprintCoresMenu(traitCustomId, core)
+    {
+        return new MessageActionRow()
+        .addComponents(
+            new MessageSelectMenu()
+                .setCustomId('SELECT_' + traitCustomId.join('_'))
+                .setPlaceholder('Select Soul Imprint Core')
+                .addOptions([
+                    {
+                        label: 'Memory Core',
+                        description: 'Display Memory Core Traits',
+                        value: 'mem',
+                        default: core == 'mem'
+                    },
+                    {
+                        label: 'Body Core',
+                        description: 'Display Body Core Traits',
+                        value: 'body',
+                        default: core == 'body'
+                    },
+                    {
+                        label: 'Soul Core',
+                        description: 'Display Soul Core Traits',
+                        value: 'soul',
+                        default: core == 'soul'
+                    }
+                ]),
+        )
+    }
 };

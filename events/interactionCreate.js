@@ -5,12 +5,15 @@ module.exports = async (client, int) => {
 
     try {
 
-        if (!int.isButton()) return;
+        if (!int.isButton() && !int.isSelectMenu()) return;
 
         const queue = player.getQueue(int.guildId);
         
         const args = int.customId.split('_');
-        const customId = args.shift();
+        let customId = args.shift();
+        if(customId == 'SELECT'){
+            customId = args.shift();
+        }
 
         switch (customId) {
             case 'saveTrack': 
@@ -107,11 +110,16 @@ module.exports = async (client, int) => {
                 .then(async response => {
                     const hero = response.data;
                     const cmd = client.commands.get('trait')
+
+                    if(args.includes('si')){
+                        args.push(int.values[0])
+                    }
+
                     const trait = await cmd.getHeroTrait(hero, args, traitAuthor);
                     return int.update({
                         embeds: [trait.embed],
                         files: trait.attachment ? [trait.attachment]: [],
-                        components: trait.components ? [trait.components]: []
+                        components: trait.components ? trait.components: []
                     })
                 })
                 .catch(e => {
