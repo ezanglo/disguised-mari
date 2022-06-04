@@ -111,7 +111,7 @@ module.exports = async (client, int) => {
                     const hero = response.data;
                     const cmd = client.commands.get('trait')
 
-                    if(args.includes('si')){
+                    if(int.isSelectMenu() && args.includes('si')){
                         args.push(int.values[0])
                     }
 
