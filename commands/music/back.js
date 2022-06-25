@@ -5,6 +5,7 @@ module.exports = {
     aliases: ['previous'],
     utilisation: client.config.app.px + 'back',
     description: 'go back smh',
+    type: 'music',
     voiceChannel: true,
 
     async execute(client, message) {

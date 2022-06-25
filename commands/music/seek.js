@@ -6,6 +6,7 @@ module.exports = {
     aliases: [],
     utilisation: client.config.app.px + 'seek [time]',
     description: 'Jumps to specific time of song',
+    type: 'music',
     voiceChannel: true,
 
     async execute(client, message, args) {

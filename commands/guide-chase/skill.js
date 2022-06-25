@@ -5,6 +5,7 @@ module.exports = {
     aliases: ['sk'],
     args: ['hero', 'skill', 'upgrade'],
     description: 'Shows the skill for the selected hero',
+    type: 'gc',
     utilisation: client.config.app.gc + 'skill mari s1 si',
 
     async execute(client, message, args) {

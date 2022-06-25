@@ -6,6 +6,7 @@ module.exports = {
     aliases: ['lp', 'repeat'],
     utilisation: client.config.app.px + 'loop <one|queue|off>',
     description: 'Loops the Queue',
+    type: 'music',
     voiceChannel: true,
 
     execute(client, message, args) {

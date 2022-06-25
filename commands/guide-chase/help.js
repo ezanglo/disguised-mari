@@ -5,6 +5,7 @@ module.exports = {
     aliases: ['h'],
     showHelp: false,
     description: '',
+    type: 'gc',
     utilisation: client.config.app.gc + 'help',
 
     execute(client, message, args) {
@@ -13,7 +14,7 @@ module.exports = {
         embed.setColor('RED');
         embed.setAuthor('GUIDE-CHASE COMMANDS', client.user.displayAvatarURL({ size: 1024, dynamic: true }));
 
-        const commands = client.commands.filter(x => x.showHelp !== false);
+        const commands = client.commands.filter(x => x.showHelp !== false && x.type == 'gc');
 
         const prefix = client.config.app.gc
         

@@ -5,6 +5,7 @@ module.exports = {
     aliases: ['sh'],
     utilisation: client.config.app.px + 'shuffle',
     description: 'Shuffle the Queue',
+    type: 'music',
     voiceChannel: true,
 
     async execute(client, message) {

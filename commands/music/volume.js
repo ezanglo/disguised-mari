@@ -6,6 +6,7 @@ module.exports = {
     aliases: ['vol'],
     utilisation: `${client.config.app.px}volume [1-${maxVol}]`,
     description: 'Adjust the volume',
+    type: 'music',
     voiceChannel: true,
 
     execute(client, message, args) {

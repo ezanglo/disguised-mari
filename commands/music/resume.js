@@ -3,6 +3,7 @@ module.exports = {
     aliases: ['rs'],
     utilisation: client.config.app.px + 'resume',
     description: 'Resume the current song',
+    type: 'music',
     voiceChannel: true,
 
     execute(client, message) {

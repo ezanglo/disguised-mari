@@ -5,6 +5,7 @@ module.exports = {
     aliases: ['sv'],
     utilisation: client.config.app.px + 'save',
     description: 'Save the current song',
+    type: 'music',
     voiceChannel: true,
 
     async execute(client, message) {

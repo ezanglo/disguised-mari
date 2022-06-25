@@ -5,6 +5,7 @@ module.exports = {
     aliases: ['np'],
     utilisation: client.config.app.px + 'nowplaying',
     description: 'Shows currently playing song',
+    type: 'music',
     voiceChannel: true,
 
     execute(client, message) {

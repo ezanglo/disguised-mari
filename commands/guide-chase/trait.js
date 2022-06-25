@@ -6,6 +6,7 @@ module.exports = {
     aliases: ['tr'],
     args: ['hero', 'content', 'type'],
     description: 'Shows the selected trait for selected content',
+    type: 'gc',
     utilisation: client.config.app.gc + 'trait mari wb cs',
 
     async execute(client, message, args) {

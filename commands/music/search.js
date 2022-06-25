@@ -6,6 +6,7 @@ module.exports = {
     aliases: ['sh'],
     utilisation: client.config.app.px + 'search [song name]',
     description: 'Search a song name',
+    type: 'music',
     voiceChannel: true,
 
     async execute(client, message, args) {

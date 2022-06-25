@@ -4,6 +4,7 @@ module.exports = {
     name: 'hero',
     aliases: [],
     description: 'Show basic hero information',
+    type: 'gc',
     utilisation: client.config.app.gc + 'hero mari',
 
     async execute(client, message, args) {

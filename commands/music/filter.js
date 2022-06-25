@@ -5,6 +5,7 @@ module.exports = {
     aliases: [],
     utilisation: client.config.app.px + 'filter [filter name]',
     description: 'Filters the Queue',
+    type: 'music',
     voiceChannel: true,
 
     async execute(client, message, args) {

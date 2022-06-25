@@ -5,6 +5,7 @@ module.exports = {
     aliases: ['dc', 'l'],
     utilisation: client.config.app.px + 'leave',
     description: 'Stops the songs and leave the voice channel',
+    type: 'music',
     voiceChannel: true,
 
     execute(client, message) {

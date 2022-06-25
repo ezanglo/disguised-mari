@@ -5,6 +5,7 @@ module.exports = {
     aliases: ['pbar'],
     utilisation: client.config.app.px + 'progress',
     description: 'Shows the current song\'s progress',
+    type: 'music',
     voiceChannel: true,
 
     async execute(client, message) {

@@ -6,6 +6,7 @@ module.exports = {
     aliases: ['p'],
     utilisation: client.config.app.px + 'play [song name/URL]',
     description: 'Plays a song or a URL',
+    type: 'music',
     voiceChannel: true,
 
     async execute(client, message, args) {

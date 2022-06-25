@@ -5,6 +5,7 @@ module.exports = {
     aliases: [],
     utilisation: client.config.app.px + 'pause',
     description: 'Pause the current song',
+    type: 'music',
     voiceChannel: true,
 
     execute(client, message) {

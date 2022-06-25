@@ -5,6 +5,7 @@ module.exports = {
     aliases: ['q'],
     utilisation: client.config.app.px + 'queue',
     description: 'List the songs in Queue',
+    type: 'music',
     voiceChannel: true,
     maxPageItems: 5,
 

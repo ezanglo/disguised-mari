@@ -5,6 +5,7 @@ module.exports = {
     aliases: ['sk'],
     utilisation: client.config.app.px + 'skip',
     description: 'Skips the current song',
+    type: 'music',
     voiceChannel: true,
 
     execute(client, message, args) {

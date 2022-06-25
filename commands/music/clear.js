@@ -5,6 +5,7 @@ module.exports = {
     aliases: ['cq'],
     utilisation: client.config.app.px + 'clear',
     description: 'Clears the Queue',
+    type: 'music',
     voiceChannel: true,
 
     async execute(client, message) {

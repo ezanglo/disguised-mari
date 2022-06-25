@@ -5,6 +5,7 @@ module.exports = {
     aliases: ['up'],
     showHelp: false,
     description: 'update hero',
+    type: 'gc',
     utilisation: client.config.app.gc + 'update mari',
 
     async execute(client, message, args) {
