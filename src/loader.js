@@ -51,14 +51,14 @@ readdirSync('./commands/guide-chase').forEach(file => {
     }
 });
 
-// readdirSync('./commands/music').forEach(file => {
-//     if(file.endsWith('.js')){
-//         const command = require(`../commands/music/${file}`);
-//         console.log(`-> Loaded command ${command.name.toLowerCase()}`);
-//         client.commands.set(command.name.toLowerCase(), command);
-//         delete require.cache[require.resolve(`../commands/music/${file}`)];
-//     }
-// });
+readdirSync('./commands/music').forEach(file => {
+    if(file.endsWith('.js')){
+        const command = require(`../commands/music/${file}`);
+        console.log(`-> Loaded command ${command.name.toLowerCase()}`);
+        client.commands.set(command.name.toLowerCase(), command);
+        delete require.cache[require.resolve(`../commands/music/${file}`)];
+    }
+});
 
 // readdirSync('./commands/').forEach(dirs => {
 //     const commands = readdirSync(`./commands/${dirs}`).filter(files => files.endsWith('.js'));
