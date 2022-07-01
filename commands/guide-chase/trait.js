@@ -135,7 +135,7 @@ module.exports = {
             traitCommands.push(args[2] ? args[2].toLowerCase(): 'mem')
         }
 
-        let trait = hero.Traits.find(x => x.Code == traitCommands.join('.'));
+        let trait = hero.Traits.find(x => x.Code == traitCommands.join('.').toLowerCase());
         if(trait)
         {
             embed.setAuthor(`${hero.DisplayName} | ${trait.UpgradeTypeRead.Name} Traits | ${trait.ContentTypeRead.Name}`, hero.Image);

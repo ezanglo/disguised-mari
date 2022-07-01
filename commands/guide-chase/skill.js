@@ -101,7 +101,7 @@ module.exports = {
             skillCommands.push(args[0].toLowerCase());
         }
 
-        let skill = hero.Skills.find(x => x.Code == skillCommands.join('.'));
+        let skill = hero.Skills.find(x => x.Code == skillCommands.join('.').toLowerCase());
         if(skill){
             let authorLabel = skill.Name;
             if(skill.SP){
