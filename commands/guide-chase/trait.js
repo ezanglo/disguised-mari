@@ -92,16 +92,16 @@ module.exports = {
                 ]});
             }
 
-            const reply = await message.channel.send({
+            await message.channel.send({
                 embeds: [result.embed],
                 files: result.attachment ? [result.attachment]: [],
                 components: result.components ? result.components: []
+            }).then(reply => {
+                const traitImageUrl = reply.embeds[0].image.proxyURL;
+                if((refreshImage || !result.trait.Image) && traitImageUrl){
+                    api.patch('HeroTrait/' + result.trait.Id, { Image: traitImageUrl })
+                }
             })
-
-            const traitImageUrl = reply.embeds[0].image.url;
-            if((refreshImage || !result.trait.Image) && traitImageUrl){
-                api.patch('HeroTrait/' + result.trait.Id, { Image: traitImageUrl })
-            }
         })
         .catch(e => {
             message.channel.send(`An Error has occured ${message.author}... try again ? ❌`);
@@ -207,7 +207,7 @@ module.exports = {
                     const canvas = createCanvas(883, 784 + offset)
                     const ctx = canvas.getContext('2d')
             
-                    const bg = await loadImage('https://i.imgur.com/79U1BZF.png');
+                    const bg = await loadImage('https://media.discordapp.net/attachments/992458789234163713/995058917224743043/trait-lvl-base.png');
                     ctx.drawImage(bg, 0, 0, canvas.width, canvas.height - offset)
 
                     ctx.font = 'italic bold 36px Arial';
@@ -280,7 +280,7 @@ module.exports = {
                     const canvas = createCanvas(900, 781 + offset)
                     const ctx = canvas.getContext('2d')
             
-                    const bg = await loadImage('https://i.imgur.com/1bg0oWo.png');
+                    const bg = await loadImage('https://media.discordapp.net/attachments/992458789234163713/995059038746333194/1bg0oWo.png');
 
                     ctx.drawImage(bg, 0, 0, canvas.width, canvas.height - offset)
 
@@ -353,7 +353,7 @@ module.exports = {
                     const canvas = createCanvas(883, 831 + offset)
                     const ctx = canvas.getContext('2d')
             
-                    const bg = await loadImage('https://i.imgur.com/R0QvvKK.png');
+                    const bg = await loadImage('https://media.discordapp.net/attachments/992458789234163713/995059104643022848/R0QvvKK.png');
 
                     ctx.drawImage(bg, 0, 0, canvas.width, canvas.height - offset)
                     

@@ -97,7 +97,7 @@ module.exports = {
                 files: result.attachment ? [result.attachment]: [],
                 components: result.components ? result.components: []
             }).then(reply => {
-                const equipImageUrl = reply.embeds[0].image.url;
+                const equipImageUrl = reply.embeds[0].image.proxyUrl;
                 if((refreshImage || !result.equip.Image) && equipImageUrl){
                     api.patch('HeroEquip/' + result.equip.Id, { Image: equipImageUrl })
                 }
