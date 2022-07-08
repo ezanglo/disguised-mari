@@ -885,7 +885,7 @@ module.exports = {
                 }
 
                 return {
-                    ExclusiveWeaponConfig : stats[0]
+                    Artifact : stats[0]
                 }
             }
             case 'ring': {
@@ -949,6 +949,8 @@ module.exports = {
                             ...this.getConfigMap(configType, configStats)
                         }
                     }
+
+                    console.log(configData);
 
                     await api.patch('HeroEquip/' + heroEquip.Id, configData)
                 }
