@@ -42,6 +42,13 @@ api.get('TraitType?limit=100').then((response) => {
     }
 })
 
+
+api.get('HeroGearType?limit=100&fields=Id,Name,Code,EquipTypeRead,HeroClassRead,Image').then((response) => {
+    if(response.status == 200){
+        client.heroGearTypes = response.data.list
+    }
+})
+
 readdirSync('./commands/guide-chase').forEach(file => {
     if(file.endsWith('.js')){
         const command = require(`../commands/guide-chase/${file}`);
@@ -51,14 +58,14 @@ readdirSync('./commands/guide-chase').forEach(file => {
     }
 });
 
-readdirSync('./commands/music').forEach(file => {
-    if(file.endsWith('.js')){
-        const command = require(`../commands/music/${file}`);
-        console.log(`-> Loaded command ${command.name.toLowerCase()}`);
-        client.commands.set(command.name.toLowerCase(), command);
-        delete require.cache[require.resolve(`../commands/music/${file}`)];
-    }
-});
+// readdirSync('./commands/music').forEach(file => {
+//     if(file.endsWith('.js')){
+//         const command = require(`../commands/music/${file}`);
+//         console.log(`-> Loaded command ${command.name.toLowerCase()}`);
+//         client.commands.set(command.name.toLowerCase(), command);
+//         delete require.cache[require.resolve(`../commands/music/${file}`)];
+//     }
+// });
 
 // readdirSync('./commands/').forEach(dirs => {
 //     const commands = readdirSync(`./commands/${dirs}`).filter(files => files.endsWith('.js'));

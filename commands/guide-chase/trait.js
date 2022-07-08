@@ -215,7 +215,7 @@ module.exports = {
                     ctx.textAlign = "end";
                     ctx.fillText(`${hero.DisplayName} | ${trait.UpgradeTypeRead.Name} Traits | ${trait.ContentTypeRead.Name}`, canvas.width - 20, canvas.height - 20);
 
-                    this.addWaterMark(ctx, canvas);
+                    this.addWaterMark(ctx, canvas, -70);
 
                     const height = 120;
                     const width = 120;
@@ -289,7 +289,7 @@ module.exports = {
                     ctx.textAlign = "end";
                     ctx.fillText(`${hero.DisplayName} | ${trait.UpgradeTypeRead.Name} Traits | ${trait.ContentTypeRead.Name}`, canvas.width, canvas.height - 10);
 
-                    this.addWaterMark(ctx, canvas);
+                    this.addWaterMark(ctx, canvas, -70);
 
                     const height = 130;
                     const width = 130;
@@ -361,7 +361,7 @@ module.exports = {
                     ctx.fillStyle = 'white';
                     ctx.fillText(`${hero.DisplayName} | ${trait.UpgradeTypeRead.Name} Traits | ${trait.ContentTypeRead.Name}`, 30, 70);
 
-                    this.addWaterMark(ctx, canvas);
+                    this.addWaterMark(ctx, canvas, -70);
 
                     const height = 133;
                     const width = 133;
