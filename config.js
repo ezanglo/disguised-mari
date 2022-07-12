@@ -7,7 +7,8 @@ module.exports = {
         token: token,
         playing: 'with your feelings',
         debug_mode: true,
-        error_log_channel: '979175534363832340'
+        error_log_channel: '979175534363832340',
+        maintenance: false
     },
 
     opt: {
