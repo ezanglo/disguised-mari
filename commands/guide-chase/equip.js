@@ -91,6 +91,8 @@ module.exports = {
                     })
                 ]});
             }
+            
+            result.embed.setFooter(`Source: Trust me bro`);
 
             await message.channel.send({
                 embeds: [result.embed],
