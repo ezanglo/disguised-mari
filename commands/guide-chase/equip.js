@@ -73,7 +73,7 @@ module.exports = {
             '&nested[HeroEquips][fields]='+
             'Id,Code,ContentTypeRead,WeaponConfig,SubWeaponConfig,ArmorConfig,' +
             'SubArmor1Config,SubArmor2Config,ExclusiveWeaponConfig,RingConfig,' +
-            'NecklaceConfig,EarringConfig,Image,Artifact')
+            'NecklaceConfig,EarringConfig,Image,Artifact,Notes')
         .then(async (response) => {
             const hero = response.data;
 
@@ -124,7 +124,10 @@ module.exports = {
         if(equip)
         {
             embed.setAuthor(`${hero.DisplayName} Equips | ${equip.ContentTypeRead.Name}`, hero.Image);
-            
+            if(equip.Notes){
+                embed.setFooter({ text: 'Note: ' + equip.Notes, iconURL: client.user.displayAvatarURL({ size: 1024, dynamic: true }) });
+            }
+
             const row = new MessageActionRow();
 
             const ContentTypeButtons = [

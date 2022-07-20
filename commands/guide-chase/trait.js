@@ -73,7 +73,7 @@ module.exports = {
         await api.get('Hero/' + selectedHero.Id + 
             '?nested[Upgrades][fields]=Id,Name,Code'+
             '&nested[Skills][fields]=Code,Image,UpgradeTypeRead,SkillTypeRead' +
-            '&nested[Traits][fields]=Id,Code,UpgradeTypeRead,ContentTypeRead,Config,Image')
+            '&nested[Traits][fields]=Id,Code,UpgradeTypeRead,ContentTypeRead,Config,Image,Notes')
         .then(async (response) => {
             const hero = response.data;
 
@@ -93,7 +93,7 @@ module.exports = {
             }
             
             await message.reply({
-                embeds: [result.embed],
+                embeds: result.embeds,
                 files: result.attachment ? [result.attachment]: [],
                 components: result.components ? result.components: []
             }).then(reply => {
@@ -139,6 +139,9 @@ module.exports = {
         if(trait)
         {
             embed.setAuthor(`${hero.DisplayName} | ${trait.UpgradeTypeRead.Name} Traits | ${trait.ContentTypeRead.Name}`, hero.Image);
+            if(trait.Notes){
+                embed.setFooter({ text: 'Note: ' + trait.Notes, iconURL: client.user.displayAvatarURL({ size: 1024, dynamic: true }) });
+            }
             
             const row = new MessageActionRow();
 
@@ -211,11 +214,15 @@ module.exports = {
                 rows.push(row);
 
                 return {
-                    embed: embed,
+                    embeds: [embed],
                     components: rows,
                     trait: trait
                 }
             }
+
+            let embeds = [];
+            let components = [row];
+            let attachment;
 
             switch(trait.UpgradeTypeRead.Code)
             {
@@ -281,16 +288,12 @@ module.exports = {
                     }
 
                     const fileName = `${hero.Code}-${trait.UpgradeTypeRead.Code}-${trait.ContentTypeRead.Code}.png`
-                    const attachment = new MessageAttachment(canvas.toBuffer('image/png'), fileName);
+                    const imgAttachment = new MessageAttachment(canvas.toBuffer('image/png'), fileName);
                     embed.setImage('attachment://' + fileName)
-
-                    return {
-                        embed: embed,
-                        attachment: attachment,
-                        components: [row],
-                        trait: trait,
-                        refreshImage: true
-                    }
+                    embeds.push(embed);
+                    attachment = imgAttachment;
+                    
+                    break;
                 }
                 case 'cs': {
 
@@ -356,16 +359,12 @@ module.exports = {
                     }
 
                     const fileName = `${hero.Code}-${trait.UpgradeTypeRead.Code}-${trait.ContentTypeRead.Code}.png`
-                    const attachment = new MessageAttachment(canvas.toBuffer('image/png'), fileName);
+                    const imgAttachment = new MessageAttachment(canvas.toBuffer('image/png'), fileName);
                     embed.setImage('attachment://' + fileName)
+                    embeds.push(embed);
+                    attachment = imgAttachment;
 
-                    return {
-                        embed: embed,
-                        attachment: attachment,
-                        components: [row],
-                        trait: trait,
-                        refreshImage: true
-                    }
+                    break;
                 }
                 case 'trans': {
                     const offset = 0;
@@ -425,16 +424,12 @@ module.exports = {
                     }
 
                     const fileName = `${hero.Code}-${trait.UpgradeTypeRead.Code}-${trait.ContentTypeRead.Code}.png`
-                    const attachment = new MessageAttachment(canvas.toBuffer('image/png'), fileName);
+                    const imgAttachment = new MessageAttachment(canvas.toBuffer('image/png'), fileName);
                     embed.setImage('attachment://' + fileName)
-
-                    return {
-                        embed: embed,
-                        attachment: attachment,
-                        components: [row],
-                        trait: trait,
-                        refreshImage: true
-                    }
+                    embeds.push(embed);
+                    attachment = imgAttachment;
+                    
+                    break;
                 }
                 case 'si': {
 
@@ -542,17 +537,22 @@ module.exports = {
                     }
 
                     const fileName = `${hero.Code}-${trait.UpgradeTypeRead.Code}-${trait.ContentTypeRead.Code}.png`
-                    const attachment = new MessageAttachment(canvas.toBuffer('image/png'), fileName);
+                    const imgAttachment = new MessageAttachment(canvas.toBuffer('image/png'), fileName);
                     embed.setImage('attachment://' + fileName)
+                    embeds.push(embed);
+                    attachment = imgAttachment;
+                    components.push(this.getSoulImprintCoresMenu(traitCustomId, core));
 
-                    return {
-                        embed: embed,
-                        attachment: attachment,
-                        components: [this.getSoulImprintCoresMenu(traitCustomId, core), row],
-                        trait: trait,
-                        refreshImage: true
-                    }
+                    break;
                 }
+            }
+            
+            return {
+                embeds: embeds,
+                attachment: attachment,
+                components: components,
+                trait: trait,
+                refreshImage: true
             }
         }      
     },

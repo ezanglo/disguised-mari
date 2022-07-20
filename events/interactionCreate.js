@@ -108,7 +108,7 @@ module.exports = async (client, int) => {
                 await api.get('Hero/' + traitHeroId + 
                     '?nested[Upgrades][fields]=Id,Name,Code'+
                     '&nested[Skills][fields]=Code,Image,UpgradeTypeRead,SkillTypeRead' +
-                    '&nested[Traits][fields]=Id,Code,UpgradeTypeRead,ContentTypeRead,Config,OrderBy')
+                    '&nested[Traits][fields]=Id,Code,UpgradeTypeRead,ContentTypeRead,Config,OrderBy,Note')
                 .then(async response => {
                     const hero = response.data;
                     const cmd = client.commands.get('trait')
@@ -119,7 +119,7 @@ module.exports = async (client, int) => {
 
                     const trait = await cmd.getHeroTrait(hero, args, traitAuthor);
                     return int.update({
-                        embeds: [trait.embed],
+                        embeds: trait.embeds,
                         files: trait.attachment ? [trait.attachment]: [],
                         components: trait.components ? trait.components: []
                     })
@@ -148,7 +148,7 @@ module.exports = async (client, int) => {
                 '&nested[HeroEquips][fields]='+
                 'Id,Code,ContentTypeRead,WeaponConfig,SubWeaponConfig,ArmorConfig,' +
                 'SubArmor1Config,SubArmor2Config,ExclusiveWeaponConfig,RingConfig,' +
-                'NecklaceConfig,EarringConfig,Image,Artifact')
+                'NecklaceConfig,EarringConfig,Image,Artifact,Notes')
                 .then(async response => {
                     hero = response.data;
                     const cmd = client.commands.get('equip')
