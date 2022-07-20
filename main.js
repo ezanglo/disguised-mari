@@ -37,7 +37,7 @@ client.errorLog = (e, message) => {
         embed.setAuthor(`❌ An error has occured`)
         embed.setThumbnail(client.user.displayAvatarURL({ size: 1024, dynamic: true }))
         embed.addField('User', `${message.author.tag}`, true)
-        embed.addField('Server', `${message.guild}`, true)
+        embed.addField('Server', `${message.channel.guild}`, true)
         embed.addField('Channel', `${message.channel}`, true)
         embed.addField('Command', `\`${message.content}\``, true)
         embed.addField('Stack Trace', '```' + e.stack + '```')

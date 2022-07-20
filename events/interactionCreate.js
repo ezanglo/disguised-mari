@@ -1,8 +1,10 @@
 /* eslint-disable no-case-declarations */
 const { MessageEmbed } = require('discord.js');
+const { log } = require('node:console');
+const wait = require('node:timers/promises').setTimeout;
 
 module.exports = async (client, int) => {
-
+    
     try {
 
         if (!int.isButton() && !int.isSelectMenu()) return;
@@ -87,7 +89,7 @@ module.exports = async (client, int) => {
                     })
                 })
                 .catch(e => {
-                    int.reply({ content: `An Error has occured ${int.member}... try again ? ❌`, ephemeral: true });
+                    int.channel.send({ content: `An Error has occured ${int.member}... try again ? ❌`, ephemeral: true });
                     client.errorLog(e, {
                         author: int.member,
                         channel: int.channel,
@@ -123,9 +125,45 @@ module.exports = async (client, int) => {
                     })
                 })
                 .catch(e => {
-                    int.reply({ content: `An Error has occured ${int.member}... try again ? ❌`, ephemeral: true });
+                    int.channel.send({ content: `An Error has occured ${int.member}... try again ? ❌`, ephemeral: true });
                     client.errorLog(e, {
                         author: int.member,
+                        channel: int.channel,
+                        content: `Interaction: ${customId}`
+                    });
+                });
+                
+            break;
+            case 'EQUIP':
+                const equipAuthor = args.shift();
+                if(equipAuthor != int.member.user.id){
+                    return int.reply({ content: `You don't have access to this interaction ${int.member}... ❌`, ephemeral: true });
+                }
+
+                let hero;
+
+                const equipHeroId = args.shift();
+                await api.get('Hero/' + equipHeroId + 
+                '?nested[HeroClassRead][fields]=Id,Name,Image'+
+                '&nested[HeroEquips][fields]='+
+                'Id,Code,ContentTypeRead,WeaponConfig,SubWeaponConfig,ArmorConfig,' +
+                'SubArmor1Config,SubArmor2Config,ExclusiveWeaponConfig,RingConfig,' +
+                'NecklaceConfig,EarringConfig,Image,Artifact')
+                .then(async response => {
+                    hero = response.data;
+                    const cmd = client.commands.get('equip')
+
+                    const result = await cmd.getHeroEquip(hero, args, equipAuthor);
+                    return int.update({
+                        embeds: [result.embed],
+                        files: result.attachment ? [result.attachment]: [],
+                        components: result.components ? result.components: []
+                    })
+                })
+                .catch(e => {
+                    int.channel.send({ content: `An Error has occured ${int.user}... please try command directly \`?equip ${hero.Code} ${args.join(' ')}\` ❌`, ephemeral: true });
+                    client.errorLog(e, {
+                        author: int.user,
                         channel: int.channel,
                         content: `Interaction: ${customId}`
                     });
@@ -135,9 +173,9 @@ module.exports = async (client, int) => {
         }
     }
     catch(e){
-        int.reply({ content: `An Error has occured ${int.member}... try again ? ❌`, ephemeral: true });
+        int.channel.send({ content: `An Error has occured ${int.member}... try again ? ❌`, ephemeral: true });
         client.errorLog(e, {
-            author: int.member,
+            author: int.user,
             channel: int.channel,
             content: `Interaction`
         });

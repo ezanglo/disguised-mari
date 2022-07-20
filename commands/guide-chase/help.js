@@ -33,6 +33,6 @@ module.exports = {
         embed.setTimestamp();
         embed.setFooter('I am not Mari', client.user.avatarURL({ dynamic: true }));
 
-        message.channel.send({ embeds: [embed] });
+        message.reply({ embeds: [embed] });
     },
 };

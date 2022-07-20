@@ -10,7 +10,7 @@ module.exports = {
 
     async execute(client, message, args) {
 
-        if (!args[0]) return message.channel.send(`Hero name is required ${message.author}... try again ? ❌`);
+        if (!args[0]) return message.reply(`Hero name is required ${message.author}... try again ? ❌`);
         
         if (!args[1]){
             args.push('base');
@@ -20,7 +20,7 @@ module.exports = {
 
         let selectedHero = client.heroes.filter(x => x.Code.startsWith(heroCode.toLowerCase()));
         if(selectedHero.length == 0){
-            return message.channel.send({ embeds: [
+            return message.reply({ embeds: [
                 new MessageEmbed({
                     color: 'RED',
                     description: `Hero not found ${message.author}... try again ? ❌`
@@ -44,7 +44,7 @@ module.exports = {
                 description: `Multiple heroes found! please select:`
             });
 
-            return message.channel.send({ 
+            return message.reply({ 
                 embeds: [embed], 
                 components: [row]
             });
@@ -60,7 +60,7 @@ module.exports = {
 
             const skill = this.getHeroSkill(hero, args, message.author.id)
             if(!skill) {
-                return message.channel.send({ embeds: [
+                return message.reply({ embeds: [
                     new MessageEmbed({
                         color: 'RED',
                         description: `Skill not found ${message.author}... try again ? ❌`
@@ -68,13 +68,13 @@ module.exports = {
                 ]});
             }
 
-            return message.channel.send({
+            await message.reply({
                 embeds: [skill.embed],
                 components: skill.components ? [skill.components]: []
             })
         })
         .catch(e => {
-            message.channel.send(`An Error has occured ${message.author}... try again ? ❌`);
+            message.reply(`An Error has occured ${message.author}... try again ? ❌`);
             client.errorLog(e, message);
         });
     },

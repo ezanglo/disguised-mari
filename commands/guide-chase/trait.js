@@ -11,7 +11,7 @@ module.exports = {
 
     async execute(client, message, args) {
 
-        if (!args[0]) return message.channel.send(`Hero name is required ${message.author}... try again ? ❌`);
+        if (!args[0]) return message.reply(`Hero name is required ${message.author}... try again ? ❌`);
         
         if (!args[1]){
             args.push('lvl');
@@ -23,7 +23,7 @@ module.exports = {
 
             if (!message.member._roles.includes(GuideChaseBot.id)) {
             
-                return message.channel.send({ embeds: [
+                return message.reply({ embeds: [
                     new MessageEmbed({
                         color: 'RED',
                         description: `This command is reserved for members with the <@&${GuideChaseBot.id}> role on the server ${message.author}... try again ? ❌`
@@ -38,7 +38,7 @@ module.exports = {
 
         let selectedHero = client.heroes.filter(x => x.Code.startsWith(heroCode.toLowerCase()));
         if(selectedHero.length == 0){
-            return message.channel.send({ embeds: [
+            return message.reply({ embeds: [
                 new MessageEmbed({
                     color: 'RED',
                     description: `Hero not found ${message.author}... try again ? ❌`
@@ -62,7 +62,7 @@ module.exports = {
                 description: `Multiple heroes found! please select:`
             });
 
-            return message.channel.send({ 
+            return message.reply({ 
                 embeds: [embed], 
                 components: [row]
             });
@@ -84,7 +84,7 @@ module.exports = {
 
             const result = await this.getHeroTrait(hero, args, message.author.id, refreshImage);
             if(!result){
-                return message.channel.send({ embeds: [
+                return message.reply({ embeds: [
                     new MessageEmbed({
                         color: 'RED',
                         description: `Trait not found ${message.author}... try again ? ❌`
@@ -92,22 +92,20 @@ module.exports = {
                 ]});
             }
             
-            result.embed.setFooter(`Source: Trust me bro`);
-
-            await message.channel.send({
+            await message.reply({
                 embeds: [result.embed],
                 files: result.attachment ? [result.attachment]: [],
                 components: result.components ? result.components: []
             }).then(reply => {
                 const traitImageUrl = reply.embeds[0].image.proxyURL;
-                if((refreshImage || !result.trait.Image) && traitImageUrl){
+                if((refreshImage || result.refreshImage || !result.trait.Image) && traitImageUrl){
                     api.patch('HeroTrait/' + result.trait.Id, { Image: traitImageUrl })
                 }
             })
         })
         .catch(e => {
-            message.channel.send(`An Error has occured ${message.author}... try again ? ❌`);
             client.errorLog(e, message);
+            return message.reply(`An Error has occured ${message.author}... try again ? ❌`);
         });
     },
     async getHeroTrait(hero, args, author, refreshImage)
@@ -184,10 +182,27 @@ module.exports = {
                     }
                 }
             }
-            
-            if(trait.Image && !refreshImage){
-                embed.setImage(trait.Image)
 
+            if(trait.Image){
+                await api.get(trait.Image)
+                .then(response => {
+                    if(response.status == 200){
+                        embed.setImage(trait.Image)
+                    }
+                })
+                .catch(error => {
+                    console.log(error.response.status, trait.Image);
+                    refreshImage = true;
+                })
+                .finally(() => {
+                    
+                })
+            }
+            else {
+                refreshImage = true;
+            }
+
+            if(!refreshImage){
                 const rows = [];
                 if(trait.UpgradeTypeRead.Code == 'si'){
                     rows.push(this.getSoulImprintCoresMenu(traitCustomId, traitCommands[traitCommands.length - 1]))
@@ -273,7 +288,8 @@ module.exports = {
                         embed: embed,
                         attachment: attachment,
                         components: [row],
-                        trait: trait
+                        trait: trait,
+                        refreshImage: true
                     }
                 }
                 case 'cs': {
@@ -347,7 +363,8 @@ module.exports = {
                         embed: embed,
                         attachment: attachment,
                         components: [row],
-                        trait: trait
+                        trait: trait,
+                        refreshImage: true
                     }
                 }
                 case 'trans': {
@@ -415,7 +432,8 @@ module.exports = {
                         embed: embed,
                         attachment: attachment,
                         components: [row],
-                        trait: trait
+                        trait: trait,
+                        refreshImage: true
                     }
                 }
                 case 'si': {
@@ -531,7 +549,8 @@ module.exports = {
                         embed: embed,
                         attachment: attachment,
                         components: [this.getSoulImprintCoresMenu(traitCustomId, core), row],
-                        trait: trait
+                        trait: trait,
+                        refreshImage: true
                     }
                 }
             }
@@ -539,9 +558,9 @@ module.exports = {
     },
     async updateHeroTrait(args, message)
     {
-        if (!args[0]) return message.channel.send(`Trait Code is required ${message.author}... try again ? ❌`);
+        if (!args[0]) return message.reply(`Trait Code is required ${message.author}... try again ? ❌`);
         
-        if (!args[1]) return message.channel.send(`Trait Config is required ${message.author}... try again ? ❌`);
+        if (!args[1]) return message.reply(`Trait Config is required ${message.author}... try again ? ❌`);
         
         const traitCode = args[0];
         const traitConfig = args[1].split('-');
@@ -576,7 +595,7 @@ module.exports = {
             }
         })
         .catch(e => {
-            message.channel.send(`An Error has occured ${message.author}... try again ? ❌`);
+            message.reply(`An Error has occured ${message.author}... try again ? ❌`);
             client.errorLog(e, message);
         });
     },

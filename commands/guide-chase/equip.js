@@ -11,7 +11,7 @@ module.exports = {
 
     async execute(client, message, args) {
 
-        if (!args[0]) return message.channel.send(`Hero name is required ${message.author}... try again ? ❌`);
+        if (!args[0]) return message.reply(`Hero name is required ${message.author}... try again ? ❌`);
 
         let heroCode = args.shift();
         if(heroCode == 'update'){
@@ -19,7 +19,7 @@ module.exports = {
 
             if (!message.member._roles.includes(GuideChaseBot.id)) {
             
-                return message.channel.send({ embeds: [
+                return message.reply({ embeds: [
                     new MessageEmbed({
                         color: 'RED',
                         description: `This command is reserved for members with the <@&${GuideChaseBot.id}> role on the server ${message.author}... try again ? ❌`
@@ -36,7 +36,7 @@ module.exports = {
 
         let selectedHero = client.heroes.filter(x => x.Code.startsWith(heroCode.toLowerCase()));
         if(selectedHero.length == 0){
-            return message.channel.send({ embeds: [
+            return message.reply({ embeds: [
                 new MessageEmbed({
                     color: 'RED',
                     description: `Hero not found ${message.author}... try again ? ❌`
@@ -60,7 +60,7 @@ module.exports = {
                 description: `Multiple heroes found! please select:`
             });
 
-            return message.channel.send({ 
+            return message.reply({ 
                 embeds: [embed], 
                 components: [row]
             });
@@ -84,30 +84,28 @@ module.exports = {
 
             const result = await this.getHeroEquip(hero, args, message.author.id, refreshImage);
             if(!result){
-                return message.channel.send({ embeds: [
+                return message.reply({ embeds: [
                     new MessageEmbed({
                         color: 'RED',
                         description: `Equip not found ${message.author}... try again ? ❌`
                     })
                 ]});
             }
-            
-            result.embed.setFooter(`Source: Trust me bro`);
 
-            await message.channel.send({
+            await message.reply({
                 embeds: [result.embed],
                 files: result.attachment ? [result.attachment]: [],
                 components: result.components ? result.components: []
             }).then(reply => {
-                const equipImageUrl = reply.embeds[0].image.proxyUrl;
-                if((refreshImage || !result.equip.Image) && equipImageUrl){
+                const equipImageUrl = reply.embeds[0].image.proxyURL;
+                if((refreshImage || result.refreshImage || !result.equip.Image) && equipImageUrl){
                     api.patch('HeroEquip/' + result.equip.Id, { Image: equipImageUrl })
                 }
             })
             
         })
         .catch(e => {
-            message.channel.send(`An Error has occured ${message.author}... try again ? ❌`);
+            message.reply(`An Error has occured ${message.author}... try again ? ❌`);
             client.errorLog(e, message);
         });
     },
@@ -144,15 +142,28 @@ module.exports = {
                 }))
             }
 
-            if(equip.Image && !refreshImage){
-                embed.setImage(equip.Image)
+            if(equip.Image){
+                await api.get(equip.Image)
+                .then(response => {
+                    if(response.status == 200){
+                        embed.setImage(equip.Image)
+                    }
+                })
+                .catch(error => {
+                    console.log(error.response.status, equip.Image);
+                    refreshImage = true;
+                })
+                .finally(() => {
+                })
+            }
+            else {
+                refreshImage = true;
+            }
 
-                const rows = [];
-                rows.push(row);
-
+            if(!refreshImage){
                 return {
                     embed: embed,
-                    components: rows,
+                    components: [row],
                     equip: equip
                 }
             }
@@ -451,7 +462,8 @@ module.exports = {
                 embed: embed,
                 attachment: attachment,
                 components: [row],
-                equip: equip
+                equip: equip,
+                refreshImage: true
             }
         }      
     },
@@ -933,7 +945,7 @@ module.exports = {
     },
     async updateHeroEquip(heroEquipCode, args, message)
     {
-        if (!args[0]) return message.channel.send(`Equip Config is required ${message.author}... try again ? ❌`);
+        if (!args[0]) return message.reply(`Equip Config is required ${message.author}... try again ? ❌`);
 
         await api.get(`HeroEquip?where=(Code,eq,${heroEquipCode})`).then(async response => {
             if(response.status == 200){
@@ -952,14 +964,12 @@ module.exports = {
                         }
                     }
 
-                    console.log(configData);
-
                     await api.patch('HeroEquip/' + heroEquip.Id, configData)
                 }
             }
         })
         .catch(e => {
-            message.channel.send(`An Error has occured ${message.author}... try again ? ❌`);
+            message.reply(`An Error has occured ${message.author}... try again ? ❌`);
             client.errorLog(e, message);
         });
     },

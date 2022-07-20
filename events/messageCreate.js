@@ -142,7 +142,7 @@ module.exports = (client, message) => {
 
                 if (!message.member._roles.includes(roleDJ.id)) {
                 
-                    return message.channel.send({ embeds: [
+                    return message.reply({ embeds: [
                         new MessageEmbed({
                             color: 'RED',
                             description: `This command is reserved for members with the ${DJ.roleName} role on the server ${message.author}... try again ? ❌`
@@ -151,9 +151,9 @@ module.exports = (client, message) => {
                 }
             }
             if (cmd && cmd.voiceChannel) {
-                if (!message.member.voice.channel) return message.channel.send(`You're not in a voice channel ${message.author}... try again ? ❌`);
+                if (!message.member.voice.channel) return message.reply(`You're not in a voice channel ${message.author}... try again ? ❌`);
     
-                if (message.guild.me.voice.channel && message.member.voice.channel.id !== message.guild.me.voice.channel.id) return message.channel.send(`You are not in the same voice channel ${message.author}... try again ? ❌`);
+                if (message.guild.me.voice.channel && message.member.voice.channel.id !== message.guild.me.voice.channel.id) return message.reply(`You are not in the same voice channel ${message.author}... try again ? ❌`);
             }
         }
 
@@ -164,9 +164,10 @@ module.exports = (client, message) => {
                 return message.reply(`Mari is under maintenance :( Sorry for the inconvenience ❌`);
             }
             cmd.execute(client, message, args);
+
         }
     }
     catch(e){
-        message.channel.send(`An Error has occured ${message.author}... try again ? ❌`);
+        message.reply(`An Error has occured ${message.author}... try again ? ❌`);
     }
 };

@@ -9,13 +9,13 @@ module.exports = {
 
     async execute(client, message, args) {
 
-        if (!args[0]) return message.channel.send(`Hero name is required ${message.author}... try again ? ❌`);
+        if (!args[0]) return message.reply(`Hero name is required ${message.author}... try again ? ❌`);
         
         const heroCode = args.shift();
 
         let selectedHero = client.heroes.filter(x => x.Code.startsWith(heroCode.toLowerCase()));
         if(selectedHero.length == 0){
-            return message.channel.send({ embeds: [
+            return message.reply({ embeds: [
                 new MessageEmbed({
                     color: 'RED',
                     description: `Hero not found ${message.author}... try again ? ❌`
@@ -23,7 +23,7 @@ module.exports = {
             ]});
         }
         else if (selectedHero.length > 1){
-            return message.channel.send({ 
+            return message.reply({ 
                 embeds: [new MessageEmbed({
                     color: 'RED',
                     description: `Multiple heroes found!\nplease select: [${selectedHero.map(x => {return x.Code}).join(',')}]`
@@ -40,7 +40,7 @@ module.exports = {
             embed.setThumbnail(hero.Image);
             embed.setAuthor(hero.Name);
             embed.setColor(hero.Color);
-            message.channel.send({
+            message.reply({
                 embeds: [embed]
             })
         });

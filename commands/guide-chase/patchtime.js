@@ -10,7 +10,7 @@ module.exports = {
 
     async execute(client, message, args) {
 
-        if (!args[0]) return message.channel.send(`Server is required ${message.author}... try again ? ❌`);
+        if (!args[0]) return message.reply(`Server is required ${message.author}... try again ? ❌`);
 
         const patchMap = {
             asia: 1,
@@ -68,7 +68,7 @@ module.exports = {
                 embed.addField('Notes', '```' + patchtime.Notes + '```');
             }
 
-            return message.channel.send({ embeds: [embed]});
+            return message.reply({ embeds: [embed]});
 
         })
     }
