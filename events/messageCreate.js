@@ -132,7 +132,13 @@ module.exports = (client, message) => {
         const args = message.content.toLowerCase().slice(prefix.length).trim().split(/ +/g);
         const command = args.shift().toLowerCase();
 
-        const cmd = client.commands.get(command) || client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(command));
+        let cmd = client.commands.get(command) || client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(command));
+
+        let hero = client.heroes.filter(x => x.Code.startsWith(command));
+        if(hero.length > 0 && command.length >= 3){
+            cmd = client.commands.get('hero');
+            args.unshift(command);
+        }
 
         if(prefix == musicpx){
             const DJ = client.config.opt.DJ;
