@@ -1,4 +1,5 @@
 const { MessageEmbed } = require('discord.js');
+const { maintenance } = require('./../config.json');
 
 module.exports = (client, message) => {
 
@@ -166,7 +167,7 @@ module.exports = (client, message) => {
         if (cmd) {
             message.channel.sendTyping();
             
-            if(client.config.app.maintenance && message.author.id != "481506666727079956"){
+            if(maintenance && message.author.id != "481506666727079956"){
                 return message.reply(`Mari is under maintenance :( Sorry for the inconvenience ❌`);
             }
             cmd.execute(client, message, args);
