@@ -1,4 +1,4 @@
-const { MessageEmbed, MessageButton, MessageActionRow } = require('discord.js');
+const { MessageEmbed, MessageButton, MessageActionRow, MessageSelectMenu } = require('discord.js');
 
 module.exports = {
     name: 'skill',
@@ -70,7 +70,7 @@ module.exports = {
 
             await message.reply({
                 embeds: [skill.embed],
-                components: skill.components ? [skill.components]: []
+                components: skill.components ? skill.components: []
             })
         })
         .catch(e => {
@@ -91,65 +91,60 @@ module.exports = {
             a.UpgradeTypeRead.OrderBy.localeCompare(b.UpgradeTypeRead.OrderBy),
         )
 
-        let skillCommands = [hero.Code];
-        if(isSkill){
-            skillCommands.push(args[0].toLowerCase());
-            skillCommands.push(args[1] ? args[1].toLowerCase() : (hero.Skills.length > 0) ? hero.Skills[0].UpgradeTypeRead.Code : 'base');
-        }
-        else if(isUpgradeType){
-            skillCommands.push(args[1] ? args[1].toLowerCase() : (hero.Skills.length > 0) ? hero.Skills[0].SkillTypeRead.Code : 's1');
-            skillCommands.push(args[0].toLowerCase());
+        let heroCode = hero.Code;
+        let skillTypeCode = 's1';
+        let upgradeTypeCode = 'base';
+        if(hero.Skills.length > 0){
+            skillTypeCode = hero.Skills[0].SkillTypeRead.Code;
+            upgradeTypeCode = hero.Skills[0].UpgradeTypeRead.Code;
         }
 
-        let skill = hero.Skills.find(x => x.Code == skillCommands.join('.').toLowerCase());
+        if(isSkill){
+            skillTypeCode = args[0].toLowerCase();
+            if(args[1]) upgradeTypeCode = args[1].toLowerCase();
+            
+        }
+        else if(isUpgradeType){
+            if(args[1]) skillTypeCode = args[1].toLowerCase();
+            upgradeTypeCode = args[0].toLowerCase();
+        }
+
+        let skill = hero.Skills.find(x => x.Code == [heroCode, skillTypeCode, upgradeTypeCode].join('.').toLowerCase());
         if(skill){
             let authorLabel = skill.Name;
             if(skill.SP){
                 authorLabel += ` | ${skill.SP} SP`;
             }
             embed.setThumbnail(skill.Image);
-            embed.setAuthor(authorLabel);
+            embed.setAuthor(authorLabel, hero.Image);
 
-            const row = new MessageActionRow();
+            const buttonsRow = new MessageActionRow();
+            const selectMenu = new MessageSelectMenu();
+            const customId = ['SKILL', author, hero.Id, skill.SkillTypeRead.Code].join('_');
+            selectMenu.setCustomId(customId)
+            hero.Skills.forEach(s => {
+                if(upgradeTypeCode == s.UpgradeTypeRead.Code){
+                    const isCurrentSkill = (s.SkillTypeRead.Code == skill.SkillTypeRead.Code);
+                    const customButtonId = ['SKILL', author, hero.Id, s.SkillTypeRead.Code, s.UpgradeTypeRead.Code].join('_');
+                    buttonsRow.addComponents(new MessageButton({
+                        label: s.SkillTypeRead.Name,
+                        customId: customButtonId,
+                        style: isCurrentSkill ? 'SECONDARY' : 'PRIMARY',
+                        disabled: isCurrentSkill
+                    }))
+                }
 
-            if(isSkill){
-                hero.Skills.forEach(s => {
-                    if(args[0] == s.SkillTypeRead.Code){
-                        const isCurrentSkill = (s.UpgradeTypeRead.Code == skill.UpgradeTypeRead.Code);
-                        row.addComponents(new MessageButton({
-                            label: s.UpgradeTypeRead.Name,
-                            customId: [
-                                'SKILL',
-                                author,
-                                hero.Id,
-                                s.SkillTypeRead.Code,
-                                s.UpgradeTypeRead.Code
-                            ].join('_'),
-                            style: isCurrentSkill ? 'SECONDARY' : 'PRIMARY',
-                            disabled: isCurrentSkill
-                        }))
-                    }
-                });
-            }
-            else if(isUpgradeType){
-                hero.Skills.forEach(s => {
-                    if(args[0] == s.UpgradeTypeRead.Code){
-                        const isCurrentSkill = (s.SkillTypeRead.Code == skill.SkillTypeRead.Code);
-                        row.addComponents(new MessageButton({
-                            label: s.SkillTypeRead.Name,
-                            customId: [
-                                'SKILL',
-                                author,
-                                hero.Id,
-                                s.UpgradeTypeRead.Code,
-                                s.SkillTypeRead.Code
-                            ].join('_'),
-                            style: isCurrentSkill ? 'SECONDARY' : 'PRIMARY',
-                            disabled: isCurrentSkill
-                        }))
-                    }
-                })
-            }
+                if(skillTypeCode == s.SkillTypeRead.Code){
+                    const isCurrentUpgradeType = (s.UpgradeTypeRead.Code == skill.UpgradeTypeRead.Code);
+                    selectMenu.addOptions({
+                        label: s.UpgradeTypeRead.Name,
+                        value: s.UpgradeTypeRead.Code,
+                        default: isCurrentUpgradeType
+                    })
+                }
+            })
+
+            const menuRow = new MessageActionRow().addComponents(selectMenu);
 
             if(skill.UpgradeTypeRead){
                 embed.addField('Upgrade Type', skill.UpgradeTypeRead.Name, true)
@@ -158,7 +153,7 @@ module.exports = {
                 embed.addField('Cooldown',`${skill.Cooldown}s`, true)
             }
             const description = skill.Description.split('[Title]')
-
+            
             for(let x = 0; x < description.length; x++){
                 const desc = description[x];
                 if(x == 0){
@@ -169,7 +164,7 @@ module.exports = {
                     const title = descSplit.shift();
                     embed.addField(title, descSplit.join('\n').substring(0, 1024))
                     if(descSplit.join('\n').length > 1024){
-                        embed.addField('Cont...', descSplit.join('\n').substring(1025))
+                        embed.addField('Cont...', descSplit.join('\n').substring(1024))
                     }
                 }
             }
@@ -180,7 +175,7 @@ module.exports = {
 
             return {
                 embed: embed,
-                components: row
+                components: [menuRow, buttonsRow]
             }
         }
     },

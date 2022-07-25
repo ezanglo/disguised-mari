@@ -82,16 +82,21 @@ module.exports = async (client, int) => {
                 .then((response) => {
                     const hero = response.data;
                     const cmd = client.commands.get('skill')
-                    const skill = cmd.getHeroSkill(hero, args, author)
+
+                    if(int.isSelectMenu()){
+                        args.push(int.values[0])
+                    }
+
+                    const skill = cmd.getHeroSkill(hero, args, author);
                     return int.update({
                         embeds: [skill.embed],
-                        components: skill.components ? [skill.components]: []
+                        components: skill.components ? skill.components: []
                     })
                 })
                 .catch(e => {
                     int.channel.send({ content: `An Error has occured ${int.member}... try again ? ❌`, ephemeral: true });
                     client.errorLog(e, {
-                        author: int.member,
+                        author: int.member.user,
                         channel: int.channel,
                         content: `Interaction: ${customId}`
                     });
@@ -127,7 +132,7 @@ module.exports = async (client, int) => {
                 .catch(e => {
                     int.channel.send({ content: `An Error has occured ${int.member}... try again ? ❌`, ephemeral: true });
                     client.errorLog(e, {
-                        author: int.member,
+                        author: int.member.user,
                         channel: int.channel,
                         content: `Interaction: ${customId}`
                     });
@@ -161,9 +166,9 @@ module.exports = async (client, int) => {
                     })
                 })
                 .catch(e => {
-                    int.channel.send({ content: `An Error has occured ${int.user}... please try command directly \`?equip ${hero.Code} ${args.join(' ')}\` ❌`, ephemeral: true });
+                    int.channel.send({ content: `An Error has occured ${int.member}... please try command directly \`?equip ${hero.Code} ${args.join(' ')}\` ❌`, ephemeral: true });
                     client.errorLog(e, {
-                        author: int.user,
+                        author: int.member.user,
                         channel: int.channel,
                         content: `Interaction: ${customId}`
                     });
@@ -173,9 +178,9 @@ module.exports = async (client, int) => {
         }
     }
     catch(e){
-        int.channel.send({ content: `An Error has occured ${int.member}... try again ? ❌`, ephemeral: true });
+        int.channel.send({ content: `An Error has occured ${int.member.user}... try again ? ❌`, ephemeral: true });
         client.errorLog(e, {
-            author: int.user,
+            author: int.member.user,
             channel: int.channel,
             content: `Interaction`
         });
