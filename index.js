@@ -247,4 +247,4 @@ function date_diff(d1)
 }
 
 // Login to Discord with your client's token
-client.login(token);
+client.login(process.env.BOT_TOKEN);

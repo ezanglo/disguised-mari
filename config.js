@@ -1,10 +1,8 @@
-const { token } = require('./config.json');
-
 module.exports = {
     app: {
         px: '!',
         gc: '?',
-        token: token,
+        token: process.env.BOT_TOKEN,
         playing: 'with your feelings',
         debug_mode: true,
         error_log_channel: '979175534363832340',
