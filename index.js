@@ -2,7 +2,7 @@
 /* eslint-disable indent */
 // Require the necessary discord.js classes
 const { Client, Intents, MessageEmbed } = require('discord.js');
-const { token, firebase } = require('./config.json');
+const { firebase } = require('./config.json');
 
 const admin = require('firebase-admin');
 
