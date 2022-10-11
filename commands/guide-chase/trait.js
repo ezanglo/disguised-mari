@@ -121,17 +121,26 @@ module.exports = {
             a.UpgradeTypeRead.OrderBy.localeCompare(b.UpgradeTypeRead.OrderBy),
         )
 
-        let traitCommands = [hero.Code];
-        if(isContentTypeTrait){
-            traitCommands.push(args[0].toLowerCase());
-            traitCommands.push(args[1] ? args[1].toLowerCase() : (hero.Traits.length > 0) ? hero.Traits[0].UpgradeTypeRead.Code : 'lvl');
-        }
-        else if(isUpgradeTypeTrait){
-            traitCommands.push(args[1] ? args[1].toLowerCase() : (hero.Traits.length > 0) ? hero.Traits[0].ContentTypeRead.Code : 'pve');
-            traitCommands.push(args[0].toLowerCase());
+        let heroCode = hero.Code;
+        let contentTypeCode = 'pve';
+        let upgradeTypeCode = 'lvl';
+        if(hero.Traits.length > 0){
+            contentTypeCode = hero.Traits[0].ContentTypeRead.Code;
+            upgradeTypeCode = hero.Traits[0].UpgradeTypeRead.Code;
         }
 
-        if(traitCommands.includes('si')){
+        if(isContentTypeTrait){
+            contentTypeCode = args[0].toLowerCase();
+            if(args[1]) upgradeTypeCode = args[1].toLowerCase();
+        }
+
+        if(isUpgradeTypeTrait){
+            if(args[1]) contentTypeCode = args[1].toLowerCase();
+            upgradeTypeCode = args[0].toLowerCase();
+        }
+
+        let traitCommands = [heroCode, contentTypeCode, upgradeTypeCode]
+        if(upgradeTypeCode == 'si'){
             traitCommands.push(args[2] ? args[2].toLowerCase(): 'mem')
         }
 
@@ -142,49 +151,53 @@ module.exports = {
             if(trait.Notes){
                 embed.setFooter({ text: 'Note: ' + trait.Notes, iconURL: client.user.displayAvatarURL({ size: 1024, dynamic: true }) });
             }
+
+            let traitCustomId;
             
-            const row = new MessageActionRow();
+            const buttonsRow = new MessageActionRow();
+            const selectMenu = new MessageSelectMenu();
+
+            const menuCustomId = ['TRAIT', author, hero.Id, trait.UpgradeTypeRead.Code];
+            if(trait.UpgradeTypeRead.Code == 'si'){
+                menuCustomId.push(traitCommands[traitCommands.length - 1])
+            }
+
+            selectMenu.setCustomId(menuCustomId.join('_'))
 
             const traitButtons = [
                 ...new Map(hero.Traits.map((item) => [item["ContentTypeRead"]['Code']+item["UpgradeTypeRead"]['Code'], item])).values(),
             ];
 
-            let traitCustomId;
+            for(const t of traitButtons){
+                if(contentTypeCode == t.ContentTypeRead.Code){
+                    const isCurrentUpgradeType = (t.UpgradeTypeRead.Code == trait.UpgradeTypeRead.Code);
+                    const buttonCustomId = ['TRAIT', author, hero.Id, t.ContentTypeRead.Code, t.UpgradeTypeRead.Code];
+                    if(isCurrentUpgradeType){
+                        traitCustomId = buttonCustomId;
+                    }
+                    buttonsRow.addComponents(new MessageButton({
+                        label: t.UpgradeTypeRead.Name,
+                        customId: buttonCustomId.join('_'),
+                        style: isCurrentUpgradeType ? 'SECONDARY' : 'PRIMARY',
+                        disabled: isCurrentUpgradeType
+                    }))
+                }
 
-            if(isContentTypeTrait){
-                for(const t of traitButtons){
-                    if(args[0] == t.ContentTypeRead.Code){
-                        const isCurrentTrait = (t.UpgradeTypeRead.Code == trait.UpgradeTypeRead.Code);
-                        const customId = ['TRAIT', author, hero.Id, t.ContentTypeRead.Code, t.UpgradeTypeRead.Code];
-                        if(isCurrentTrait){
-                            traitCustomId = customId
-                        }
-                        row.addComponents(new MessageButton({
-                            label: t.UpgradeTypeRead.Name,
-                            customId: customId.join('_'),
-                            style: isCurrentTrait ? 'SECONDARY' : 'PRIMARY',
-                            disabled: isCurrentTrait
-                        }))
+                if(upgradeTypeCode == t.UpgradeTypeRead.Code){
+                    const isCurrentContent = (t.ContentTypeRead.Code == trait.ContentTypeRead.Code);
+                    if(isCurrentContent){
+                        menuCustomId.push(trait.ContentTypeRead.Code);
+                        traitCustomId = menuCustomId;
                     }
+                    selectMenu.addOptions({
+                        label: t.ContentTypeRead.Name,
+                        value: t.ContentTypeRead.Code,
+                        default: isCurrentContent
+                    })
                 }
             }
-            else if (isUpgradeTypeTrait){
-                for(const t of traitButtons){
-                    if(args[0] == t.UpgradeTypeRead.Code){
-                        const isCurrentTrait = (t.ContentTypeRead.Code == trait.ContentTypeRead.Code);
-                        const customId = ['TRAIT', author, hero.Id, t.UpgradeTypeRead.Code, t.ContentTypeRead.Code];
-                        if(isCurrentTrait){
-                            traitCustomId = customId
-                        }
-                        row.addComponents(new MessageButton({
-                            label: t.ContentTypeRead.Name,
-                            customId: customId.join('_'),
-                            style: isCurrentTrait ? 'SECONDARY' : 'PRIMARY',
-                            disabled: isCurrentTrait
-                        }))
-                    }
-                }
-            }
+            
+            const menuRow = new MessageActionRow().addComponents(selectMenu);
 
             if(trait.Image){
                 await api.get(trait.Image)
@@ -205,24 +218,24 @@ module.exports = {
                 refreshImage = true;
             }
 
+            let embeds = [];
+            let components = [menuRow, buttonsRow];
+            let attachment;
+
             if(!refreshImage){
-                const rows = [];
+            
                 if(trait.UpgradeTypeRead.Code == 'si'){
-                    rows.push(this.getSoulImprintCoresMenu(traitCustomId, traitCommands[traitCommands.length - 1]))
+                    components.push(this.getSoulImprintCoresMenu(traitCustomId, traitCommands[traitCommands.length - 1]))
                 }
 
-                rows.push(row);
+                embeds.push(embed);
 
                 return {
-                    embeds: [embed],
-                    components: rows,
+                    embeds: embeds,
+                    components: components,
                     trait: trait
                 }
             }
-
-            let embeds = [];
-            let components = [row];
-            let attachment;
 
             switch(trait.UpgradeTypeRead.Code)
             {
@@ -683,7 +696,7 @@ module.exports = {
         return new MessageActionRow()
         .addComponents(
             new MessageSelectMenu()
-                .setCustomId('SELECT_' + traitCustomId.join('_'))
+                .setCustomId(traitCustomId.join('_'))
                 .setPlaceholder('Select Soul Imprint Core')
                 .addOptions([
                     {

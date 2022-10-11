@@ -13,9 +13,6 @@ module.exports = async (client, int) => {
         
         const args = int.customId.split('_');
         let customId = args.shift();
-        if(customId == 'SELECT'){
-            customId = args.shift();
-        }
 
         switch (customId) {
             case 'saveTrack': 
@@ -113,15 +110,27 @@ module.exports = async (client, int) => {
                 await api.get('Hero/' + traitHeroId + 
                     '?nested[Upgrades][fields]=Id,Name,Code'+
                     '&nested[Skills][fields]=Code,Image,UpgradeTypeRead,SkillTypeRead' +
-                    '&nested[Traits][fields]=Id,Code,UpgradeTypeRead,ContentTypeRead,Config,OrderBy,Note')
+                    '&nested[Traits][fields]=Id,Code,UpgradeTypeRead,ContentTypeRead,Config,Image,OrderBy,Note')
                 .then(async response => {
                     const hero = response.data;
                     const cmd = client.commands.get('trait')
 
-                    if(int.isSelectMenu() && args.includes('si')){
-                        args.push(int.values[0])
-                    }
+                    if(int.isSelectMenu()){
 
+                        if(args.includes('si')){
+                            if(['mem', 'body', 'soul'].includes(args[args.length - 1])){
+                                args.unshift(int.values[0])
+                            }
+                            else {
+                                const content = args.pop();
+                                args.unshift(content)
+                                args[args.length - 1] = int.values[0];
+                            }
+                        }
+                        else {
+                            args.unshift(int.values[0])
+                        }
+                    }
                     const trait = await cmd.getHeroTrait(hero, args, traitAuthor);
                     return int.update({
                         embeds: trait.embeds,
