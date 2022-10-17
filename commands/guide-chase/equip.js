@@ -599,7 +599,7 @@ module.exports = {
                 td: { label: 'True Damage Chance', value: '10.00%' },
                 ddi: { label: 'Debuff Duration Inc', value: '20.00%' },
                 ddd: { label: 'Debuff Duration Dec', value: '20.00%' },
-                critdef: { label: 'Debuff Duration Dec', value: '5.00%' },
+                critdef: { label: 'Critical Defense Chance', value: '5.00%' },
                 enchants: {
                     matk: { label: 'Magic Attack', value: '570' },
                     patk: { label: 'Physical Attack', value: '570' },
@@ -640,7 +640,7 @@ module.exports = {
                 mdef: { label: 'Magic Defense', value: '1,670' },
                 hp: { label: 'Max Health', value: '8,330' },
                 crit: { label: 'Critical Chance', value: '4.00%' },
-                critdef: { label: 'Critical Defense', value: '5.00%' },
+                critdef: { label: 'Critical Defense Chance', value: '5.00%' },
                 heal: { label: 'Healing Increase', value: '5.00%' },
                 enchants: {
                     matk: { label: 'Magic Attack', value: '570' },
