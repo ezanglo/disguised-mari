@@ -1,5 +1,6 @@
 const { MessageEmbed, MessageButton, MessageActionRow, MessageAttachment, MessageSelectMenu } = require('discord.js');
-const { createCanvas, loadImage } = require('canvas')
+const { createCanvas, loadImage } = require('canvas');
+const { DateTime } = require('luxon');
 
 module.exports = {
     name: 'equip',
@@ -73,7 +74,7 @@ module.exports = {
             '&nested[HeroEquips][fields]='+
             'Id,Code,ContentTypeRead,WeaponConfig,SubWeaponConfig,ArmorConfig,' +
             'SubArmor1Config,SubArmor2Config,ExclusiveWeaponConfig,RingConfig,' +
-            'NecklaceConfig,EarringConfig,Image,Artifact,Notes')
+            'NecklaceConfig,EarringConfig,Image,Artifact,Notes,UpdatedAt')
         .then(async (response) => {
             const hero = response.data;
 
@@ -145,6 +146,7 @@ module.exports = {
                 }))
             }
 
+
             if(equip.Image){
                 await api.get(equip.Image)
                 .then(response => {
@@ -160,6 +162,10 @@ module.exports = {
                 })
             }
             else {
+                refreshImage = true;
+            }
+
+            if(this.isEquipUpdated(hero, equip)){
                 refreshImage = true;
             }
 
@@ -215,7 +221,7 @@ module.exports = {
                 
                 const gearStatValues = this.getStatValues(heroGear);
 
-                if(gearConfig.stat1){
+                if(gearConfig.stat1 && gearStatValues[gearConfig.stat1]){
                     const stat = gearStatValues[gearConfig.stat1];
                     ctx.save()
                     ctx.font = 'italic bold 20px Arial';
@@ -226,7 +232,7 @@ module.exports = {
                     this.drawStrokedText(ctx, `+${stat.value}`, 'center', left + 480, top + 20)
                 }
 
-                if(gearConfig.stat2){
+                if(gearConfig.stat2 && gearStatValues[gearConfig.stat2]){
                     const stat = gearStatValues[gearConfig.stat2];
                     ctx.save()
                     ctx.font = 'italic bold 20px Arial';
@@ -237,7 +243,7 @@ module.exports = {
                     this.drawStrokedText(ctx, `+${stat.value}`, 'center', left + 480, top + 50)
                 }
 
-                if(gearConfig.enchant1){
+                if(gearConfig.enchant1 && gearStatValues.enchants[gearConfig.enchant1]){
                     const stat = gearStatValues.enchants[gearConfig.enchant1];
                     ctx.save()
                     ctx.font = 'italic bold 20px Arial';
@@ -248,7 +254,7 @@ module.exports = {
                     this.drawStrokedText(ctx, `+${stat.value}`, 'end', left + 555, top + 100)
                 }
 
-                if(gearConfig.enchant2){
+                if(gearConfig.enchant2 && gearStatValues.enchants[gearConfig.enchant2]){
                     const stat = gearStatValues.enchants[gearConfig.enchant2];
                     ctx.save()
                     ctx.font = 'italic bold 20px Arial';
@@ -259,7 +265,7 @@ module.exports = {
                     this.drawStrokedText(ctx, `+${stat.value}`, 'end', left + 555, top + 130)
                 }
 
-                if(gearConfig.enchant3){
+                if(gearConfig.enchant3 && gearStatValues.enchants[gearConfig.enchant3]){
                     const stat = gearStatValues.enchants[gearConfig.enchant3];
                     ctx.save()
                     ctx.font = 'italic bold 20px Arial';
@@ -297,7 +303,7 @@ module.exports = {
             const ewConfig = equip.ExclusiveWeaponConfig;
             const ewStatValues = this.getStatValues('ew');
 
-            if(ewConfig.rune1){
+            if(ewConfig.rune1 && ewStatValues[ewConfig.rune1]){
                 const rune1Url = this.getRuneImage('normal', ewConfig.rune1);
                 await loadImage(rune1Url).then(img => {
                     ctx.drawImage(img, left + 145, 95, 30, 30)
@@ -313,7 +319,7 @@ module.exports = {
                 this.drawStrokedText(ctx, `+${stat.value}`, 'end', left + 555, top + 75)
             }
 
-            if(ewConfig.rune2){
+            if(ewConfig.rune2 && ewStatValues[ewConfig.rune2]){
                 const rune2Url = this.getRuneImage('special', ewConfig.rune2);
                 await loadImage(rune2Url).then(img => {
                     ctx.drawImage(img, left + 145, 125, 30, 30)
@@ -350,7 +356,7 @@ module.exports = {
             this.drawStrokedText(ctx, `Legendary`, 'start', left + 140, top + 30, '30px', '#bd5175')
 
             const artiStatValues = this.getStatValues('arti');
-            if(equip.Artifact){
+            if(equip.Artifact && artiStatValues[equip.Artifact]){
                 const artiStat = artiStatValues[equip.Artifact];
                 if(artiStat.stat1){
                     ctx.save()
@@ -418,7 +424,7 @@ module.exports = {
 
                 const acceStatValues = this.getStatValues(accesory);
 
-                if(acceConfig.stat){
+                if(acceConfig.stat && acceStatValues[acceConfig.stat]){
                     const stat = acceStatValues[acceConfig.stat];
                     ctx.save()
                     ctx.font = 'italic bold 20px Arial';
@@ -429,7 +435,7 @@ module.exports = {
                     this.drawStrokedText(ctx, `+${stat.value}`, 'center', left + 480, top + 50)
                 }
 
-                if(acceConfig.type){
+                if(acceConfig.type && acceStatValues[acceConfig.type]){
                     const stat = acceStatValues[acceConfig.type];
                     ctx.save()
                     ctx.font = 'italic bold 20px Arial';
@@ -440,7 +446,7 @@ module.exports = {
                     this.drawStrokedText(ctx, `+${stat.value}`, 'end', left + 555, top + 95)
                 }
 
-                if(acceConfig.color){
+                if(acceConfig.color && acceStatValues[acceConfig.color]){
                     const stat = acceStatValues[acceConfig.color];
                     ctx.save()
                     ctx.font = 'italic bold 20px Arial';
@@ -587,183 +593,185 @@ module.exports = {
         }
         return url;
     },
-    getStatValues(stat){
-
-        const values = {
-            weap: {
-                patk: { label: 'Physical Attack', value: '4,000' },
-                matk: { label: 'Magic Attack', value: '4,000' },
-                pdef: { label: 'Physical Defense', value: '4,000' },
-                mdef: { label: 'Magic Defense', value: '4,000' },
-                hp: { label: 'Max Health', value: '20,000' },
-                td: { label: 'True Damage Chance', value: '10.00%' },
-                ddi: { label: 'Debuff Duration Inc', value: '20.00%' },
-                ddd: { label: 'Debuff Duration Dec', value: '20.00%' },
-                critdef: { label: 'Critical Defense Chance', value: '5.00%' },
-                enchants: {
-                    matk: { label: 'Magic Attack', value: '570' },
-                    patk: { label: 'Physical Attack', value: '570' },
-                    mdef: { label: 'Magic Defense', value: '570' },
-                    pdef: { label: 'Physical Defense', value: '570' },
-                    hp: { label: 'Max Health', value: '2,860' },
-                    crit: { label: 'Crit Chance', value: '4.00%' },
-                    cdr: { label: 'Skill Cooldown', value: '4.00%' },
-                    aspd: { label: 'Attack Speed', value: '4.00%' },
-                    sscdr: { label: 'SS Cooldown', value: '4.00%' },
-                }
-            },
-            subweap: {
-                patk: { label: 'Physical Attack', value: '4,000' },
-                matk: { label: 'Magic Attack', value: '4,000' },
-                pdef: { label: 'Physical Defense', value: '4,000' },
-                mdef: { label: 'Magic Defense', value: '4,000' },
-                hp: { label: 'Max Health', value: '20,000' },
-                pvpdmg: { label: 'PVP Damage Increase', value: '10.00%' },
-                pvpdef: { label: 'PVP Damage Decrease', value: '10.00%' },
-                bossdmg: { label: 'Boss Damage Increase', value: '10.00%' },
-                enchants: {
-                    matk: { label: 'Magic Attack', value: '570' },
-                    patk: { label: 'Physical Attack', value: '570' },
-                    mdef: { label: 'Magic Defense', value: '570' },
-                    pdef: { label: 'Physical Defense', value: '570' },
-                    hp: { label: 'Max Health', value: '2,860' },
-                    crit: { label: 'Crit Chance', value: '4.00%' },
-                    cdr: { label: 'Skill Cooldown', value: '4.00%' },
-                    aspd: { label: 'Attack Speed', value: '4.00%' },
-                    sscdr: { label: 'SS Cooldown', value: '4.00%' },
-                }
-            },
-            armor: {
-                patk: { label: 'Physical Attack', value: '1,670' },
-                matk: { label: 'Magic Attack', value: '1,670' },
-                pdef: { label: 'Physical Defense', value: '1,670' },
-                mdef: { label: 'Magic Defense', value: '1,670' },
-                hp: { label: 'Max Health', value: '8,330' },
-                crit: { label: 'Critical Chance', value: '4.00%' },
-                critdef: { label: 'Critical Defense Chance', value: '5.00%' },
-                heal: { label: 'Healing Increase', value: '5.00%' },
-                enchants: {
-                    matk: { label: 'Magic Attack', value: '570' },
-                    patk: { label: 'Physical Attack', value: '570' },
-                    mdef: { label: 'Magic Defense', value: '570' },
-                    pdef: { label: 'Physical Defense', value: '570' },
-                    hp: { label: 'Max Health', value: '2,860' }
-                }
-            },
-            subarmor1: {
-                patk: { label: 'Physical Attack', value: '1,670' },
-                matk: { label: 'Magic Attack', value: '1,670' },
-                pdef: { label: 'Physical Defense', value: '1,670' },
-                mdef: { label: 'Magic Defense', value: '1,670' },
-                hp: { label: 'Max Health', value: '8,330' },
-                crit: { label: 'Critical Damage', value: '8.00%' },
-                critdef: { label: 'Critical Damage Decrease', value: '8.00%' },
-                heal: { label: 'Healing Increase', value: '5.00%' },
-                enchants: {
-                    matk: { label: 'Magic Attack', value: '570' },
-                    patk: { label: 'Physical Attack', value: '570' },
-                    mdef: { label: 'Magic Defense', value: '570' },
-                    pdef: { label: 'Physical Defense', value: '570' },
-                    hp: { label: 'Max Health', value: '2,860' },
-                    bdi: { label: 'Basic Damage Increase', value: '4.00%' },
-                    sdi: { label: 'Skill Damage Increase', value: '4.00%' },
-                    bdr: { label: 'Basic Damage Decrease', value: '4.00%' },
-                    sdr: { label: 'Skill Damage Decrease', value: '4.00%' }
-                }
-            },
-            subarmor2: {
-                patk: { label: 'Physical Attack', value: '1,670' },
-                matk: { label: 'Magic Attack', value: '1,670' },
-                pdef: { label: 'Physical Defense', value: '1,670' },
-                mdef: { label: 'Magic Defense', value: '1,670' },
-                hp: { label: 'Max Health', value: '8,330' },
-                crit: { label: 'Critical Damage', value: '8.00%' },
-                critdef: { label: 'Critical Damage Decrease', value: '8.00%' },
-                heal: { label: 'Healing Increase', value: '5.00%' },
-                enchants: {
-                    matk: { label: 'Magic Attack', value: '570' },
-                    patk: { label: 'Physical Attack', value: '570' },
-                    mdef: { label: 'Magic Defense', value: '570' },
-                    pdef: { label: 'Physical Defense', value: '570' },
-                    hp: { label: 'Max Health', value: '2,860' },
-                    bdi: { label: 'Basic Damage Increase', value: '4.00%' },
-                    sdi: { label: 'Skill Damage Increase', value: '4.00%' },
-                    bdr: { label: 'Basic Damage Decrease', value: '4.00%' },
-                    sdr: { label: 'Skill Damage Decrease', value: '4.00%' }
-                }
-            },
-            ew: {
-                matk: { label: 'Magic Attack', value: '1,140' },
-                patk: { label: 'Physical Attack', value: '1,140' },
-                mdef: { label: 'Magic Defense', value: '1,140' },
-                pdef: { label: 'Physical Defense', value: '1,140' },
-                hp: { label: 'Health', value: '4,200' },
-                assaultdmg: { label: 'Assault Damage', value: '30.00%' },
-                rangerdmg: { label: 'Ranger Damage', value: '30.00%' },
-                magedmg: { label: 'Mage Damage', value: '30.00%' },
-                tankdmg: { label: 'Tank Damage', value: '30.00%' },
-                healerdmg: { label: 'Healer Damage', value: '30.00%' },
-                assaultdef: { label: 'Assault Defense', value: '30.00%' },
-                rangerdef: { label: 'Ranger Defense', value: '30.00%' },
-                magedef: { label: 'Mage Defense', value: '30.00%' },
-                tankdef: { label: 'Tank Defense', value: '30.00%' },
-                healerdef: { label: 'Healer Defense', value: '30.00%' }
-            },
-            arti: {
-                crit: {
-                    effect: 'Darkness',
-                    stat1: { label: '+4 Crit Chance', value: '3.20%' },
-                    stat2: { label: '+7 Basic Attack Reduction', value: '3.20%' }
-                },
-                bdi: {
-                    effect: 'Frost',
-                    stat1: { label: '+4 Basic Damage Increase', value: '3.20%' },
-                    stat2: { label: '+7 Skill Damage Reduction', value: '3.20%' }
-                },
-                aspd: {
-                    effect: 'Flame',
-                    stat1: { label: '+4 Attack Speed Increase', value: '3.20%' },
-                    stat2: { label: '+7 Skill Damage Reduction', value: '3.20%' }
-                }
-            },
-            ring: {
-                aspd: { label: 'Attack Speed Increase', value: '6.00%' },
-                crit: { label: 'Crit Chance', value: '4.00%' },
-                bdr: { label: 'Basic Damage Reduction', value: '4.00%' },
-                sscdr: { label: 'SS Cooldown Reduction', value: '4.00%' },
-                bdi: { label: 'Basic Damage Increase', value: '4.00%' },
-                sdi: { label: 'Skill Damage Increase', value: '4.00%' },
-                critdef: { label: 'Critical Defense', value: '5.00%' },
-                purple: { label: 'True Damage Increase', value: '30.00%' },
-                orange: { label: 'PVP Atk/Def', value: '5.00%' },
-                cyan: { label: 'Null Damage Chance', value: '3.00%' }
-            },
-            neck: {
-                cdr: { label: 'Skill Cooldown Reduction', value: '4.00%' },
-                crit: { label: 'Crit Chance', value: '4.00%' },
-                sdr: { label: 'Skill Damage Reduction', value: '4.00%' },
-                sscdr: { label: 'SS Cooldown Reduction', value: '4.00%' },
-                bdi: { label: 'Basic Damage Increase', value: '4.00%' },
-                sdi: { label: 'Skill Damage Increase', value: '4.00%' },
-                critdef: { label: 'Critical Defense', value: '5.00%' },
-                purple: { label: 'True Damage Increase', value: '30.00%' },
-                orange: { label: 'PVP Atk/Def', value: '5.00%' },
-                cyan: { label: 'Null Damage Chance', value: '3.00%' }
-            },
-            ear: {
-                aspd: { label: 'Attack Speed Increase', value: '6.00%' },
-                cdr: { label: 'Skill Cooldown Reduction', value: '4.00%' },
-                sdr: { label: 'Skill Damage Reduction', value: '4.00%' },
-                bdr: { label: 'Basic Damage Reduction', value: '4.00%' },
-                crit: { label: 'Critical Damage', value: '8.00%' },
-                critdef: { label: 'Critical Damage Decrease', value: '8.00%' },
-                heal: { label: 'Healing Increase', value: '5.00%' },
-                purple: { label: 'True Damage Increase', value: '30.00%' },
-                orange: { label: 'PVP Atk/Def', value: '5.00%' },
-                cyan: { label: 'Null Damage Chance', value: '3.00%' }
-            }
-        }
-        return values[stat];
+    getStatValues(stat)
+    {
+        const EquipConfig = client.EquipConfig.find(x => x.Code == stat);
+        return EquipConfig.Config;
+        // const values = {
+        //     weap: {
+        //         "patk": { "label": "Physical Attack", "value": "4,000" },
+        //         "matk": { "label": "Magic Attack", "value": "4,000" },
+        //         "pdef": { "label": "Physical Defense", "value": "4,000" },
+        //         "mdef": { "label": "Magic Defense", "value": "4,000" },
+        //         "hp": { "label": "Max Health", "value": "20,000" },
+        //         "td": { "label": "True Damage Chance", "value": "10.00%" },
+        //         "ddi": { "label": "Debuff Duration Inc", "value": "20.00%" },
+        //         "ddd": { "label": "Debuff Duration Dec", "value": "20.00%" },
+        //         "critdef": { "label": "Critical Defense Chance", "value": "5.00%" },
+        //         "enchants": {
+        //             "matk": { "label": "Magic Attack", "value": "570" },
+        //             "patk": { "label": "Physical Attack", "value": "570" },
+        //             "mdef": { "label": "Magic Defense", "value": "570" },
+        //             "pdef": { "label": "Physical Defense", "value": "570" },
+        //             "hp": { "label": "Max Health", "value": "2,860" },
+        //             "crit": { "label": "Crit Chance", "value": "4.00%" },
+        //             "cdr": { "label": "Skill Cooldown", "value": "4.00%" },
+        //             "aspd": { "label": "Attack Speed", "value": "4.00%" },
+        //             "sscdr": { "label": "SS Cooldown", "value": "4.00%" },
+        //         }
+        //     },
+        //     subweap: {
+        //         "patk": { "label": "Physical Attack", "value": "4,000" },
+        //         "matk": { "label": "Magic Attack", "value": "4,000" },
+        //         "pdef": { "label": "Physical Defense", "value": "4,000" },
+        //         "mdef": { "label": "Magic Defense", "value": "4,000" },
+        //         "hp": { "label": "Max Health", "value": "20,000" },
+        //         "pvpdmg": { "label": "PVP Damage Increase", "value": "10.00%" },
+        //         "pvpdef": { "label": "PVP Damage Decrease", "value": "10.00%" },
+        //         "bossdmg": { "label": "Boss Damage Increase", "value": "10.00%" },
+        //         "enchants": {
+        //             "matk": { "label": "Magic Attack", "value": "570" },
+        //             "patk": { "label": "Physical Attack", "value": "570" },
+        //             "mdef": { "label": "Magic Defense", "value": "570" },
+        //             "pdef": { "label": "Physical Defense", "value": "570" },
+        //             "hp": { "label": "Max Health", "value": "2,860" },
+        //             "crit": { "label": "Crit Chance", "value": "4.00%" },
+        //             "cdr": { "label": "Skill Cooldown", "value": "4.00%" },
+        //             "aspd": { "label": "Attack Speed", "value": "4.00%" },
+        //             "sscdr": { "label": "SS Cooldown", "value": "4.00%" },
+        //         }
+        //     },
+        //     armor: {
+        //         "patk": { "label": "Physical Attack", "value": "1,670" },
+        //         "matk": { "label": "Magic Attack", "value": "1,670" },
+        //         "pdef": { "label": "Physical Defense", "value": "1,670" },
+        //         "mdef": { "label": "Magic Defense", "value": "1,670" },
+        //         "hp": { "label": "Max Health", "value": "8,330" },
+        //         "crit": { "label": "Critical Chance", "value": "4.00%" },
+        //         "critdef": { "label": "Critical Defense Chance", "value": "5.00%" },
+        //         "heal": { "label": "Healing Increase", "value": "5.00%" },
+        //         "enchants": {
+        //             "matk": { "label": "Magic Attack", "value": "570" },
+        //             "patk": { "label": "Physical Attack", "value": "570" },
+        //             "mdef": { "label": "Magic Defense", "value": "570" },
+        //             "pdef": { "label": "Physical Defense", "value": "570" },
+        //             "hp": { "label": "Max Health", "value": "2,860" }
+        //         }
+        //     },
+        //     subarmor1: {
+        //         "patk": { "label": "Physical Attack", "value": "1,670" },
+        //         "matk": { "label": "Magic Attack", "value": "1,670" },
+        //         "pdef": { "label": "Physical Defense", "value": "1,670" },
+        //         "mdef": { "label": "Magic Defense", "value": "1,670" },
+        //         "hp": { "label": "Max Health", "value": "8,330" },
+        //         "crit": { "label": "Critical Damage", "value": "8.00%" },
+        //         "critdef": { "label": "Critical Damage Decrease", "value": "8.00%" },
+        //         "heal": { "label": "Healing Increase", "value": "5.00%" },
+        //         "enchants": {
+        //             "matk": { "label": "Magic Attack", "value": "570" },
+        //             "patk": { "label": "Physical Attack", "value": "570" },
+        //             "mdef": { "label": "Magic Defense", "value": "570" },
+        //             "pdef": { "label": "Physical Defense", "value": "570" },
+        //             "hp": { "label": "Max Health", "value": "2,860" },
+        //             "bdi": { "label": "Basic Damage Increase", "value": "4.00%" },
+        //             "sdi": { "label": "Skill Damage Increase", "value": "4.00%" },
+        //             "bdr": { "label": "Basic Damage Decrease", "value": "4.00%" },
+        //             "sdr": { "label": "Skill Damage Decrease", "value": "4.00%" }
+        //         }
+        //     },
+        //     subarmor2: {
+        //         "patk": { "label": "Physical Attack", "value": "1,670" },
+        //         "matk": { "label": "Magic Attack", "value": "1,670" },
+        //         "pdef": { "label": "Physical Defense", "value": "1,670" },
+        //         "mdef": { "label": "Magic Defense", "value": "1,670" },
+        //         "hp": { "label": "Max Health", "value": "8,330" },
+        //         "crit": { "label": "Critical Damage", "value": "8.00%" },
+        //         "critdef": { "label": "Critical Damage Decrease", "value": "8.00%" },
+        //         "heal": { "label": "Healing Increase", "value": "5.00%" },
+        //         "enchants": {
+        //             "matk": { "label": "Magic Attack", "value": "570" },
+        //             "patk": { "label": "Physical Attack", "value": "570" },
+        //             "mdef": { "label": "Magic Defense", "value": "570" },
+        //             "pdef": { "label": "Physical Defense", "value": "570" },
+        //             "hp": { "label": "Max Health", "value": "2,860" },
+        //             "bdi": { "label": "Basic Damage Increase", "value": "4.00%" },
+        //             "sdi": { "label": "Skill Damage Increase", "value": "4.00%" },
+        //             "bdr": { "label": "Basic Damage Decrease", "value": "4.00%" },
+        //             "sdr": { "label": "Skill Damage Decrease", "value": "4.00%" }
+        //         }
+        //     },
+        //     ew: {
+        //         "matk": { "label": "Magic Attack", "value": "1,140" },
+        //         "patk": { "label": "Physical Attack", "value": "1,140" },
+        //         "mdef": { "label": "Magic Defense", "value": "1,140" },
+        //         "pdef": { "label": "Physical Defense", "value": "1,140" },
+        //         "hp": { "label": "Health", "value": "4,200" },
+        //         "assaultdmg": { "label": "Assault Damage", "value": "30.00%" },
+        //         "rangerdmg": { "label": "Ranger Damage", "value": "30.00%" },
+        //         "magedmg": { "label": "Mage Damage", "value": "30.00%" },
+        //         "tankdmg": { "label": "Tank Damage", "value": "30.00%" },
+        //         "healerdmg": { "label": "Healer Damage", "value": "30.00%" },
+        //         "assaultdef": { "label": "Assault Defense", "value": "30.00%" },
+        //         "rangerdef": { "label": "Ranger Defense", "value": "30.00%" },
+        //         "magedef": { "label": "Mage Defense", "value": "30.00%" },
+        //         "tankdef": { "label": "Tank Defense", "value": "30.00%" },
+        //         "healerdef": { "label": "Healer Defense", "value": "30.00%" }
+        //     },
+        //     arti: {
+        //         "crit": {
+        //             "effect": "Darkness",
+        //             "stat1": { "label": "+4 Crit Chance", "value": "3.20%" },
+        //             "stat2": { "label": "+7 Basic Attack Reduction", "value": "3.20%" }
+        //         },
+        //         "bdi": {
+        //             "effect": "Frost",
+        //             "stat1": { "label": "+4 Basic Damage Increase", "value": "3.20%" },
+        //             "stat2": { "label": "+7 Skill Damage Reduction", "value": "3.20%" }
+        //         },
+        //         "aspd": {
+        //             "effect": "Flame",
+        //             "stat1": { "label": "+4 Attack Speed Increase", "value": "3.20%" },
+        //             "stat2": { "label": "+7 Skill Damage Reduction", "value": "3.20%" }
+        //         }
+        //     },
+        //     ring: {
+        //         "aspd": { "label": "Attack Speed Increase", "value": "6.00%" },
+        //         "crit": { "label": "Crit Chance", "value": "4.00%" },
+        //         "bdr": { "label": "Basic Damage Reduction", "value": "4.00%" },
+        //         "sscdr": { "label": "SS Cooldown Reduction", "value": "4.00%" },
+        //         "bdi": { "label": "Basic Damage Increase", "value": "4.00%" },
+        //         "sdi": { "label": "Skill Damage Increase", "value": "4.00%" },
+        //         "critdef": { "label": "Critical Defense", "value": "5.00%" },
+        //         "purple": { "label": "True Damage Increase", "value": "30.00%" },
+        //         "orange": { "label": "PVP Atk/Def", "value": "5.00%" },
+        //         "cyan": { "label": "Null Damage Chance", "value": "3.00%" }
+        //     },
+        //     neck: {
+        //         "cdr": { "label": "Skill Cooldown Reduction", "value": "4.00%" },
+        //         "crit": { "label": "Crit Chance", "value": "4.00%" },
+        //         "sdr": { "label": "Skill Damage Reduction", "value": "4.00%" },
+        //         "sscdr": { "label": "SS Cooldown Reduction", "value": "4.00%" },
+        //         "bdi": { "label": "Basic Damage Increase", "value": "4.00%" },
+        //         "sdi": { "label": "Skill Damage Increase", "value": "4.00%" },
+        //         "critdef": { "label": "Critical Defense", "value": "5.00%" },
+        //         "purple": { "label": "True Damage Increase", "value": "30.00%" },
+        //         "orange": { "label": "PVP Atk/Def", "value": "5.00%" },
+        //         "cyan": { "label": "Null Damage Chance", "value": "3.00%" }
+        //     },
+        //     ear: {
+        //         "aspd": { "label": "Attack Speed Increase", "value": "6.00%" },
+        //         "cdr": { "label": "Skill Cooldown Reduction", "value": "4.00%" },
+        //         "sdr": { "label": "Skill Damage Reduction", "value": "4.00%" },
+        //         "bdr": { "label": "Basic Damage Reduction", "value": "4.00%" },
+        //         "crit": { "label": "Critical Damage", "value": "8.00%" },
+        //         "critdef": { "label": "Critical Damage Decrease", "value": "8.00%" },
+        //         "heal": { "label": "Healing Increase", "value": "5.00%" },
+        //         "purple": { "label": "True Damage Increase", "value": "30.00%" },
+        //         "orange": { "label": "PVP Atk/Def", "value": "5.00%" },
+        //         "cyan": { "label": "Null Damage Chance", "value": "3.00%" }
+        //     }
+        // }
+        // return values[stat];
     },
     addWaterMark(ctx, canvas, heightOffset){
         heightOffset = heightOffset ? heightOffset : 0;
@@ -945,6 +953,47 @@ module.exports = {
                 }
             }
         }
+    },
+    isEquipUpdated(hero, equip)
+    {
+        if(!equip.UpdatedAt){
+            return true;
+        }
+
+        const equipUpdateAt = DateTime.fromISO(equip.UpdatedAt)
+        
+        const heroGearList = [
+            'weap', 'subweap', 'armor','subarmor1','subarmor2'
+        ]
+
+        let isUpdated = false;
+
+        for(const heroGear of heroGearList)
+        {
+            const weaponCode = [
+                hero.HeroClassRead.Name.toLowerCase(),
+                'gear',
+                heroGear
+            ].join('.');
+            const gear = client.heroGearTypes.find(x => x.Code == weaponCode);
+
+            const equipUpdateDiff = equipUpdateAt.diff(new DateTime(gear.UpdatedAt), ["hours", "minutes", "seconds"]);
+            if(equipUpdateDiff.valueOf() > 0){
+                isUpdated = true;
+                break;
+            }
+        }
+
+        for(const equipConfig of client.EquipConfig)
+        {
+            const equipUpdateDiff = equipUpdateAt.diff(new DateTime(equipConfig.UpdatedAt), ["hours", "minutes", "seconds"]);
+            if(equipUpdateDiff.valueOf() > 0){
+                isUpdated = true;
+                break;
+            }
+        }
+        
+        return isUpdated;
     },
     async updateHeroEquip(heroEquipCode, args, message)
     {

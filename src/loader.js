@@ -43,9 +43,16 @@ api.get('TraitType?limit=100').then((response) => {
 })
 
 
-api.get('HeroGearType?limit=100&fields=Id,Name,Code,EquipTypeRead,HeroClassRead,Image').then((response) => {
+api.get('HeroGearType?limit=100&fields=Id,Name,Code,EquipTypeRead,HeroClassRead,Image,UpdatedAt').then((response) => {
     if(response.status == 200){
         client.heroGearTypes = response.data.list
+    }
+})
+
+
+api.get('EquipConfig?limit=100&fields=Id,Code,EquipTypeRead,Config,UpdatedAt').then((response) => {
+    if(response.status == 200){
+        client.EquipConfig = response.data.list
     }
 })
 

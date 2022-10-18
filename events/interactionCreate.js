@@ -13,6 +13,13 @@ module.exports = async (client, int) => {
         
         const args = int.customId.split('_');
         let customId = args.shift();
+        
+        const disableComponents = int.message.components;
+        for(const row of disableComponents){
+            for(const comp of row.components){
+                comp.setDisabled(true);
+            }
+        }
 
         switch (customId) {
             case 'saveTrack': 
@@ -72,11 +79,14 @@ module.exports = async (client, int) => {
                     return int.reply({ content: `You don't have access to this interaction ${int.member}... ❌`, ephemeral: true });
                 }
 
+                await int.message.edit({ components: disableComponents});
+                await int.deferUpdate();
+
                 const heroId = args.shift();
                 await api.get('Hero/' + heroId + 
                     '?nested[Upgrades][fields]=Id,Name,Code' +
                     '&nested[Skills][fields]=Id,Name,Code,Image,SP,Description,Cooldown,UpgradeTypeRead,SkillTypeRead,CreatedAt,UpdatedAt,OrderBy')
-                .then((response) => {
+                .then(async (response) => {
                     const hero = response.data;
                     const cmd = client.commands.get('skill')
 
@@ -85,13 +95,13 @@ module.exports = async (client, int) => {
                     }
 
                     const skill = cmd.getHeroSkill(hero, args, author);
-                    return int.update({
+                    await int.message.edit({ 
                         embeds: [skill.embed],
                         components: skill.components ? skill.components: []
                     })
                 })
                 .catch(e => {
-                    int.channel.send({ content: `An Error has occured ${int.member}... try again ? ❌`, ephemeral: true });
+                    int.reply({ content: `An Error has occured ${int.member}... try again ? ❌`, ephemeral: true });
                     client.errorLog(e, {
                         author: int.member.user,
                         channel: int.channel,
@@ -105,6 +115,9 @@ module.exports = async (client, int) => {
                 if(traitAuthor != int.member.user.id){
                     return int.reply({ content: `You don't have access to this interaction ${int.member}... ❌`, ephemeral: true });
                 }
+
+                await int.message.edit({ components: disableComponents});
+                await int.deferUpdate();
 
                 const traitHeroId = args.shift();
                 await api.get('Hero/' + traitHeroId + 
@@ -132,18 +145,18 @@ module.exports = async (client, int) => {
                         }
                     }
                     const trait = await cmd.getHeroTrait(hero, args, traitAuthor);
-                    return int.update({
+                    await int.message.edit({ 
                         embeds: trait.embeds,
                         files: trait.attachment ? [trait.attachment]: [],
                         components: trait.components ? trait.components: []
                     })
                 })
                 .catch(e => {
-                    int.channel.send({ content: `An Error has occured ${int.member}... try again ? ❌`, ephemeral: true });
+                    int.reply({ content: `An Error has occured ${int.member}... try again ? ❌`, ephemeral: true });
                     client.errorLog(e, {
                         author: int.member.user,
                         channel: int.channel,
-                        content: `Interaction: ${customId}`
+                        content: `Interaction: ${int.customId}`
                     });
                 });
                 
@@ -156,30 +169,33 @@ module.exports = async (client, int) => {
 
                 let hero;
 
+                await int.message.edit({ components: disableComponents});
+                await int.deferUpdate();
+
                 const equipHeroId = args.shift();
                 await api.get('Hero/' + equipHeroId + 
                 '?nested[HeroClassRead][fields]=Id,Name,Image'+
                 '&nested[HeroEquips][fields]='+
                 'Id,Code,ContentTypeRead,WeaponConfig,SubWeaponConfig,ArmorConfig,' +
                 'SubArmor1Config,SubArmor2Config,ExclusiveWeaponConfig,RingConfig,' +
-                'NecklaceConfig,EarringConfig,Image,Artifact,Notes')
+                'NecklaceConfig,EarringConfig,Image,Artifact,Notes,UpdatedAt')
                 .then(async response => {
                     hero = response.data;
                     const cmd = client.commands.get('equip')
 
                     const result = await cmd.getHeroEquip(hero, args, equipAuthor);
-                    return int.update({
+                    await int.message.edit({
                         embeds: [result.embed],
                         files: result.attachment ? [result.attachment]: [],
                         components: result.components ? result.components: []
                     })
                 })
                 .catch(e => {
-                    int.channel.send({ content: `An Error has occured ${int.member}... please try command directly \`?equip ${hero.Code} ${args.join(' ')}\` ❌`, ephemeral: true });
+                    int.reply({ content: `An Error has occured ${int.member}... please try command directly \`?equip ${hero.Code} ${args.join(' ')}\` ❌`, ephemeral: true });
                     client.errorLog(e, {
                         author: int.member.user,
                         channel: int.channel,
-                        content: `Interaction: ${customId}`
+                        content: `Interaction: ${int.customId}`
                     });
                 });
                 
@@ -187,7 +203,7 @@ module.exports = async (client, int) => {
         }
     }
     catch(e){
-        int.channel.send({ content: `An Error has occured ${int.member.user}... try again ? ❌`, ephemeral: true });
+        int.editReply({ content: `An Error has occured ${int.member.user}... try again ? ❌`, ephemeral: true });
         client.errorLog(e, {
             author: int.member.user,
             channel: int.channel,

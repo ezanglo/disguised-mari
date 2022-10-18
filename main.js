@@ -40,7 +40,11 @@ client.errorLog = (e, message) => {
         embed.addField('Server', `${message.channel.guild}`, true)
         embed.addField('Channel', `${message.channel}`, true)
         embed.addField('Command', `\`${message.content}\``, true)
-        embed.addField('Stack Trace', '```' + e.stack + '```')
+        let stackTrace = e.stack;
+        if(e.stack.length > 1024){
+            stackTrace = e.stack.substring(0, 1000);
+        }
+        embed.addField('Stack Trace', '```' + stackTrace + '```')
         
         channel.send({
             embeds: [embed]
