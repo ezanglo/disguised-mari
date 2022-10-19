@@ -94,13 +94,7 @@ module.exports = {
             
             await message.reply({
                 embeds: result.embeds,
-                files: result.attachment ? [result.attachment]: [],
                 components: result.components ? result.components: []
-            }).then(reply => {
-                const traitImageUrl = reply.embeds[0].image.proxyURL;
-                if((refreshImage || result.refreshImage || !result.trait.Image) && traitImageUrl){
-                    api.patch('HeroTrait/' + result.trait.Id, { Image: traitImageUrl })
-                }
             })
         })
         .catch(e => {
@@ -147,6 +141,9 @@ module.exports = {
         let trait = hero.Traits.find(x => x.Code == traitCommands.join('.').toLowerCase());
         if(trait)
         {
+
+            let fileName = `${hero.Code}-${trait.UpgradeTypeRead.Code}-${trait.ContentTypeRead.Code}.jpg`
+
             embed.setAuthor(`${hero.DisplayName} | ${trait.UpgradeTypeRead.Name} Traits | ${trait.ContentTypeRead.Name}`, hero.Image);
             if(trait.Notes){
                 embed.setFooter({ text: 'Note: ' + trait.Notes, iconURL: client.user.displayAvatarURL({ size: 1024, dynamic: true }) });
@@ -159,7 +156,9 @@ module.exports = {
 
             const menuCustomId = ['TRAIT', author, hero.Id, trait.UpgradeTypeRead.Code];
             if(trait.UpgradeTypeRead.Code == 'si'){
-                menuCustomId.push(traitCommands[traitCommands.length - 1])
+                const core = traitCommands[traitCommands.length - 1];
+                menuCustomId.push(core)
+                fileName = `${hero.Code}-${trait.UpgradeTypeRead.Code}-${core}-${trait.ContentTypeRead.Code}.jpg`
             }
 
             selectMenu.setCustomId(menuCustomId.join('_'))
@@ -198,29 +197,25 @@ module.exports = {
             }
             
             const menuRow = new MessageActionRow().addComponents(selectMenu);
+            
+            const traitImage = `${process.env.AWS_S3_CLOUDFRONT_LINK}traits/${fileName}`;
 
-            if(trait.Image){
-                await api.get(trait.Image)
+            await api.get(traitImage)
                 .then(response => {
                     if(response.status == 200){
-                        embed.setImage(trait.Image)
+                        embed.setImage(traitImage)
                     }
                 })
                 .catch(error => {
-                    console.log(error.response.status, trait.Image);
+                    console.log(error.response.status, traitImage);
                     refreshImage = true;
                 })
                 .finally(() => {
                     
                 })
-            }
-            else {
-                refreshImage = true;
-            }
 
             let embeds = [];
             let components = [menuRow, buttonsRow];
-            let attachment;
 
             if(!refreshImage){
             
@@ -300,11 +295,11 @@ module.exports = {
                         top+= 141;
                     }
 
-                    const fileName = `${hero.Code}-${trait.UpgradeTypeRead.Code}-${trait.ContentTypeRead.Code}.png`
-                    const imgAttachment = new MessageAttachment(canvas.toBuffer('image/png'), fileName);
-                    embed.setImage('attachment://' + fileName)
-                    embeds.push(embed);
-                    attachment = imgAttachment;
+                    await s3.upload({
+                        Bucket: process.env.AWS_S3_BUCKET_NAME,
+                        Key: `traits/${fileName}`,
+                        Body: canvas.toBuffer('image/jpeg')
+                    }).promise()
                     
                     break;
                 }
@@ -371,11 +366,11 @@ module.exports = {
                         top+= 190;
                     }
 
-                    const fileName = `${hero.Code}-${trait.UpgradeTypeRead.Code}-${trait.ContentTypeRead.Code}.png`
-                    const imgAttachment = new MessageAttachment(canvas.toBuffer('image/png'), fileName);
-                    embed.setImage('attachment://' + fileName)
-                    embeds.push(embed);
-                    attachment = imgAttachment;
+                    await s3.upload({
+                        Bucket: process.env.AWS_S3_BUCKET_NAME,
+                        Key: `traits/${fileName}`,
+                        Body: canvas.toBuffer('image/jpeg')
+                    }).promise()
 
                     break;
                 }
@@ -436,11 +431,11 @@ module.exports = {
                         top+= 236;
                     }
 
-                    const fileName = `${hero.Code}-${trait.UpgradeTypeRead.Code}-${trait.ContentTypeRead.Code}.png`
-                    const imgAttachment = new MessageAttachment(canvas.toBuffer('image/png'), fileName);
-                    embed.setImage('attachment://' + fileName)
-                    embeds.push(embed);
-                    attachment = imgAttachment;
+                    await s3.upload({
+                        Bucket: process.env.AWS_S3_BUCKET_NAME,
+                        Key: `traits/${fileName}`,
+                        Body: canvas.toBuffer('image/jpeg')
+                    }).promise()
                     
                     break;
                 }
@@ -549,20 +544,23 @@ module.exports = {
                         top+= selectedCore.topInc;
                     }
 
-                    const fileName = `${hero.Code}-${trait.UpgradeTypeRead.Code}-${trait.ContentTypeRead.Code}.png`
-                    const imgAttachment = new MessageAttachment(canvas.toBuffer('image/png'), fileName);
-                    embed.setImage('attachment://' + fileName)
-                    embeds.push(embed);
-                    attachment = imgAttachment;
+                    await s3.upload({
+                        Bucket: process.env.AWS_S3_BUCKET_NAME,
+                        Key: `traits/${fileName}`,
+                        Body: canvas.toBuffer('image/jpeg')
+                    }).promise()
+
                     components.push(this.getSoulImprintCoresMenu(traitCustomId, core));
 
                     break;
                 }
             }
             
+            embed.setImage(traitImage)
+            embeds.push(embed)
+            
             return {
                 embeds: embeds,
-                attachment: attachment,
                 components: components,
                 trait: trait,
                 refreshImage: true

@@ -1,4 +1,8 @@
 require("dotenv").config();
+
+const AWS = require('aws-sdk');
+
+
 const { Player } = require('discord-player');
 const { Client, Intents, MessageEmbed } = require('discord.js');
 const  axios  = require('axios');
@@ -23,10 +27,16 @@ global.api = axios.create({
     headers: {'xc-auth': process.env.API_TOKEN}
 });
 
+global.s3 = new AWS.S3({
+    accessKeyId: process.env.AWS_S3_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_S3_SECRET_ACCESS_KEY,
+})
+
 require('./src/loader');
 require('./src/events.js');
 
 client.login(client.config.app.token);
+
 
 client.errorLog = (e, message) => {
     if(client.config.app.debug_mode){

@@ -147,7 +147,6 @@ module.exports = async (client, int) => {
                     const trait = await cmd.getHeroTrait(hero, args, traitAuthor);
                     await int.message.edit({ 
                         embeds: trait.embeds,
-                        files: trait.attachment ? [trait.attachment]: [],
                         components: trait.components ? trait.components: []
                     })
                 })
@@ -175,6 +174,7 @@ module.exports = async (client, int) => {
                 const equipHeroId = args.shift();
                 await api.get('Hero/' + equipHeroId + 
                 '?nested[HeroClassRead][fields]=Id,Name,Image'+
+                '&nested[AttributeTypeRead][fields]=Id,Name,Code,Image'+
                 '&nested[HeroEquips][fields]='+
                 'Id,Code,ContentTypeRead,WeaponConfig,SubWeaponConfig,ArmorConfig,' +
                 'SubArmor1Config,SubArmor2Config,ExclusiveWeaponConfig,RingConfig,' +
@@ -186,7 +186,6 @@ module.exports = async (client, int) => {
                     const result = await cmd.getHeroEquip(hero, args, equipAuthor);
                     await int.message.edit({
                         embeds: [result.embed],
-                        files: result.attachment ? [result.attachment]: [],
                         components: result.components ? result.components: []
                     })
                 })

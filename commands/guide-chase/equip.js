@@ -71,6 +71,7 @@ module.exports = {
 
         await api.get('Hero/' + selectedHero.Id + 
             '?nested[HeroClassRead][fields]=Id,Name,Image'+
+            '&nested[AttributeTypeRead][fields]=Id,Name,Code,Image'+
             '&nested[HeroEquips][fields]='+
             'Id,Code,ContentTypeRead,WeaponConfig,SubWeaponConfig,ArmorConfig,' +
             'SubArmor1Config,SubArmor2Config,ExclusiveWeaponConfig,RingConfig,' +
@@ -95,13 +96,7 @@ module.exports = {
 
             await message.reply({
                 embeds: [result.embed],
-                files: result.attachment ? [result.attachment]: [],
                 components: result.components ? result.components: []
-            }).then(reply => {
-                const equipImageUrl = reply.embeds[0].image.proxyURL;
-                if((refreshImage || result.refreshImage || !result.equip.Image) && equipImageUrl){
-                    api.patch('HeroEquip/' + result.equip.Id, { Image: equipImageUrl })
-                }
             })
             
         })
@@ -124,6 +119,8 @@ module.exports = {
         let equip = hero.HeroEquips.find(x => x.Code == EquipCode.join('.').toLowerCase());
         if(equip)
         {
+            const fileName = `equip-${hero.Code}-${equip.ContentTypeRead.Code}.jpg`
+
             embed.setAuthor(`${hero.DisplayName} Equips | ${equip.ContentTypeRead.Name}`, hero.Image);
             if(equip.Notes){
                 embed.setFooter({ text: 'Note: ' + equip.Notes, iconURL: client.user.displayAvatarURL({ size: 1024, dynamic: true }) });
@@ -146,28 +143,20 @@ module.exports = {
                 }))
             }
 
+            const equipImage = `${process.env.AWS_S3_CLOUDFRONT_LINK}equips/${fileName}`;
 
-            if(equip.Image){
-                await api.get(equip.Image)
+            await api.get(equipImage)
                 .then(response => {
                     if(response.status == 200){
-                        embed.setImage(equip.Image)
+                        embed.setImage(equipImage)
                     }
                 })
                 .catch(error => {
-                    console.log(error.response.status, equip.Image);
+                    console.log(error.response.status, equipImage);
                     refreshImage = true;
                 })
                 .finally(() => {
                 })
-            }
-            else {
-                refreshImage = true;
-            }
-
-            if(this.isEquipUpdated(hero, equip)){
-                refreshImage = true;
-            }
 
             if(!refreshImage){
                 return {
@@ -319,20 +308,33 @@ module.exports = {
                 this.drawStrokedText(ctx, `+${stat.value}`, 'end', left + 555, top + 75)
             }
 
-            if(ewConfig.rune2 && ewStatValues[ewConfig.rune2]){
-                const rune2Url = this.getRuneImage('special', ewConfig.rune2);
-                await loadImage(rune2Url).then(img => {
-                    ctx.drawImage(img, left + 145, 125, 30, 30)
-                });
+            if(ewConfig.rune2){
 
-                const stat = ewStatValues[ewConfig.rune2];
-                ctx.save()
-                ctx.font = 'italic bold 20px Arial';
-                ctx.fillStyle = 'white';
-                ctx.textAlign = "start";
-                ctx.fillText(`${stat.label}`, left + 185, top + 105);
-                ctx.restore()
-                this.drawStrokedText(ctx, `+${stat.value}`, 'end', left + 555, top + 105)
+                const rune2 = ewConfig.rune2.slice(-3);
+                const attributeRune = hero.AttributeTypeRead.Code + rune2;
+                
+                if(ewStatValues[attributeRune]){
+
+                    let runeLabel = 'Damage Given Increased';
+                    if(rune2 == 'def'){
+                        runeLabel = 'Reduce Damage Received'
+                    }
+
+                    const rune2Url = this.getRuneImage('special', attributeRune);
+
+                    await loadImage(rune2Url).then(img => {
+                        ctx.drawImage(img, left + 145, 125, 30, 30)
+                    });
+
+                    const stat = ewStatValues[attributeRune];
+                    ctx.save()
+                    ctx.font = 'italic bold 20px Arial';
+                    ctx.fillStyle = 'white';
+                    ctx.textAlign = "start";
+                    ctx.fillText(`${runeLabel}`, left + 185, top + 105);
+                    ctx.restore()
+                    this.drawStrokedText(ctx, `+${stat.value}`, 'end', left + 555, top + 105)
+                }
             }
 
             
@@ -463,13 +465,16 @@ module.exports = {
             
             this.addWaterMark(ctx, canvas, -70);
 
-            const fileName = `equip-${hero.Code}-${equip.ContentTypeRead.Code}.png`
-            const attachment = new MessageAttachment(canvas.toBuffer('image/png'), fileName);
-            embed.setImage('attachment://' + fileName)
+            await s3.upload({
+                Bucket: process.env.AWS_S3_BUCKET_NAME,
+                Key: `equips/${fileName}`,
+                Body: canvas.toBuffer('image/jpeg')
+            }).promise()
 
+            embed.setImage(equipImage)
+            
             return {
                 embed: embed,
-                attachment: attachment,
                 components: [row],
                 equip: equip,
                 refreshImage: true
@@ -559,35 +564,35 @@ module.exports = {
         }
         else{
             switch(rune){
-                case 'assaultdmg':
-                    url = 'https://media.discordapp.net/attachments/992459474394677369/993248103421460611/IncreaseDamageToAssaultRune.png';
+                case 'reddmg':
+                    url = 'https://cdn.discordapp.com/attachments/992459267292528710/996801150877700126/Icon_Equip_eRune_02_eRedAtk.png';
                 break;
-                case 'assaultdef':
-                    url = 'https://media.discordapp.net/attachments/992459474394677369/993248158257774676/ReducedDamageToAssault.png';
+                case 'reddef':
+                    url = 'https://cdn.discordapp.com/attachments/992459267292528710/996801151104209018/Icon_Equip_eRune_02_eRedDef.png';
                 break;
-                case 'rangerdmg':
-                    url = 'https://media.discordapp.net/attachments/992459474394677369/993248104017051648/IncreaseDamageToRangerRune.png';
+                case 'greendmg':
+                    url = 'https://cdn.discordapp.com/attachments/992459267292528710/996801149954957462/Icon_Equip_eRune_02_eGreenAtk.png';
                 break;
-                case 'rangerdef':
-                    url = 'https://media.discordapp.net/attachments/992459474394677369/993248158979215451/ReducedDamageToRanger.png';
+                case 'greendef':
+                    url = 'https://cdn.discordapp.com/attachments/992459267292528710/996801150185640056/Icon_Equip_eRune_02_eGreenDef.png';
                 break;
-                case 'magedmg':
-                    url = 'https://media.discordapp.net/attachments/992459474394677369/993248103815729194/IncreaseDamageToMageRune.png';
+                case 'bluedmg':
+                    url = 'https://cdn.discordapp.com/attachments/992459267292528710/996801149569085440/Icon_Equip_eRune_02_eBlueAtk.png';
                 break;
-                case 'magedef':
-                    url = 'https://media.discordapp.net/attachments/992459474394677369/993248158790463548/ReducedDamageToMage.png';
+                case 'bluedef':
+                    url = 'https://cdn.discordapp.com/attachments/992459267292528710/996801149770420334/Icon_Equip_eRune_02_eBlueDef.png';
                 break;
-                case 'tankdmg':
-                    url = 'https://media.discordapp.net/attachments/992459474394677369/993248103085899786/IncreaseDamageToToTankRune.png';
+                case 'darkdmg':
+                    url = 'https://cdn.discordapp.com/attachments/992459267292528710/996801150382788648/Icon_Equip_eRune_02_ePurpleAtk.png';
                 break;
-                case 'tankdef':
-                    url = 'https://media.discordapp.net/attachments/992459474394677369/993248158048063538/ReducedDamageToTank.png';
+                case 'darkdef':
+                    url = 'https://cdn.discordapp.com/attachments/992459267292528710/996801150647009361/Icon_Equip_eRune_02_ePurpleDef.png';
                 break;
-                case 'healerdmg':
-                    url = 'https://media.discordapp.net/attachments/992459474394677369/993248103639547944/IncreaseDamageToHealerRune.png';
+                case 'lightdmg':
+                    url = 'https://cdn.discordapp.com/attachments/992459267292528710/996801151334875227/Icon_Equip_eRune_02_eYellowAtk.png';
                 break;
-                case 'healerdef':
-                    url = 'https://media.discordapp.net/attachments/992459474394677369/993248158530420803/ReducedDamageToHealer.png';
+                case 'lightdef':
+                    url = 'https://cdn.discordapp.com/attachments/992459267292528710/996801151548788746/Icon_Equip_eRune_02_eYellowDef.png';
                 break;
             }
         }
