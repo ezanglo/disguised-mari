@@ -279,15 +279,17 @@ module.exports = {
 
             const ewCode = [hero.HeroClassRead.Name.toLowerCase(),'ew',hero.Code].join('.');
             const exclusiveWeap = client.heroGearTypes.find(x => x.Code == ewCode);
-            await loadImage(exclusiveWeap.Image).then(img => {
-                ctx.drawImage(img, left - 10, top - 10, 140, 140)
-            });
-            
-            this.drawStrokedText(ctx, `Exclusive`, 'center', left + 60, top + 140)
-            this.drawStrokedText(ctx, `Weapon`, 'center', left + 60, top + 160)
-
-            const fontSize = (exclusiveWeap.Name.length < 20) ? '30px': '27px';
-            this.drawStrokedText(ctx, `${exclusiveWeap.Name}`, 'start', left + 140, top + 30, fontSize)
+            if(exclusiveWeap){
+                await loadImage(exclusiveWeap.Image).then(img => {
+                    ctx.drawImage(img, left - 10, top - 10, 140, 140)
+                });
+                
+                this.drawStrokedText(ctx, `Exclusive`, 'center', left + 60, top + 140)
+                this.drawStrokedText(ctx, `Weapon`, 'center', left + 60, top + 160)
+    
+                const fontSize = (exclusiveWeap.Name.length < 20) ? '30px': '27px';
+                this.drawStrokedText(ctx, `${exclusiveWeap.Name}`, 'start', left + 140, top + 30, fontSize)
+            }
 
             const ewConfig = equip.ExclusiveWeaponConfig;
             const ewStatValues = this.getStatValues('ew');

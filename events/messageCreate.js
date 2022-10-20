@@ -21,6 +21,20 @@ module.exports = (client, message) => {
         }
 
         // if(message.content.toLowerCase().startsWith('?update')){
+            
+        //     for(const hero of client.heroes) {
+
+        //         if(!['amy', 'elesis'].includes(hero.Code)){
+        //             api.post('HeroPet', {
+        //                 Code: `${hero.Code}.pet`,
+        //                 nc_16ql__hero_id: hero.Id,
+        //             }).then(response => {
+        //                 console.log(response.status, hero.Code)
+        //             }).catch(e => {
+        //                 console.log(e);
+        //             });
+        //         }
+        //     }
 
             // api.post('HeroTrait', {
             //     Code: 'mari.pvp.base',
@@ -165,8 +179,11 @@ module.exports = (client, message) => {
 
         if (cmd) {
             message.channel.sendTyping();
-            
+
+            // const GuideChaseBot = message.guild.roles.cache.find(x => x.name === 'GuideChaseBot');
+
             // if(message.author.id != "481506666727079956"){
+            // if (!message.member._roles.includes(GuideChaseBot.id)) {
             //     return message.reply({ embeds: [
             //         new MessageEmbed({
             //             color: 'RED',
