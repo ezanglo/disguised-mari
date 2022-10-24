@@ -180,17 +180,15 @@ module.exports = (client, message) => {
         if (cmd) {
             message.channel.sendTyping();
 
-            // const GuideChaseBot = message.guild.roles.cache.find(x => x.name === 'GuideChaseBot');
-
-            // if(message.author.id != "481506666727079956"){
-            // if (!message.member._roles.includes(GuideChaseBot.id)) {
-            //     return message.reply({ embeds: [
-            //         new MessageEmbed({
-            //             color: 'RED',
-            //             description: `❌ Disguised Mari is under maintenance :( Sorry for the inconvenience\nContact @Ezwa#3117 for urgent matters`
-            //         })
-            //     ]});
-            // }
+            const GuideChaseBot = message.guild.roles.cache.find(x => x.name === 'GuideChaseBot');
+            if (process.env.ENVIRONMENT == 'dev' && (!GuideChaseBot || !message.member._roles.includes(GuideChaseBot.id))) {
+                return message.reply({ embeds: [
+                    new MessageEmbed({
+                        color: 'RED',
+                        description: `❌ Disguised Mari is under maintenance :( Sorry for the inconvenience\nContact @Ezwa#3117 for urgent matters`
+                    })
+                ]});
+            }
             cmd.execute(client, message, args);
 
         }

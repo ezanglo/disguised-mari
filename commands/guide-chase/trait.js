@@ -139,9 +139,9 @@ module.exports = {
         }
 
         let trait = hero.Traits.find(x => x.Code == traitCommands.join('.').toLowerCase());
-        if(trait)
+        
+        if(trait && trait.Config)
         {
-
             let fileName = `${hero.Code}-${trait.UpgradeTypeRead.Code}-${trait.ContentTypeRead.Code}.jpg`
 
             embed.setAuthor(`${hero.DisplayName} | ${trait.UpgradeTypeRead.Name} Traits | ${trait.ContentTypeRead.Name}`, hero.Image);
@@ -198,16 +198,16 @@ module.exports = {
             
             const menuRow = new MessageActionRow().addComponents(selectMenu);
             
-            const traitImage = `${process.env.AWS_S3_CLOUDFRONT_LINK}traits/${fileName}`;
+            const traitImageLink = `${process.env.AWS_S3_CLOUDFRONT_LINK}traits/${fileName}?ts=${Date.now()}`;
 
-            await api.get(traitImage)
+            await api.get(traitImageLink)
                 .then(response => {
                     if(response.status == 200){
-                        embed.setImage(traitImage)
+                        embed.setImage(traitImageLink)
                     }
                 })
                 .catch(error => {
-                    console.log(error.response.status, traitImage);
+                    console.log(error.response.status, traitImageLink);
                     refreshImage = true;
                 })
                 .finally(() => {
@@ -556,7 +556,7 @@ module.exports = {
                 }
             }
             
-            embed.setImage(traitImage)
+            embed.setImage(traitImageLink)
             embeds.push(embed)
             
             return {
