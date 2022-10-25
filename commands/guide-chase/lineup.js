@@ -98,6 +98,10 @@ module.exports = {
         embed.setThumbnail(data.ContentTypeRead.Icon);
         embed.setAuthor(authorLabel, data.ContentTypeRead.Image);
 
+
+        let lineupDate = (data.UpdatedAt) ? data.UpdatedAt : data.CreatedAt;
+        embed.setFooter(`Last updated ${new Date(lineupDate).toLocaleDateString()}`);
+
         const lineupImageLink = `${process.env.AWS_S3_CLOUDFRONT_LINK}lineups/${fileName}?ts=${Date.now()}`;
 
 
