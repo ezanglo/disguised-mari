@@ -146,6 +146,10 @@ module.exports = {
                 embeds: [embed],
                 files: [imgAttachment]
             })
+        })
+        .catch(e => {
+            message.reply(`An Error has occured ${message.author}... try again ? ❌`);
+            client.errorLog(e, message);
         });
     },
     roundedRect(ctx, x, y, width, height, radius) {
