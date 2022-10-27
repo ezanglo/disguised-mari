@@ -29,14 +29,24 @@ module.exports = {
         }
         else if (selectedHero.length > 1){
             
-            const row = new MessageActionRow();
+            const actionRows = [];
 
-            for(const hero of selectedHero){
-                row.addComponents(new MessageButton({
-                    label: hero.Code,
-                    customId: ['SKILL',message.author.id,hero.Id,args[0],args[1]].join('_'),
-                    style: 'PRIMARY'
-                }))
+            const rows = Math.ceil(selectedHero.length/5);
+            for(let i = 0; i < rows; i++){
+                const row = new MessageActionRow();
+
+                const heroList = selectedHero.slice(i*5, (i*5) + 5)
+
+
+                for(const hero of heroList){
+                    row.addComponents(new MessageButton({
+                        label: hero.Code,
+                        customId: ['SKILL',message.author.id,hero.Id,args[0]].join('_'),
+                        style: 'PRIMARY'
+                    }))
+                }
+
+                actionRows.push(row);
             }
 
             const embed = new MessageEmbed({
@@ -46,7 +56,7 @@ module.exports = {
 
             return message.reply({ 
                 embeds: [embed], 
-                components: [row]
+                components: actionRows
             });
         }
 
