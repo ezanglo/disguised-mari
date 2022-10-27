@@ -84,7 +84,7 @@ module.exports = {
             '&nested[HeroEquips][fields]='+
             'Id,Code,ContentTypeRead,WeaponConfig,SubWeaponConfig,ArmorConfig,' +
             'SubArmor1Config,SubArmor2Config,ExclusiveWeaponConfig,RingConfig,' +
-            'NecklaceConfig,EarringConfig,Image,Artifact,Notes,UpdatedAt')
+            'NecklaceConfig,EarringConfig,Image,Artifact,Credits,Notes,CreatedAt,UpdatedAt')
         .then(async (response) => {
             const hero = response.data;
 
@@ -130,10 +130,23 @@ module.exports = {
         {
             const fileName = `equip-${hero.Code}-${equip.ContentTypeRead.Code}.jpg`
 
-            embed.setAuthor(`${hero.DisplayName} Equips | ${equip.ContentTypeRead.Name}`, hero.Image);
+            embed.setAuthor('Equipment Recommendation');
+            embed.setThumbnail(hero.Image);
+
+            embed.addField('Hero', hero.Name, true);
+            embed.addField('Content', equip.ContentTypeRead.Name, true);
+
             if(equip.Notes){
-                embed.setFooter({ text: 'Note: ' + equip.Notes, iconURL: client.user.displayAvatarURL({ size: 1024, dynamic: true }) });
+                embed.addField('Notes','```' + `${equip.Notes}` + '```')
             }
+
+            const footerNotes = [];
+            let equipDate = (equip.UpdatedAt) ? equip.UpdatedAt : equip.CreatedAt;
+            footerNotes.push(`Last updated ${new Date(equipDate).toLocaleDateString()}`)
+            if(equip.Credits){
+                footerNotes.push(equip.Credits)
+            }
+            embed.setFooter(footerNotes.join('\n'));
 
             const row = new MessageActionRow();
 

@@ -104,7 +104,6 @@ module.exports = {
 
         const lineupImageLink = `${process.env.AWS_S3_CLOUDFRONT_LINK}lineups/${fileName}?ts=${Date.now()}`;
 
-
         await api.get(lineupImageLink)
         .then(response => {
             if(response.status == 200){

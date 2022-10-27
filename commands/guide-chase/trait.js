@@ -82,7 +82,8 @@ module.exports = {
         await api.get('Hero/' + selectedHero.Id + 
             '?nested[Upgrades][fields]=Id,Name,Code'+
             '&nested[Skills][fields]=Code,Image,UpgradeTypeRead,SkillTypeRead' +
-            '&nested[Traits][fields]=Id,Code,UpgradeTypeRead,ContentTypeRead,Config,Image,Notes')
+            '&nested[Traits][fields]=Id,Code,UpgradeTypeRead,ContentTypeRead,Config,'+
+            'Image,Notes,Credits,CreatedAt,UpdatedAt')
         .then(async (response) => {
             const hero = response.data;
 
@@ -153,10 +154,24 @@ module.exports = {
         {
             let fileName = `${hero.Code}-${trait.UpgradeTypeRead.Code}-${trait.ContentTypeRead.Code}.jpg`
 
-            embed.setAuthor(`${hero.DisplayName} | ${trait.UpgradeTypeRead.Name} Traits | ${trait.ContentTypeRead.Name}`, hero.Image);
+            embed.setAuthor(`${trait.UpgradeTypeRead.Name} Traits Recommendation`);
+            
+            embed.setThumbnail(hero.Image);
+
+            embed.addField('Hero', hero.Name, true);
+            embed.addField('Content', trait.ContentTypeRead.Name, true);
+
             if(trait.Notes){
-                embed.setFooter({ text: 'Note: ' + trait.Notes, iconURL: client.user.displayAvatarURL({ size: 1024, dynamic: true }) });
+                embed.addField('Notes','```' + `${trait.Notes}` + '```')
             }
+
+            const footerNotes = [];
+            let traitDate = (trait.UpdatedAt) ? trait.UpdatedAt : trait.CreatedAt;
+            footerNotes.push(`Last updated ${new Date(traitDate).toLocaleDateString()}`)
+            if(trait.Credits){
+                footerNotes.push(trait.Credits)
+            }
+            embed.setFooter(footerNotes.join('\n'));
 
             let traitCustomId;
             
