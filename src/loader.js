@@ -25,6 +25,7 @@ console.log(`Loading commands...`);
 //     }
 // });
 
+client.heroes = [];
 api.get('Hero?limit=100&fields=Id,Code').then((response) => {
     if(response.status == 200){
         client.heroes = response.data.list
@@ -35,28 +36,28 @@ api.get('Hero?limit=100&fields=Id,Code').then((response) => {
     }
 });
 
-
+client.contentTypes = [];
 api.get('ContentType?limit=100&fields=Id,Code').then((response) => {
     if(response.status == 200){
         client.contentTypes = response.data.list
     }
 })
 
-
+client.traitTypes = [];
 api.get('TraitType?limit=100').then((response) => {
     if(response.status == 200){
         client.traitTypes = response.data.list
     }
 })
 
-
+client.heroGearTypes = [];
 api.get('HeroGearType?limit=100&fields=Id,Name,Code,EquipTypeRead,HeroClassRead,Image,UpdatedAt').then((response) => {
     if(response.status == 200){
         client.heroGearTypes = response.data.list
     }
 })
 
-
+client.EquipConfig = [];
 api.get('EquipConfig?limit=100&fields=Id,Code,EquipTypeRead,Config,UpdatedAt').then((response) => {
     if(response.status == 200){
         client.EquipConfig = response.data.list

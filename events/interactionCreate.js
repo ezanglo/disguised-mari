@@ -7,6 +7,22 @@ module.exports = async (client, int) => {
     
     try {
 
+        if(int.isCommand()){
+            const cmd = client.commands.get(int.commandName)
+            const args = [];
+            if(cmd.slashArgs){
+                for(const option of cmd.slashArgs){
+                    args.push(int.options.getString(option.name))
+                }
+            }
+
+            int.author = int.user;
+
+            await cmd.execute(client, int, args)
+            return;
+        }
+
+
         if (!int.isButton() && !int.isSelectMenu()) return;
 
         const queue = player.getQueue(int.guildId);

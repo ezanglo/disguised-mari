@@ -8,6 +8,11 @@ module.exports = {
     description: 'Shows the selected trait for selected content',
     type: 'gc',
     utilisation: client.config.app.gc + 'trait mari wb cs',
+    slashArgs: [
+        { name: 'hero', description: 'Select a hero', required: true, type: 'StringOption' },
+        { name: 'content', description: 'Select a content', required: true, type: 'StringOption', choices: 'contentTypes', choiceIdentifier: 'Code' },
+        { name: 'type', description: 'Select a Upgrade type', required: false, type: 'StringOption', choices: ['lvl', 'cs', 'si', 'trans'] }
+    ],
 
     async execute(client, message, args) {
 
@@ -81,6 +86,8 @@ module.exports = {
 
         await api.get('Hero/' + selectedHero.Id + 
             '?nested[Upgrades][fields]=Id,Name,Code'+
+            '&nested[HeroClassRead][fields]=DiscordEmote'+
+            '&nested[AttributeTypeRead][fields]=DiscordEmote'+
             '&nested[Skills][fields]=Code,Image,UpgradeTypeRead,SkillTypeRead' +
             '&nested[Traits][fields]=Id,Code,UpgradeTypeRead,ContentTypeRead,Config,'+
             'Image,Notes,Credits,CreatedAt,UpdatedAt')
@@ -158,7 +165,7 @@ module.exports = {
             
             embed.setThumbnail(hero.Image);
 
-            embed.addField('Hero', hero.Name, true);
+            embed.addField(`Hero Name`, `${hero.DisplayName} ${hero.HeroClassRead.DiscordEmote} ${hero.AttributeTypeRead.DiscordEmote}` , true);
             embed.addField('Content', trait.ContentTypeRead.Name, true);
 
             if(trait.Notes){

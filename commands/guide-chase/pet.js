@@ -7,6 +7,9 @@ module.exports = {
     description: 'Shows the skill for the selected hero',
     type: 'gc',
     utilisation: client.config.app.gc + 'pet mari',
+    slashArgs: [
+        { name: 'hero', description: 'Select a hero', required: true, type: 'StringOption' }
+    ],
 
     async execute(client, message, args) {
 
@@ -58,7 +61,9 @@ module.exports = {
         selectedHero = selectedHero.shift();
 
         await api.get('Hero/' + selectedHero.Id + 
-            '?nested[Pet][fields]=Id,Name,BasicAttack,SkillName,SkillDescription,Image,Code,CreatedAt,UpdatedAt')
+            '?nested[Pet][fields]=Id,Name,BasicAttack,SkillName,SkillDescription,Image,Code,CreatedAt,UpdatedAt' + 
+            '&nested[HeroClassRead][fields]=DiscordEmote'+
+            '&nested[AttributeTypeRead][fields]=DiscordEmote')
         .then(async (response) => {
             const hero = response.data;
 
@@ -70,6 +75,8 @@ module.exports = {
                 const authorLabel = `${pet.Name} | ${hero.DisplayName} Pet`;
                 embed.setThumbnail(pet.Image);
                 embed.setAuthor(authorLabel, hero.Image);
+
+                embed.addField(`Hero Name`, `${hero.DisplayName} ${hero.HeroClassRead.DiscordEmote} ${hero.AttributeTypeRead.DiscordEmote}`);
 
                 let basicAttack = '*placeholder*';
                 if(pet.BasicAttack){

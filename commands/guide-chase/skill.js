@@ -7,6 +7,11 @@ module.exports = {
     description: 'Shows the skill for the selected hero',
     type: 'gc',
     utilisation: client.config.app.gc + 'skill mari s1 si',
+    slashArgs: [
+        { name: 'hero', description: 'Select a hero', required: true, type: 'StringOption' },
+        { name: 'skill', description: 'Select a skill', required: true, type: 'StringOption', choices: ['s1', 's2', 'pass', 'cs', 'ss'] },
+        { name: 'upgrade', description: 'Select a Upgrade type', required: false, type: 'StringOption', choices: ['base', 'lb', 'si'] }
+    ],
 
     async execute(client, message, args) {
 

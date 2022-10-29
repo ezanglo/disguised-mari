@@ -9,7 +9,10 @@ module.exports = {
     description: 'Shows the hero equip for selected content',
     type: 'gc',
     utilisation: client.config.app.gc + 'equip mari wb',
-
+    slashArgs: [
+        { name: 'hero', description: 'Select a hero', required: true, type: 'StringOption' },
+        { name: 'content', description: 'Select a content', required: true, type: 'StringOption', choices: 'contentTypes', choiceIdentifier: 'Code' }
+    ],
     async execute(client, message, args) {
 
         if (!args[0]) return message.reply(`Hero name is required ${message.author}... try again ? ❌`);
@@ -79,8 +82,8 @@ module.exports = {
         selectedHero = selectedHero.shift();
 
         await api.get('Hero/' + selectedHero.Id + 
-            '?nested[HeroClassRead][fields]=Id,Name,Image'+
-            '&nested[AttributeTypeRead][fields]=Id,Name,Code,Image'+
+            '?nested[HeroClassRead][fields]=Id,Name,Image,DiscordEmote'+
+            '&nested[AttributeTypeRead][fields]=Id,Name,Code,Image,DiscordEmote'+
             '&nested[HeroEquips][fields]='+
             'Id,Code,ContentTypeRead,WeaponConfig,SubWeaponConfig,ArmorConfig,' +
             'SubArmor1Config,SubArmor2Config,ExclusiveWeaponConfig,RingConfig,' +
@@ -133,7 +136,7 @@ module.exports = {
             embed.setAuthor('Equipment Recommendation');
             embed.setThumbnail(hero.Image);
 
-            embed.addField('Hero', hero.Name, true);
+            embed.addField(`Hero Name`, `${hero.DisplayName} ${hero.HeroClassRead.DiscordEmote} ${hero.AttributeTypeRead.DiscordEmote}` , true);
             embed.addField('Content', equip.ContentTypeRead.Name, true);
 
             if(equip.Notes){
