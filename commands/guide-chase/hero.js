@@ -46,12 +46,14 @@ module.exports = {
         .then(async (response) => {
             const hero = response.data;
 
-            if(args[0].startsWith('class')){
-                return message.reply(hero.HeroClassRead.DiscordEmote)
-            }
-
-            if(args[0].startsWith('attr')){
-                return message.reply(hero.AttributeTypeRead.DiscordEmote)
+            if(args[0]){
+                if(args[0].startsWith('class')){
+                    return message.reply(hero.HeroClassRead.DiscordEmote)
+                }
+    
+                if(args[0].startsWith('attr')){
+                    return message.reply(hero.AttributeTypeRead.DiscordEmote)
+                }
             }
 
             const embed = new MessageEmbed();

@@ -55,6 +55,13 @@ module.exports = {
 
         }
 
+        // const rest = new REST({ version: '9' }).setToken(process.env.BOT_TOKEN);
+        // rest.put(Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID), { body: slashCommands.map(command => command.toJSON()) })
+        // .then(() => console.log('Successfully registered application commands.'))
+        // .catch(console.error);
+
+        // return;
+
         const guilds = client.guilds.cache.map(guild => {
             return { id: guild.id, name: guild.name }
         });
@@ -70,8 +77,7 @@ module.exports = {
             })
             .catch(e => {
                 failed.push(guild);
-                message.reply(`An Error has occured ${message.author}... try again ? ❌`);
-                client.errorLog(e, message);
+                console.error(e);
             });
         }
 
