@@ -73,6 +73,7 @@ readdirSync('./commands/guide-chase').forEach(file => {
     }
 });
 
+
 // readdirSync('./commands/music').forEach(file => {
 //     if(file.endsWith('.js')){
 //         const command = require(`../commands/music/${file}`);
