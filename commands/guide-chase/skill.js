@@ -69,7 +69,8 @@ module.exports = {
 
         await api.get('Hero/' + selectedHero.Id + 
             '?nested[Upgrades][fields]=Id,Name,Code'+
-            '&nested[Skills][fields]=Id,Name,Code,Image,SP,Description,Cooldown,UpgradeTypeRead,SkillTypeRead,CreatedAt,UpdatedAt')
+            '&nested[Skills][fields]=Id,Name,Code,Image,SP,Description,'+
+            'Cooldown,UpgradeTypeRead,SkillTypeRead,CreatedAt,UpdatedAt,Gif')
         .then(async (response) => {
             const hero = response.data;
 
@@ -132,6 +133,10 @@ module.exports = {
             }
             embed.setThumbnail(skill.Image);
             embed.setAuthor(authorLabel, hero.Image);
+
+            if(skill.Gif){
+                embed.setImage(skill.Gif)
+            }
 
             const buttonsRow = new MessageActionRow();
             const selectMenu = new MessageSelectMenu();

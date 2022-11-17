@@ -75,3 +75,14 @@ player.on('channelEmpty', (queue) => {
 player.on('queueEnd', (queue) => {
     queue.metadata.send('I finished reading the whole queue ✅');
 });
+
+
+client.on("guildCreate", guild => {
+    console.log("Joined a new guild: " + guild.name);
+    const cmd = client.commands.get('slash-deploy');
+    
+    cmd.deployCommands({ 
+        id: guild.id, 
+        name: guild.name 
+    })
+})

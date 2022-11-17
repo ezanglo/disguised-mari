@@ -103,7 +103,7 @@ module.exports = async (client, int) => {
                     '?nested[Upgrades][fields]=Id,Name,Code' +
                     '&nested[HeroClassRead][fields]=DiscordEmote'+
                     '&nested[AttributeTypeRead][fields]=DiscordEmote'+
-                    '&nested[Skills][fields]=Id,Name,Code,Image,SP,Description,Cooldown,UpgradeTypeRead,SkillTypeRead,CreatedAt,UpdatedAt,OrderBy')
+                    '&nested[Skills][fields]=Id,Name,Code,Image,SP,Description,Cooldown,UpgradeTypeRead,SkillTypeRead,CreatedAt,UpdatedAt,OrderBy,Gif')
                 .then(async (response) => {
                     const hero = response.data;
                     const cmd = client.commands.get('skill')

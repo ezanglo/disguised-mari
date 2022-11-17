@@ -16,7 +16,24 @@ module.exports = {
         if(message.author.id != '481506666727079956'){
             return message.reply('<:KekPoint:955691177628291102>');
         }
+
+        const result = await this.deployCommands();
         
+
+        message.reply({ embeds: [
+            new MessageEmbed({
+                color: 'RED',
+                description: 
+                    'Command Deploy...\n' +
+                    `[${result.commands}]\n` +
+                    `Total Servers: ${result.guilds.length}\n` +
+                    `<:worrygibrose:957109353557655602>Success: ${result.success.length}\n` +
+                    `<:worryscoot:959148586166276116>Failed: ${result.failed.length}`
+            })
+        ]});
+
+    },
+    async deployCommands(guild){
         const slashCommands = [];
 
         const commands = client.commands.filter(x => x.showHelp !== false && x.type == 'gc');
@@ -55,16 +72,12 @@ module.exports = {
 
         }
 
-        // const rest = new REST({ version: '9' }).setToken(process.env.BOT_TOKEN);
-        // rest.put(Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID), { body: slashCommands.map(command => command.toJSON()) })
-        // .then(() => console.log('Successfully registered application commands.'))
-        // .catch(console.error);
-
-        // return;
-
-        const guilds = client.guilds.cache.map(guild => {
+        let guilds = client.guilds.cache.map(guild => {
             return { id: guild.id, name: guild.name }
         });
+        if(guild){
+            guilds = [guild];
+        }
 
         let success = [];
         let failed = [];
@@ -81,20 +94,11 @@ module.exports = {
             });
         }
 
-        message.reply({ embeds: [
-            new MessageEmbed({
-                color: 'RED',
-                description: 
-                    'Command Deploy...\n' +
-                    `[${slashCommands.map(s => s.name).join(',')}]\n` +
-                    `Total Servers: ${guilds.length}\n` +
-                    `<:worrygibrose:957109353557655602>Success: ${success.length}\n` +
-                    `<:worryscoot:959148586166276116>Failed: ${failed.length}`
-            })
-        ]});
-
-        console.log(`Success`, success);
-        console.log(`Failed`, failed);
-
-    },
+        return {
+            guilds: guilds,
+            commands: slashCommands.map(s => s.name).join(','),
+            success: success,
+            failed: failed
+        }
+    }
 };

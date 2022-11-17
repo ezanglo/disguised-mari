@@ -10,7 +10,10 @@ module.exports = (client, message) => {
         const gcpx = client.config.app.gc;
 
         let prefix;
-        if(message.content.indexOf(musicpx) == 0){
+        if(process.env.ENVIRONMENT == 'dev'){
+            prefix = '??';
+        }
+        else if(message.content.indexOf(musicpx) == 0){
             prefix = musicpx;
         }
         else if(message.content.indexOf(gcpx) == 0){
