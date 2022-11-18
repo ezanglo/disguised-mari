@@ -1,5 +1,6 @@
 const { MessageEmbed, MessageButton, MessageActionRow, MessageAttachment, MessageSelectMenu } = require('discord.js');
-const { createCanvas, loadImage } = require('canvas')
+const { createCanvas, loadImage } = require('canvas');
+const trait = require('./trait');
 
 module.exports = {
     name: 'hero',
@@ -42,6 +43,12 @@ module.exports = {
         '&nested[HeroClassRead][fields]=DiscordEmote'+
         '&nested[AttributeTypeRead][fields]=DiscordEmote'+
         '&nested[Skills][fields]=Name,UpgradeTypeRead,SkillTypeRead'+
+        '&nested[Traits][fields]=Id,Code,Config,'+
+        '&nested[HeroMMList][fields]=Heroes,ContentTypeRead,ContentPhaseRead'+
+        '&nested[HeroEquips][fields]='+
+        'Id,Code,ContentTypeRead,WeaponConfig,SubWeaponConfig,ArmorConfig,' +
+        'SubArmor1Config,SubArmor2Config,ExclusiveWeaponConfig,RingConfig,' +
+        'NecklaceConfig,EarringConfig,Artifact,Credits,Notes,CreatedAt,UpdatedAt'+
         '&nested[Images][fields]=Code,Name,Image')
         .then(async (response) => {
             const hero = response.data;
@@ -57,12 +64,16 @@ module.exports = {
             }
 
             const embed = new MessageEmbed();
-
             embed.setColor(hero.Color);
             embed.setThumbnail(hero.Image);
+            embed.setImage(hero.Banner);
             embed.addField(`Hero Name`, `${hero.Name} ${hero.HeroClassRead.DiscordEmote} ${hero.AttributeTypeRead.DiscordEmote}`);
 
-            const details = [
+            //content
+            if(hero.HeroMMList.length > 0){
+              embed.addField('Content :scroll:', this.getContent(hero.HeroMMList));
+            }
+            /*const details = [
                 { code: 'status', display: 'Status' }, 
                 { code: 'species', display: 'Species'  }, 
                 { code: 'age', display: 'Age'  }, 
@@ -90,8 +101,35 @@ module.exports = {
                     break;
                 }
                 embed.addField(data.display, value, true);
-            })
+            })*/
 
+            // Equipment
+            let EquipCode = ['equip', hero.Code, 'pve'];
+            let equipPve = hero.HeroEquips.find(x => x.Code == EquipCode.join('.').toLowerCase());
+            EquipCode[2] = 'pvp';
+            let equipPvp = hero.HeroEquips.find(x => x.Code == EquipCode.join('.').toLowerCase());
+            if(equipPve || equipPvp) embed.addField('Equipment :dagger: `/equip`', this.getEquipRecommendation(equipPve, equipPvp));
+
+            // Enchants
+            if(equipPve || equipPvp) embed.addField('Enchants :star2:', this.getEnchantRecommendation(equipPve, equipPvp));
+
+            // Enchants
+            if(equipPve || equipPvp) embed.addField('Accessories :ring:', this.getAccessoryRecommendation(equipPve, equipPvp));
+
+            // Traits
+            let traitCommands = [hero.Code, 'pve', 'lvl'];
+            let traitPve = hero.Traits.find(x => x.Code == traitCommands.join('.').toLowerCase());
+            traitCommands[1] = 'pvp';
+            let traitPvp = hero.Traits.find(x => x.Code == traitCommands.join('.').toLowerCase());
+            if((traitPve && traitPve.Config) || (traitPvp && traitPvp.Config)) embed.addField('Traits :gem: `/trait`', this.getTraitRecommendation(traitPve, traitPvp));
+
+            //cs
+            traitCommands = [hero.Code, 'pve', 'cs'];
+            traitPve = hero.Traits.find(x => x.Code == traitCommands.join('.').toLowerCase());
+            traitCommands[1] = 'pvp';
+            traitPvp = hero.Traits.find(x => x.Code == traitCommands.join('.').toLowerCase());
+            if((traitPve && traitPve.Config) || (traitPvp && traitPvp.Config)) embed.addField('Chaser :fire:', this.getChaserRecommendation(traitPve, traitPvp));
+            
             message.reply({
                 embeds: [embed]
             })
@@ -174,6 +212,120 @@ module.exports = {
             client.errorLog(e, message);
         });
     },
+
+    getContent(list) {
+      return list.map( (content) => content.ContentPhaseRead.Code.replace('.',' ').toUpperCase()).join(' ');
+    },
+
+    getEnchantRecommendation(equipPve, equipPvp) {
+      let pveRecommendation = '';
+      let pvpRecommendation = '';
+      if(equipPve && equipPve.WeaponConfig && equipPve.WeaponConfig.enchant1 && equipPve.WeaponConfig.enchant2 && equipPve.SubArmor1Config && equipPve.SubArmor1Config.enchant2) {
+        pveRecommendation = `**Pve:** :purple_circle: ${equipPve.WeaponConfig.enchant1.toUpperCase()} :red_circle: ${equipPve.WeaponConfig.enchant2.toUpperCase()} :blue_circle: ${equipPve.SubArmor1Config.enchant2.toUpperCase()}`;
+      }
+      if(equipPvp && equipPvp.WeaponConfig && equipPvp.WeaponConfig.enchant1 && equipPvp.WeaponConfig.enchant2 && equipPvp.SubArmor1Config && equipPvp.SubArmor1Config.enchant2) {
+        pvpRecommendation = `**Pvp:** :purple_circle: ${equipPvp.WeaponConfig.enchant1.toUpperCase()} :red_circle: ${equipPvp.WeaponConfig.enchant2.toUpperCase()} :blue_circle: ${equipPvp.SubArmor1Config.enchant2.toUpperCase()}`;
+      }
+      return `${pveRecommendation}\n${pvpRecommendation}`;
+    },
+
+    getAccessoryRecommendation(equipPve, equipPvp) {
+      let pveRecommendation = '';
+      let pvpRecommendation = '';
+      if(equipPve && equipPve.RingConfig && equipPve.RingConfig.color && equipPve.NecklaceConfig && equipPve.NecklaceConfig.color && equipPve.EarringConfig && equipPve.EarringConfig.color) {
+        pveRecommendation = `**Pve:** ${this.equipmentColors[equipPve.RingConfig.color]} ${equipPve.RingConfig.type.toUpperCase()} ${equipPve.NecklaceConfig.type.toUpperCase()} ${equipPve.EarringConfig.type.toUpperCase()}`;
+      }
+      if(equipPvp && equipPvp.RingConfig && equipPvp.RingConfig.color && equipPvp.NecklaceConfig && equipPvp.NecklaceConfig.color && equipPvp.EarringConfig && equipPvp.EarringConfig.color) {
+        pvpRecommendation = `**Pvp:** ${this.equipmentColors[equipPve.RingConfig.color]} ${equipPvp.RingConfig.type.toUpperCase()} ${equipPvp.NecklaceConfig.type.toUpperCase()} ${equipPvp.EarringConfig.type.toUpperCase()}`;
+      }
+      return `${pveRecommendation}\n${pvpRecommendation}`;
+    },
+
+    getTraitRecommendation(traitPve, traitPVP) {
+      let pveRecommendation = '';
+      let pvpRecommendation = '';
+      if(traitPve && traitPve.Config) {
+        let traits = [];
+        let keys = Object.keys(traitPve.Config)
+        keys.map((trait) => traitPve.Config[trait] < 5 ? traits.push(trait.toUpperCase()) : traits.unshift(trait.toUpperCase()));
+        if(traits.length > 0){
+          pveRecommendation = `**Pve:** ${traits.join(', ')}`;
+        }
+      }
+      if(traitPVP && traitPVP.Config) {
+        let traits = [];
+        let keys = Object.keys(traitPVP.Config)
+        keys.map((trait) => traitPVP.Config[trait] < 5 ? traits.push(trait.toUpperCase()) : traits.unshift(trait.toUpperCase()));
+        if(traits.length > 0){
+          pvpRecommendation = `**Pvp:** ${traits.join(', ')}`;
+        }
+      }
+      return `${pveRecommendation}\n${pvpRecommendation}`;
+    },
+
+    getEquipRecommendation(equipPve, equipPvp) {
+      let pveRecommendation = '';
+      let pvpRecommendation = '';
+      let items = ['WeaponConfig', 'ArmorConfig', 'SubArmor1Config', 'SubArmor2Config'];
+      if(equipPve) {
+        let gear = [];
+        items.map((item) => equipPve[item] && equipPve[item].color && gear.push(equipPve[item].color));
+        if(gear.length > 0){
+          pveRecommendation = `**Pve:** ${gear.map((color) => `${this.equipmentColors[color]} `).join('')}`;
+        }
+      }
+      if(equipPvp) {
+        let gear = [];
+        items.map((item) => equipPvp[item] && equipPvp[item].color && gear.push(equipPvp[item].color));
+        if(gear.length > 0){
+          pvpRecommendation = `**Pvp:** ${gear.map((color) => `${this.equipmentColors[color]} `).join('')}`;
+        }
+      }
+      return `${pveRecommendation}${pvpRecommendation}`;
+    },
+
+    getChaserRecommendation(traitPve, traitPvp){
+      const chaserTraits = [
+        ['ep', 'll', 'hpr', 'pob'],
+        ['ih', 'dp', 'pl', 'bol'],
+        ['con', 'imp', 'pe', 'sh'],
+        ['csr', null, null, 'csl']
+    ];
+      const traitObj = traitPve && traitPve.Config ? traitPve : traitPvp;
+      const csTraits = traitObj.Config;
+      const rows = [];
+      chaserTraits.map((row, index) => {
+        rows[index] = [];
+        row.map((trait) => {
+          if(trait){
+            csTraits[trait] ? rows[index].push(this.numbers[csTraits[trait]]) : rows[index].push(':x:');
+          }
+          else{
+            rows[index].push(':heavy_multiplication_x:')
+          }
+        });
+      });
+      return rows.map((row) => row.join(" ")).join("\n");
+    },
+
+    numbers: {
+      '1' : ':one:',
+      '2' : ':two:',
+      '3' : ':three:',
+      '4' : ':four:',
+      '5' : ':five:',
+    },
+
+    equipmentColors: {
+      red: ':red_square:',
+      blue: ':blue_square:',
+      cyan: ':blue_square:',
+      green: ':green_square:',
+      orange: ':orange_square:',
+      purple: ':purple_square:',
+      pink: ':purple_square:',
+    },
+
     roundedRect(ctx, x, y, width, height, radius) {
         ctx.beginPath();
         ctx.moveTo(x + radius, y);
