@@ -70,9 +70,11 @@ module.exports = {
             embed.addField(`Hero Name`, `${hero.Name} ${hero.HeroClassRead.DiscordEmote} ${hero.AttributeTypeRead.DiscordEmote}`);
 
             //content
+            let contentDetails = 'None';
             if(hero.HeroMMList.length > 0){
-              embed.addField('Content :scroll:', this.getContent(hero.HeroMMList));
+                contentDetails = this.getContent(hero.HeroMMList);
             }
+            embed.addField('Content `/lineup`', contentDetails);
             /*const details = [
                 { code: 'status', display: 'Status' }, 
                 { code: 'species', display: 'Species'  }, 
@@ -108,27 +110,27 @@ module.exports = {
             let equipPve = hero.HeroEquips.find(x => x.Code == EquipCode.join('.').toLowerCase());
             EquipCode[2] = 'pvp';
             let equipPvp = hero.HeroEquips.find(x => x.Code == EquipCode.join('.').toLowerCase());
-            if(equipPve || equipPvp) embed.addField('Equipment :dagger: `/equip`', this.getEquipRecommendation(equipPve, equipPvp));
+            if(equipPve || equipPvp) embed.addField('Equipment `/equip`', this.getEquipRecommendation(equipPve, equipPvp));
 
             // Enchants
-            if(equipPve || equipPvp) embed.addField('Enchants :star2:', this.getEnchantRecommendation(equipPve, equipPvp));
+            if(equipPve || equipPvp) embed.addField('Enchants `/equip`', this.getEnchantRecommendation(equipPve, equipPvp));
 
             // Enchants
-            if(equipPve || equipPvp) embed.addField('Accessories :ring:', this.getAccessoryRecommendation(equipPve, equipPvp));
+            if(equipPve || equipPvp) embed.addField('Accessories `/equip`', this.getAccessoryRecommendation(equipPve, equipPvp));
 
             // Traits
             let traitCommands = [hero.Code, 'pve', 'lvl'];
             let traitPve = hero.Traits.find(x => x.Code == traitCommands.join('.').toLowerCase());
             traitCommands[1] = 'pvp';
             let traitPvp = hero.Traits.find(x => x.Code == traitCommands.join('.').toLowerCase());
-            if((traitPve && traitPve.Config) || (traitPvp && traitPvp.Config)) embed.addField('Traits :gem: `/trait`', this.getTraitRecommendation(traitPve, traitPvp));
+            if((traitPve && traitPve.Config) || (traitPvp && traitPvp.Config)) embed.addField('Traits `/trait`', this.getTraitRecommendation(traitPve, traitPvp));
 
             //cs
             traitCommands = [hero.Code, 'pve', 'cs'];
             traitPve = hero.Traits.find(x => x.Code == traitCommands.join('.').toLowerCase());
             traitCommands[1] = 'pvp';
             traitPvp = hero.Traits.find(x => x.Code == traitCommands.join('.').toLowerCase());
-            if((traitPve && traitPve.Config) || (traitPvp && traitPvp.Config)) embed.addField('Chaser :fire:', this.getChaserRecommendation(traitPve, traitPvp));
+            if((traitPve && traitPve.Config) || (traitPvp && traitPvp.Config)) embed.addField('Chaser `/trait`', this.getChaserRecommendation(traitPve, traitPvp));
             
             message.reply({
                 embeds: [embed]
@@ -214,17 +216,20 @@ module.exports = {
     },
 
     getContent(list) {
-      return list.map( (content) => content.ContentPhaseRead.Code.replace('.',' ').toUpperCase()).join(' ');
+      return list.map( (content) => `${content.ContentTypeRead.Name} - ${content.ContentPhaseRead.Name}`).join('\n');
     },
 
     getEnchantRecommendation(equipPve, equipPvp) {
       let pveRecommendation = '';
       let pvpRecommendation = '';
+      const greyEnchant = '<:greyenchant:1043324859037536329>';
+      const pinkEnchant = '<:pinkenchant:1043324859968663603>';
+      const blueEnchant = '<:blueenchant:1043324861814161419>';
       if(equipPve && equipPve.WeaponConfig && equipPve.WeaponConfig.enchant1 && equipPve.WeaponConfig.enchant2 && equipPve.SubArmor1Config && equipPve.SubArmor1Config.enchant2) {
-        pveRecommendation = `**Pve:** :purple_circle: ${equipPve.WeaponConfig.enchant1.toUpperCase()} :red_circle: ${equipPve.WeaponConfig.enchant2.toUpperCase()} :blue_circle: ${equipPve.SubArmor1Config.enchant2.toUpperCase()}`;
+        pveRecommendation = `**PVE:** ${greyEnchant} ${equipPve.WeaponConfig.enchant1.toUpperCase()} ${pinkEnchant} ${equipPve.WeaponConfig.enchant2.toUpperCase()} ${blueEnchant} ${equipPve.SubArmor1Config.enchant2.toUpperCase()}`;
       }
       if(equipPvp && equipPvp.WeaponConfig && equipPvp.WeaponConfig.enchant1 && equipPvp.WeaponConfig.enchant2 && equipPvp.SubArmor1Config && equipPvp.SubArmor1Config.enchant2) {
-        pvpRecommendation = `**Pvp:** :purple_circle: ${equipPvp.WeaponConfig.enchant1.toUpperCase()} :red_circle: ${equipPvp.WeaponConfig.enchant2.toUpperCase()} :blue_circle: ${equipPvp.SubArmor1Config.enchant2.toUpperCase()}`;
+        pvpRecommendation = `**PVP:** ${greyEnchant} ${equipPvp.WeaponConfig.enchant1.toUpperCase()} ${pinkEnchant}  ${equipPvp.WeaponConfig.enchant2.toUpperCase()} ${blueEnchant}  ${equipPvp.SubArmor1Config.enchant2.toUpperCase()}`;
       }
       return `${pveRecommendation}\n${pvpRecommendation}`;
     },
@@ -232,11 +237,16 @@ module.exports = {
     getAccessoryRecommendation(equipPve, equipPvp) {
       let pveRecommendation = '';
       let pvpRecommendation = '';
+
+      const ring = client.heroGearTypes.find(x => x.Code == ['acce', 'ring', equipPve.RingConfig.type].join('.'));
+      const neck = client.heroGearTypes.find(x => x.Code == ['acce', 'neck', equipPve.NecklaceConfig.type].join('.'));
+      const ear = client.heroGearTypes.find(x => x.Code == ['acce', 'ear', equipPve.EarringConfig.type].join('.'));
+
       if(equipPve && equipPve.RingConfig && equipPve.RingConfig.color && equipPve.NecklaceConfig && equipPve.NecklaceConfig.color && equipPve.EarringConfig && equipPve.EarringConfig.color) {
-        pveRecommendation = `**Pve:** ${this.equipmentColors[equipPve.RingConfig.color]} ${equipPve.RingConfig.type.toUpperCase()} ${equipPve.NecklaceConfig.type.toUpperCase()} ${equipPve.EarringConfig.type.toUpperCase()}`;
+        pveRecommendation = `**PVE:** ${this.equipmentColors[equipPve.RingConfig.color]} ${ring.DiscordEmote} ${neck.DiscordEmote} ${ear.DiscordEmote}`;
       }
       if(equipPvp && equipPvp.RingConfig && equipPvp.RingConfig.color && equipPvp.NecklaceConfig && equipPvp.NecklaceConfig.color && equipPvp.EarringConfig && equipPvp.EarringConfig.color) {
-        pvpRecommendation = `**Pvp:** ${this.equipmentColors[equipPve.RingConfig.color]} ${equipPvp.RingConfig.type.toUpperCase()} ${equipPvp.NecklaceConfig.type.toUpperCase()} ${equipPvp.EarringConfig.type.toUpperCase()}`;
+        pvpRecommendation = `**PVP:** ${this.equipmentColors[equipPve.RingConfig.color]} ${ring.DiscordEmote} ${neck.DiscordEmote} ${ear.DiscordEmote}`;
       }
       return `${pveRecommendation}\n${pvpRecommendation}`;
     },
@@ -249,7 +259,7 @@ module.exports = {
         let keys = Object.keys(traitPve.Config)
         keys.map((trait) => traitPve.Config[trait] < 5 ? traits.push(trait.toUpperCase()) : traits.unshift(trait.toUpperCase()));
         if(traits.length > 0){
-          pveRecommendation = `**Pve:** ${traits.join(', ')}`;
+          pveRecommendation = `**PVE:** ${traits.join(', ')}`;
         }
       }
       if(traitPVP && traitPVP.Config) {
@@ -257,7 +267,7 @@ module.exports = {
         let keys = Object.keys(traitPVP.Config)
         keys.map((trait) => traitPVP.Config[trait] < 5 ? traits.push(trait.toUpperCase()) : traits.unshift(trait.toUpperCase()));
         if(traits.length > 0){
-          pvpRecommendation = `**Pvp:** ${traits.join(', ')}`;
+          pvpRecommendation = `**PVP:** ${traits.join(', ')}`;
         }
       }
       return `${pveRecommendation}\n${pvpRecommendation}`;
@@ -271,17 +281,17 @@ module.exports = {
         let gear = [];
         items.map((item) => equipPve[item] && equipPve[item].color && gear.push(equipPve[item].color));
         if(gear.length > 0){
-          pveRecommendation = `**Pve:** ${gear.map((color) => `${this.equipmentColors[color]} `).join('')}`;
+          pveRecommendation = `**PVE:** ${gear.map((color) => `${this.equipmentColors[color]} `).join('')}`;
         }
       }
       if(equipPvp) {
         let gear = [];
         items.map((item) => equipPvp[item] && equipPvp[item].color && gear.push(equipPvp[item].color));
         if(gear.length > 0){
-          pvpRecommendation = `**Pvp:** ${gear.map((color) => `${this.equipmentColors[color]} `).join('')}`;
+          pvpRecommendation = `**PVP:** ${gear.map((color) => `${this.equipmentColors[color]} `).join('')}`;
         }
       }
-      return `${pveRecommendation}${pvpRecommendation}`;
+      return `${pveRecommendation}\n${pvpRecommendation}`;
     },
 
     getChaserRecommendation(traitPve, traitPvp){
@@ -305,7 +315,7 @@ module.exports = {
           }
         });
       });
-      return rows.map((row) => row.join(" ")).join("\n");
+      return rows.map((row) => `` + row.join(" ")).join("\n");
     },
 
     numbers: {
@@ -317,13 +327,13 @@ module.exports = {
     },
 
     equipmentColors: {
-      red: ':red_square:',
-      blue: ':blue_square:',
-      cyan: ':blue_square:',
-      green: ':green_square:',
-      orange: ':orange_square:',
-      purple: ':purple_square:',
-      pink: ':purple_square:',
+      red: '<:color_red:1043332365113638952>',
+      blue: '<:color_blue:1043332362391527434>',
+      cyan: '<:color_cyan:1043332367504396328>',
+      green: '<:color_green:1043332360093053030>',
+      orange: '<:color_orange:1043332361263255562>',
+      purple: '<:color_purple:1043332366317408296>',
+      pink: '<:color_pink:1043332363188449321>',
     },
 
     roundedRect(ctx, x, y, width, height, radius) {

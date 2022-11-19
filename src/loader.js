@@ -51,7 +51,7 @@ api.get('TraitType?limit=100').then((response) => {
 })
 
 client.heroGearTypes = [];
-api.get('HeroGearType?limit=100&fields=Id,Name,Code,EquipTypeRead,HeroClassRead,Image,UpdatedAt').then((response) => {
+api.get('HeroGearType?limit=100&fields=Id,Name,Code,EquipTypeRead,HeroClassRead,Image,UpdatedAt,DiscordEmote').then((response) => {
     if(response.status == 200){
         client.heroGearTypes = response.data.list
     }

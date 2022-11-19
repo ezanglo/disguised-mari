@@ -36,8 +36,10 @@ module.exports = {
 
         // await api.get(`ContentLineup?where=(Code,eq,${lineUpCode})`)
         await api.get(`ContentLineup?where=(Code,eq,${lineUpCode})` +
+        '&nested[Heroes][fields]=Id,DisplayName,Code,AttributeTypeRead,HeroClassRead'+
         '&nested[ContentTypeRead][fields]=Id,Name,Code,Image,Icon'+
-        '&nested[ContentPhaseRead][fields]=Id,Name,Code,Description,Image,AttributeTypeRead,HeroClassRead'
+        '&nested[ContentPhaseRead][fields]=Id,Name,Code,Description,Image,AttributeTypeRead,HeroClassRead'+
+        '&nested[HeroPetRead][fields]=Id,Name,Code,Image,HeroRead'
         )
         .then(async (response) => {
             const data = response.data;
@@ -86,14 +88,14 @@ module.exports = {
         const content = data.ContentTypeRead.Name;
         const phase = data.ContentPhaseRead.Name;
         let authorLabel = `${content} - ${phase}`;
-        let fileName = `lineup-${data.ContentTypeRead.Code}-${args[0]}`
+        // let fileName = `lineup-${data.ContentTypeRead.Code}-${args[0]}`
         if(args[1]){
             const type = (args[1] == 'freq') ? 'Frequency' : 'Position';
             authorLabel+= ` | ${type}`
-            fileName += `-${args[1]}`;
+            // fileName += `-${args[1]}`;
         }
 
-        fileName += '.jpg'
+        // fileName += '.jpg'
 
         embed.setThumbnail(data.ContentTypeRead.Icon);
         embed.setAuthor(authorLabel, data.ContentTypeRead.Image);
@@ -102,32 +104,31 @@ module.exports = {
         let lineupDate = (data.UpdatedAt) ? data.UpdatedAt : data.CreatedAt;
         embed.setFooter(`Last updated ${new Date(lineupDate).toLocaleDateString()}`);
 
-        const lineupImageLink = `${process.env.AWS_S3_CLOUDFRONT_LINK}lineups/${fileName}?ts=${Date.now()}`;
+        // const lineupImageLink = `${process.env.AWS_S3_CLOUDFRONT_LINK}lineups/${fileName}?ts=${Date.now()}`;
 
-        await api.get(lineupImageLink)
-        .then(response => {
-            if(response.status == 200){
-                embed.setImage(lineupImageLink)
-            }
-        })
-        .catch(error => {
-            console.log(error.response.status, lineupImageLink);
-            refreshImage = true;
-        })
-        .finally(() => {
+        // await api.get(lineupImageLink)
+        // .then(response => {
+        //     if(response.status == 200){
+        //         embed.setImage(lineupImageLink)
+        //     }
+        // })
+        // .catch(error => {
+        //     console.log(error.response.status, lineupImageLink);
+        //     refreshImage = true;
+        // })
+        // .finally(() => {
             
-        })
+        // })
         
-        if(!args[1]){
-            args.push('lu');
-        }
+        // if(!args[1]){
+        //     args.push('lu');
+        // }
 
-        embed.addField(data.ContentPhaseRead.Name, data.ContentPhaseRead.Description, true)
-        embed.addField('Attribute', data.ContentPhaseRead.AttributeTypeRead.Name, true)
-        embed.addField('Class', data.ContentPhaseRead.HeroClassRead.Name, true)
-        embed.addField('Heroes', data.Heroes.map(h => h.Code).join(','), true)
+        embed.addField('Heroes', data.Heroes.map(h => `${h.HeroClassRead.DiscordEmote}${h.AttributeTypeRead.DiscordEmote} ${h.DisplayName}`).join('\n'), true)
         embed.addField('Pet', data.HeroPetRead.Name, true)
-        embed.addField('Gameplay', data.Video)
+        if(data.Video){
+            embed.addField('Gameplay', data.Video)
+        }
         
         const buttonsRow = new MessageActionRow();
         const buttons = [
