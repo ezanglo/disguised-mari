@@ -31,7 +31,9 @@ module.exports = {
         // ).join('\n') + '```');
 
         embed.setTimestamp();
-        embed.setFooter('I am not Mari', client.user.avatarURL({ dynamic: true }));
+        //embed.setFooter('I am not Mari', client.user.avatarURL({ dynamic: true }));
+        embed.setFooter(`Credits to the following : 
+Ezwa#3117 | Aonyx#7851 | FallenTaco#0120 | Forest Skirt#0994 | QBey𓆏#8190 | シャイロ#2182 | Mille#0773 | jocker#2022`);
 
         message.reply({ embeds: [embed] });
     },
