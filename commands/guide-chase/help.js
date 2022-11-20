@@ -25,6 +25,8 @@ module.exports = {
                 true
             )
         })
+        embed.addField('Website: ', ' https://disguised-mari.web.app/', true);
+        embed.addField('Server: ', ' https://discord.gg/H9WseZZ3W9', true);
         // embed.addField('Music Commands', '```yaml\n' + commands.map(x => 
         //     `${client.config.app.px}${x.name}${x.aliases[0] ? ` (${x.aliases.map(y => y).join(', ')})` : ''} - ${x.description}\n
         //           [ ${x.utilisation ? x.utilisation: ''} ]` 
@@ -33,7 +35,9 @@ module.exports = {
         embed.setTimestamp();
         //embed.setFooter('I am not Mari', client.user.avatarURL({ dynamic: true }));
         embed.setFooter(`Credits to the following : 
-Ezwa#3117 | Aonyx#7851 | FallenTaco#0120 | Forest Skirt#0994 | QBey𓆏#8190 | シャイロ#2182 | Mille#0773 | jocker#2022`);
+Ezwa#3117 | Aonyx#7851 | FallenTaco#0120 | Forest Skirt#0994 | QBey𓆏#8190
+ シャイロ#2182 | Mille#0773 | jocker#2022 | QueenBot
+`);
 
         message.reply({ embeds: [embed] });
     },
