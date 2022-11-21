@@ -3,14 +3,14 @@ require("dotenv").config();
 const AWS = require('aws-sdk');
 
 
-const { Client, GatewayIntentBits, EmbedBuilder, ColorResolvable } = require('discord.js');
+const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 const  axios  = require('axios');
 
 global.client = new Client({
     intents: [
-        GatewayIntentBits.Guilds, 
-        GatewayIntentBits.GuildMembers,
-        GatewayIntentBits.GuildMessages
+        GatewayIntentBits.Guilds
+        // GatewayIntentBits.GuildMembers
+        // GatewayIntentBits.GuildMessages
     ],
     disableMentions: 'everyone',
 });

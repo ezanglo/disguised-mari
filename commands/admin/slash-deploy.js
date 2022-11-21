@@ -7,15 +7,15 @@ module.exports = {
       .setDescription('Deploy /slash commands (Admin Only)')
       .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
     ,
-    async execute(client, message, args) {
+    async execute(interaction) {
 
-        if(message.author.id != '481506666727079956'){
-            return message.reply('<:KekPoint:955691177628291102>');
+        if(interaction.user.id != '481506666727079956'){
+            return interaction.editReply('<:KekPoint:955691177628291102>');
         }
 
-        const result = await this.deployCommands(null, message);
+        const result = await this.deployCommands(null);
 
-        message.editReply({ embeds: [
+        interaction.editReply({ embeds: [
             new EmbedBuilder({
                 color: 0xED4245,
                 description: 
