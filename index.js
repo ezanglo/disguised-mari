@@ -1,7 +1,7 @@
 /* eslint-disable no-case-declarations */
 /* eslint-disable indent */
 // Require the necessary discord.js classes
-const { Client, Intents, MessageEmbed } = require('discord.js');
+const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 const { firebase } = require('./config.json');
 
 const admin = require('firebase-admin');
@@ -14,9 +14,9 @@ const db = admin.firestore();
 
 // Create a new client instance
 const client = new Client({ intents: [
-    Intents.FLAGS.GUILDS, 
-    Intents.FLAGS.GUILD_MEMBERS, 
-    Intents.FLAGS.GUILD_MESSAGES
+    GatewayIntentBits.Guilds, 
+    GatewayIntentBits.GuildMembers, 
+    GatewayIntentBits.GuildMessages
 ] });
 
 // When the client is ready, run this code (only once)
@@ -123,7 +123,7 @@ client.on('interactionCreate', async interaction => {
 
         const hoursRemaining = date_diff(serverTime, 'hour')
 
-        const embed = new MessageEmbed()
+        const embed = new EmbedBuilder()
             .setColor('#0099ff')
             .setTitle('Grand Chase Patch Time Zone')
             .setThumbnail('https://cdn.discordapp.com/avatars/958152345718513696/f55f2f943482e928f95542f886843b77.png')

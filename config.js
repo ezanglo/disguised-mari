@@ -1,7 +1,7 @@
 module.exports = {
     app: {
         px: '!',
-        gc: '?',
+        gc: process.env.ENVIRONMENT == 'dev' ? '??' : '?',
         token: process.env.BOT_TOKEN,
         playing: 'https://disguised-mari.web.app/',
         debug_mode: true,
@@ -11,18 +11,5 @@ module.exports = {
     },
 
     opt: {
-        DJ: {
-            enabled: true,
-            roleName: 'DJ',
-            commands: ['back', 'clear', 'filter', 'loop', 'pause', 'resume', 'seek', 'shuffle', 'purge', 'volume']
-        },
-        maxVol: 100,
-        loopMessage: false,
-        discordPlayer: {
-            ytdlOptions: {
-                quality: 'highestaudio',
-                highWaterMark: 1 << 25
-            }
-        }
     }
 };

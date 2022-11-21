@@ -1,33 +1,44 @@
-const { SlashCommandBuilder } = require('@discordjs/builders');
-const { REST } = require('@discordjs/rest');
-const { Routes } = require('discord-api-types/v9');
+const { readdirSync } = require('fs');
+const { REST, Routes, SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 
-const commands = [
-	new SlashCommandBuilder().setName('mute')
-		.setDescription('Mute a user')
-		.addUserOption(option => option.setName('target').setDescription('Select a user')
-			.setRequired(true))
-		.addIntegerOption(option => option.setName('seconds').setDescription('how long?')
-			.setRequired(true)),
-	new SlashCommandBuilder().setName('gibaway')
-        .setDescription('for gibaways')
-        .addStringOption(option => option.setName('command').setDescription('Give a command')),
-    new SlashCommandBuilder().setName('patchtime')
-        .setDescription('convert patchtime')
-        .addStringOption(option => option.setName('server')
-            .setDescription('Your Server')
-			.addChoice('Asia', 'Asia')
-			.addChoice('Western', 'Western')
-			.addChoice('KR', 'KR')
-            .setRequired(true))
-        .addStringOption(option => option.setName('city')
-            .setDescription('give the city of your country')
-            .setRequired(true)),
-]
-	.map(command => command.toJSON());
+require('dotenv').config()
 
-const rest = new REST({ version: '9' }).setToken(process.env.BOT_TOKEN);
+const slashCommands = [];
 
-rest.put(Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID), { body: commands })
-	.then(() => console.log('Successfully registered application commands.'))
-	.catch(console.error);
+readdirSync('./commands/').forEach(dirs => {
+    const commands = readdirSync(`./commands/${dirs}/`).filter(files => files.endsWith('.js'));
+    for (const file of commands) {
+        const cmd = require(`./commands/${dirs}/${file}`);
+
+        const slashCmd = new SlashCommandBuilder()
+        .setName(cmd.name)
+        .setDescription(cmd.description);
+        
+
+        if(cmd.type == 'admin'){
+            slashCmd.setDefaultMemberPermissions(PermissionFlagsBits.BanMembers);
+        }
+        
+        slashCommands.push(slashCmd);
+    }
+});
+
+const rest = new REST({ version: '10' }).setToken(process.env.BOT_TOKEN);
+
+(async () => {
+	try {
+		console.log(`Started refreshing ${slashCommands.length} application (/) commands.`);
+
+		// The put method is used to fully refresh all commands in the guild with the current set
+		const data = await rest.put(
+			Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID),
+			{ body: slashCommands.map(command => command.toJSON()) },
+		);
+
+		console.log(`Successfully reloaded ${data.length} application (/) commands.`);
+        console.log(slashCommands.map(command => command.name));
+	} catch (error) {
+		// And of course, make sure you catch and log any errors!
+		console.error(error);
+	}
+})();

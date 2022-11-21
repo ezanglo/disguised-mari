@@ -3,24 +3,19 @@ require("dotenv").config();
 const AWS = require('aws-sdk');
 
 
-const { Player } = require('discord-player');
-const { Client, Intents, MessageEmbed } = require('discord.js');
+const { Client, GatewayIntentBits, EmbedBuilder, ColorResolvable } = require('discord.js');
 const  axios  = require('axios');
 
 global.client = new Client({
     intents: [
-        Intents.FLAGS.GUILDS,
-        Intents.FLAGS.GUILD_MEMBERS,
-        Intents.FLAGS.GUILD_MESSAGES,
-        Intents.FLAGS.GUILD_VOICE_STATES
+        GatewayIntentBits.Guilds, 
+        GatewayIntentBits.GuildMembers,
+        GatewayIntentBits.GuildMessages
     ],
     disableMentions: 'everyone',
 });
 
 client.config = require('./config');
-
-global.player = new Player(client, client.config.opt.discordPlayer);
-
 
 global.api = axios.create({
     baseURL: process.env.API_BASE_URL,
@@ -41,20 +36,23 @@ client.login(client.config.app.token);
 client.errorLog = (e, message) => {
     if(client.config.app.debug_mode){
         const channel = client.channels.cache.get(client.config.app.error_log_channel)
-        const embed = new MessageEmbed({
-            color: 'RED'
-        })
-        embed.setAuthor(`❌ An error has occured`)
+        const embed = new EmbedBuilder()
+        embed.setColor(0xED4245);
+        embed.setAuthor({ name: `❌ An error has occured` })
         embed.setThumbnail(client.user.displayAvatarURL({ size: 1024, dynamic: true }))
-        embed.addField('User', `${message.author.tag}`, true)
-        embed.addField('Server', `${message.channel.guild}`, true)
-        embed.addField('Channel', `${message.channel}`, true)
-        embed.addField('Command', `\`${message.content}\``, true)
+        embed.addFields([
+            { name: 'User', value: `${message.user.tag}`, inline: true},
+            { name: 'Server', value: `${message.channel.guild}`, inline: true},
+            { name: 'Channel', value: `${message.channel}`, inline: true},
+            { name: 'Command', value: `\`${message.content}\``, inline: true},
+        ])
         let stackTrace = e.stack;
         if(e.stack.length > 1024){
             stackTrace = e.stack.substring(0, 1000);
         }
-        embed.addField('Stack Trace', '```' + stackTrace + '```')
+        embed.addFields([
+            { name: 'Stack Trace', value: '```' + stackTrace + '```'}
+        ])
         
         channel.send({
             embeds: [embed]

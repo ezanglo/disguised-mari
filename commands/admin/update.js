@@ -1,12 +1,12 @@
-const { MessageEmbed, MessageButton, MessageActionRow } = require('discord.js');
+const { EmbedBuilder, ButtonBuilder, ActionRowBuilder } = require('discord.js');
 
 module.exports = {
     name: 'update',
     aliases: ['up'],
     showHelp: false,
     description: 'update hero',
-    type: 'gc',
-    utilisation: client.config.app.gc + 'update mari',
+    type: 'admin',
+    utilisation: '/update mari',
 
     async execute(client, message, args) {
 
@@ -17,16 +17,16 @@ module.exports = {
         let selectedHero = client.heroes.filter(x => x.Code.startsWith(heroCode.toLowerCase()));
         if(selectedHero.length == 0){
             return message.reply({ embeds: [
-                new MessageEmbed({
-                    color: 'RED',
+                new EmbedBuilder({
+                    color: 0xED4245,
                     description: `Hero not found ${message.author}... try again ? ❌`
                 })
             ]});
         }
         else if (selectedHero.length > 1){
             return message.reply({ 
-                embeds: [new MessageEmbed({
-                    color: 'RED',
+                embeds: [new EmbedBuilder({
+                    color: 0xED4245,
                     description: `Multiple heroes found!\nplease select: [${selectedHero.map(x => {return x.Code}).join(',')}]`
                 })],
             });
@@ -37,14 +37,14 @@ module.exports = {
         await api.get('Hero/' + selectedHero.Id)
         .then(async (response) => {
             const hero = response.data;
-            const embed = new MessageEmbed();
+            const embed = new EmbedBuilder();
             embed.setThumbnail(hero.Image);
             embed.setAuthor(hero.Name);
             embed.setColor(hero.Color);
 
-            const row = new MessageActionRow();
+            const row = new ActionRowBuilder();
             const customId = ['UPDATE', message.author.id, hero.Id, 'SKILL'];
-            row.addComponents(new MessageButton({
+            row.addComponents(new ButtonBuilder({
                 label: 'SKILL',
                 customId: customId.join('_'),
                 style: 'PRIMARY'

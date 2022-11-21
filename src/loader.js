@@ -1,5 +1,9 @@
 const { readdirSync } = require('fs');
-const { Collection } = require('discord.js');
+const { 
+    Collection, 
+    REST, 
+    Routes, 
+} = require('discord.js');
 
 client.commands = new Collection();
 
@@ -16,23 +20,10 @@ for (const file of events) {
 
 console.log(`Loading commands...`);
 
-// readdirSync('./commands/guide-chase').forEach(file => {
-//     if(file.endsWith('.js')){
-//         const command = require(`../commands/guide-chase/${file}`);
-//         console.log(`-> Loaded command ${command.name.toLowerCase()}`);
-//         client.commands.set(command.name.toLowerCase(), command);
-//         delete require.cache[require.resolve(`../commands/guide-chase/${file}`)];
-//     }
-// });
-
 client.heroes = [];
 api.get('Hero?limit=100&fields=Id,Code').then((response) => {
     if(response.status == 200){
         client.heroes = response.data.list
-        // client.heroes.forEach(hero => {
-        //     console.log(`-> Loaded command ${hero.Code.toLowerCase()}`);
-        //     client.commands.set(hero.Code.toLowerCase(), require(`../commands/guide-chase/hero`))
-        // });
     }
 });
 
@@ -64,32 +55,37 @@ api.get('EquipConfig?limit=100&fields=Id,Code,EquipTypeRead,Config,UpdatedAt').t
     }
 })
 
-readdirSync('./commands/guide-chase').forEach(file => {
-    if(file.endsWith('.js')){
-        const command = require(`../commands/guide-chase/${file}`);
-        console.log(`-> Loaded command ${command.name.toLowerCase()}`);
-        client.commands.set(command.name.toLowerCase(), command);
-        delete require.cache[require.resolve(`../commands/guide-chase/${file}`)];
+readdirSync('./commands/').forEach(dirs => {
+    const commands = readdirSync(`./commands/${dirs}`).filter(files => files.endsWith('.js'));
+
+    for (const file of commands) {
+        const command = require(`../commands/${dirs}/${file}`);
+
+        if(command.data){
+            client.commands.set(command.data.name.toLowerCase(), command);
+            console.log(`-> Loaded command /${command.data.name.toLowerCase()}`);
+        }
+
+        delete require.cache[require.resolve(`../commands/${dirs}/${file}`)];
     }
 });
+    
+const rest = new REST({ version: '10' }).setToken(process.env.BOT_TOKEN);
 
+(async () => {
+	try {
+		console.log(`Started refreshing ${client.commands.length} application (/) commands.`);
 
-// readdirSync('./commands/music').forEach(file => {
-//     if(file.endsWith('.js')){
-//         const command = require(`../commands/music/${file}`);
-//         console.log(`-> Loaded command ${command.name.toLowerCase()}`);
-//         client.commands.set(command.name.toLowerCase(), command);
-//         delete require.cache[require.resolve(`../commands/music/${file}`)];
-//     }
-// });
+		// The put method is used to fully refresh all commands in the guild with the current set
+		const data = await rest.put(
+			Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID),
+			{ body: client.commands.map(command => command.data.toJSON()) },
+		);
 
-// readdirSync('./commands/').forEach(dirs => {
-//     const commands = readdirSync(`./commands/${dirs}`).filter(files => files.endsWith('.js'));
-
-//     for (const file of commands) {
-//         const command = require(`../commands/${dirs}/${file}`);
-//         console.log(`-> Loaded command ${command.name.toLowerCase()}`);
-//         client.commands.set(command.name.toLowerCase(), command);
-//         delete require.cache[require.resolve(`../commands/${dirs}/${file}`)];
-//     }
-// });
+        console.log(client.commands.map(command => `[${command.data.name}]`).join(','));
+		console.log(`Successfully reloaded ${data.length} application (/) commands.\n`);
+	} catch (error) {
+		// And of course, make sure you catch and log any errors!
+		console.error(error);
+	}
+})();
