@@ -106,7 +106,7 @@ module.exports = {
             },
           ]);
 
-        // Enchants
+        // Accessories
         if (equipPve || equipPvp)
           embed.addFields([
             {
@@ -202,16 +202,6 @@ module.exports = {
     let pveRecommendation = "";
     let pvpRecommendation = "";
 
-    const ring = client.heroGearTypes.find(
-      (x) => x.Code == ["acce", "ring", equipPve.RingConfig.type].join(".")
-    );
-    const neck = client.heroGearTypes.find(
-      (x) => x.Code == ["acce", "neck", equipPve.NecklaceConfig.type].join(".")
-    );
-    const ear = client.heroGearTypes.find(
-      (x) => x.Code == ["acce", "ear", equipPve.EarringConfig.type].join(".")
-    );
-
     if (
       equipPve &&
       equipPve.RingConfig &&
@@ -221,9 +211,18 @@ module.exports = {
       equipPve.EarringConfig &&
       equipPve.EarringConfig.color
     ) {
+      const ring = client.heroGearTypes.find(
+        (x) => x.Code == ["acce", "ring", equipPve.RingConfig.type].join(".")
+      );
+      const neck = client.heroGearTypes.find(
+        (x) => x.Code == ["acce", "neck", equipPve.NecklaceConfig.type].join(".")
+      );
+      const ear = client.heroGearTypes.find(
+        (x) => x.Code == ["acce", "ear", equipPve.EarringConfig.type].join(".")
+      );
       pveRecommendation = `**PVE:** ${
         this.equipmentColors[equipPve.RingConfig.color]
-      } ${ring.DiscordEmote} ${neck.DiscordEmote} ${ear.DiscordEmote}`;
+      } ${ring.DiscordEmote} ${equipPve.RingConfig.type.toUpperCase()} ${neck.DiscordEmote} ${equipPve.NecklaceConfig.type.toUpperCase()} ${ear.DiscordEmote} ${equipPve.EarringConfig.type.toUpperCase()}`;
     }
     if (
       equipPvp &&
@@ -234,9 +233,18 @@ module.exports = {
       equipPvp.EarringConfig &&
       equipPvp.EarringConfig.color
     ) {
+      const ring = client.heroGearTypes.find(
+        (x) => x.Code == ["acce", "ring", equipPvp.RingConfig.type].join(".")
+      );
+      const neck = client.heroGearTypes.find(
+        (x) => x.Code == ["acce", "neck", equipPvp.NecklaceConfig.type].join(".")
+      );
+      const ear = client.heroGearTypes.find(
+        (x) => x.Code == ["acce", "ear", equipPvp.EarringConfig.type].join(".")
+      );
       pvpRecommendation = `**PVP:** ${
-        this.equipmentColors[equipPve.RingConfig.color]
-      } ${ring.DiscordEmote} ${neck.DiscordEmote} ${ear.DiscordEmote}`;
+        this.equipmentColors[equipPvp.RingConfig.color]
+      } ${ring.DiscordEmote} ${equipPvp.RingConfig.type.toUpperCase()} ${neck.DiscordEmote} ${equipPvp.NecklaceConfig.type.toUpperCase()} ${ear.DiscordEmote} ${equipPvp.EarringConfig.type.toUpperCase()}`;
     }
     return `${pveRecommendation}\n${pvpRecommendation}`;
   },
