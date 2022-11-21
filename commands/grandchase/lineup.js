@@ -132,6 +132,26 @@ module.exports = {
         ]);
     }
 
+    if (data.Formation) {
+      const rows = [];
+      for(var y = 0; y < 5; y++){
+        rows[y] = [];
+        for(var x = 0; x < 5; x++){
+          rows[y][x] = '<:blanksquare:1044298072940875816>'
+        }
+      }
+      const keys = Object.keys(data.Formation);
+      keys.map( (key) => {
+        const hero = data.Heroes.filter( (hero) => {
+          return hero.Code === key;
+        });
+        rows[data.Formation[key][0]][data.Formation[key][1]] = hero[0].HeroClassRead.DiscordEmote
+      })
+      embed.addFields([
+        { name: "Formation", value: rows.map((row) => `` + row.join(" ")).join("\n") },
+      ]);
+    }
+
     let embeds = [];
 
     if (!refreshImage) {
