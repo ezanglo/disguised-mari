@@ -137,7 +137,7 @@ module.exports = {
       for(var y = 0; y < 5; y++){
         rows[y] = [];
         for(var x = 0; x < 5; x++){
-          rows[y][x] = ':white_medium_square:'
+          rows[y][x] = '<:blanksquare:1044298072940875816>'
         }
       }
       const keys = Object.keys(data.Formation);
