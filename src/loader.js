@@ -21,7 +21,7 @@ for (const file of events) {
 console.log(`Loading commands...`);
 
 client.heroes = [];
-api.get('Hero?limit=100&fields=Id,Code').then((response) => {
+api.get('Hero?limit=100&fields=Id,Code,DiscordEmote').then((response) => {
     if(response.status == 200){
         client.heroes = response.data.list
     }
