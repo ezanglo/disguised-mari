@@ -35,6 +35,9 @@ module.exports = async (client, interaction) => {
         case "trait_type":
           choices = ["lvl", "cs", "si", "trans"];
           break;
+        case "calc_type":
+          choices = ["ht"];
+          break;
       }
 
       const filtered = choices.filter((choice) =>
