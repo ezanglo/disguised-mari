@@ -9,7 +9,10 @@ module.exports = {
         .setName("calc_type")
         .setDescription("Choose which kind of calculator")
         .setRequired(true)
-				.setAutocomplete(true)
+				.addChoices(
+					{ name: 'ht', value: 'ht'},
+					{ name: 'pets', value: 'pets'}
+				)
     )    
     .addStringOption((option) =>
       option
@@ -65,15 +68,25 @@ module.exports = {
 			let wizDays = Math.round(amount / 604);
 
 			if (wizDays < 1) wizDays = 1;
+
+			let wizEmote = '<:wizlab_tix:1044675274110939138>';
+			let bovEmote = '<:bov:1044675273355968612>';
+
 			return interaction.editReply({
 				embeds: [
 					new EmbedBuilder({
 						color: 0xed4245,
-						title: `Level ${start} -> Level ${end}`,
-						description: `Required BoV: ${amount.toLocaleString()} <:bov:1044675273355968612>\nAmount of Days Required in Wizard Labyrinth Rank 6: ${wizDays.toLocaleString()} days (${wizDays.toLocaleString()} <:wizlab_tix:1044675274110939138>)`
+						title: `**Level ${start} -> Level ${end}**`,
 					})
+					.setAuthor(
+						{ name: 'Hero Taining Calculator' }
+					)
+					.addFields(
+						{ name: '\u200b', value: `Required BoV: ${bovEmote} ${amount.toLocaleString()}\nWizard Lab Entry: ${wizEmote} ${wizDays.toLocaleString()}`}
+					)
+					.setThumbnail("https://cdn.discordapp.com/attachments/992459474394677369/993246962260398270/BlessingsOfValor.png")
 					.setFooter({
-						text: `Hero Training Calculator`
+						text: `Last Updated November 23, 2022`
 					}),
 				],
 			});
@@ -163,15 +176,24 @@ module.exports = {
 
 			let goldAmount = goldCalc(parseInt(end)) - goldCalc(parseInt(start));
 
+			let petEmote = '<:pet:1045020933867450539>';
+			let goldEmote = '<:gold:1045020932416229488>';
+
 			return interaction.editReply({
 				embeds: [
 					new EmbedBuilder({
 							color: 0xed4245,
 							title: `Level ${start} -> Level ${end}`,
-							description: `Pet Dupes Cost: ${petAmount.toLocaleString()}\nGold Cost: ${goldAmount.toLocaleString()}`
 					})
+					.setAuthor(
+						{ name: 'Pet Calculator' }
+					)
+					.addFields(
+						{ name: '\u200b', value: `Pet Dupes Cost: ${petEmote} ${petAmount.toLocaleString()}\nGold Cost: ${goldEmote} ${goldAmount.toLocaleString()}` }
+					)
+					.setThumbnail('https://cdn.discordapp.com/attachments/992459474394677369/993247439349886997/PetSelect.png')
 					.setFooter({
-							text: `Pet Calculator`
+						text: `Last Updated November 23, 2022`
 					}),
 				],
 			});
