@@ -3,7 +3,7 @@ const { EmbedBuilder, SlashCommandBuilder } = require("discord.js");
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("calc")
-    .setDescription("Calculates Hero Training Levels")
+    .setDescription("A calculator for Hero Training and Pets")
     .addStringOption((option) =>
       option
         .setName("calc_type")
