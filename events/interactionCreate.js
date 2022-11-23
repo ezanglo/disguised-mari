@@ -36,7 +36,7 @@ module.exports = async (client, interaction) => {
           choices = ["lvl", "cs", "si", "trans"];
           break;
         case "calc_type":
-          choices = ["ht"];
+          choices = ["ht", 'pets'];
           break;
       }
 
