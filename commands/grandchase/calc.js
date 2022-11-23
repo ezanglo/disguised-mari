@@ -13,14 +13,14 @@ module.exports = {
 					{ name: 'ht', value: 'ht'},
 					{ name: 'pets', value: 'pets'}
 				)
-    )    
-    .addStringOption((option) =>
+    )
+    .addIntegerOption((option) =>
       option
         .setName("start")
         .setDescription("Provide the start level")
         .setRequired(true)
   	)
-    .addStringOption((option) =>
+    .addIntegerOption((option) =>
       option
         .setName("end")
         .setDescription("Provide the end level")
@@ -29,27 +29,11 @@ module.exports = {
     async execute(interaction) {
 		const contentType = interaction.options.get("calc_type").value;
 
-		let list = ['ht','pets'];
-
-		let selectedContent = list.filter((x) =>
-				x.startsWith(contentType.toLowerCase())
-		);
-		
-		if (selectedContent.length == 0) {
-			return interaction.editReply({
-				embeds: [
-					new EmbedBuilder({
-						color: 0xed4245,
-						description: `Provide the type of calculator you want me to calculate!`,
-					}),
-				],
-			});
-		}
 		if (contentType == 'ht') {
 			const start = interaction.options.get("start").value;
 			const end = interaction.options.get("end").value;
 
-			if (isNaN(start) || isNaN(end) || start > end) return interaction.editReply({
+			if (start > end) return interaction.editReply({
 				embeds: [
 					new EmbedBuilder({
 						color: 0xed4245,
@@ -94,7 +78,7 @@ module.exports = {
 			const start = interaction.options.get("start").value;
 			const end = interaction.options.get("end").value;
 			
-			if (isNaN(start) || isNaN(end) || start > end) return interaction.editReply({
+			if (start > end) return interaction.editReply({
 				embeds: [
 					new EmbedBuilder({
 							color: 0xed4245,
