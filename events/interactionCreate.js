@@ -17,7 +17,7 @@ module.exports = async (client, interaction) => {
         return;
       }
 
-      let choices;
+      let choices = [];
       const focusedOption = interaction.options.getFocused(true);
 
       if (focusedOption.name == "hero") {
