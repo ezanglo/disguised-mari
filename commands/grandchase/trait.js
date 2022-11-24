@@ -29,9 +29,14 @@ module.exports = {
     )
     .addStringOption((option) =>
       option
-        .setName("trait_type")
-        .setDescription("Select a Trait type")
-        .setAutocomplete(true)
+        .setName("type")
+        .setDescription("Select a Trait type") //["lvl", "cs", "si", "trans"];
+        .addChoices(
+          { name: "lvl", value: "lvl" },
+          { name: "cs", value: "cs" },
+          { name: "si", value: "si" },
+          { name: "trans", value: "trans" }
+        )
     )
     .addStringOption((option) =>
       option
@@ -135,8 +140,8 @@ module.exports = {
 
             const traitType = args.shift();
             if (traitType) {
-              int.options.set("trait_type", {
-                name: "trait_type",
+              int.options.set("type", {
+                name: "type",
                 value: traitType,
               });
               if (traitType == "si") {
@@ -197,8 +202,8 @@ module.exports = {
       contentTypeCode = interaction.options.get("content").value;
     }
 
-    if (interaction.options.get("trait_type")) {
-      upgradeTypeCode = interaction.options.get("trait_type").value;
+    if (interaction.options.get("type")) {
+      upgradeTypeCode = interaction.options.get("type").value;
     }
 
     let traitCommands = [heroCode, contentTypeCode, upgradeTypeCode];

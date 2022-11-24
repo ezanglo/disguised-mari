@@ -21,7 +21,7 @@ for (const file of events) {
 console.log(`Loading commands...`);
 
 client.heroes = [];
-api.get('Hero?limit=100&fields=Id,Code,DiscordEmote').then((response) => {
+api.get('Hero?limit=100&fields=Id,Code,DiscordEmote,HeroEquips,Traits').then((response) => {
     if(response.status == 200){
         client.heroes = response.data.list
     }
@@ -52,6 +52,14 @@ client.EquipConfig = [];
 api.get('EquipConfig?limit=100&fields=Id,Code,EquipTypeRead,Config,UpdatedAt').then((response) => {
     if(response.status == 200){
         client.EquipConfig = response.data.list
+    }
+})
+
+client.ContentLineups = [];
+api.get('ContentLineup?limit=100&fields=Id,Code,ContentTypeRead,ContentPhaseRead,UpdatedAt').then((response) => {
+    if(response.status == 200){
+        client.ContentLineups = response.data.list
+        console.log(client.ContentLineups);
     }
 })
 

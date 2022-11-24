@@ -19,22 +19,40 @@ module.exports = async (client, interaction) => {
 
       let choices;
       const focusedOption = interaction.options.getFocused(true);
-      switch (focusedOption.name) {
-        case "hero":
-          choices = interaction.client.heroes.map((x) => x.Code);
-          break;
-        case "content":
-          choices = interaction.client.contentTypes.map((x) => x.Code);
-          break;
-        case "skill":
-          choices = ["s1", "s2", "pass", "cs", "ss"];
-          break;
-        case "upgrade_type":
-          choices = ["base", "lb", "si"];
-          break;
-        case "trait_type":
-          choices = ["lvl", "cs", "si", "trans"];
-          break;
+
+      if (focusedOption.name == "hero") {
+        choices = interaction.client.heroes.map((x) => x.Code);
+      } else if (focusedOption.name == "content") {
+        choices = interaction.client.contentTypes.map((x) => x.Code);
+        let contentTypeIds = [];
+        switch (interaction.commandName) {
+          case "equip":
+            if (interaction.options.get("hero")) {
+              contentTypeIds = interaction.client.heroes
+                .find((x) => x.Code == interaction.options.get("hero").value)
+                .HeroEquips.map((x) => x.nc_16ql__content_type_id);
+            }
+            break;
+          case "trait":
+            if (interaction.options.get("hero")) {
+              contentTypeIds = interaction.client.heroes
+                .find((x) => x.Code == interaction.options.get("hero").value)
+                .Traits.map((x) => x.nc_16ql__content_type_id);
+            }
+            break;
+          case "lineup":
+            contentTypeIds = interaction.client.ContentLineups.map(
+              (x) => x.ContentTypeRead.Id
+            );
+            contentTypeIds = [...new Set(contentTypeIds)];
+            break;
+        }
+
+        if (contentTypeIds.length > 0) {
+          choices = interaction.client.contentTypes
+            .filter((x) => contentTypeIds.includes(x.Id))
+            .map((x) => x.Code);
+        }
       }
 
       const filtered = choices.filter((choice) =>
