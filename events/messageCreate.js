@@ -7,7 +7,7 @@ module.exports = (client, message) => {
         if (message.author.bot || message.channel.type === 'dm') return;
 
         const gcpx = client.config.app.gc;
-
+        
         let prefix;
         if(message.content.indexOf(gcpx) == 0){
             prefix = gcpx;
