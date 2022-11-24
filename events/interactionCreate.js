@@ -24,20 +24,31 @@ module.exports = async (client, interaction) => {
         choices = interaction.client.heroes.map((x) => x.Code);
       } else if (focusedOption.name == "content") {
         choices = interaction.client.contentTypes.map((x) => x.Code);
+        let hero;
+        if (interaction.options.get("hero")) {
+          hero = interaction.client.heroes.find(
+            (x) => x.Code == interaction.options.get("hero").value
+          );
+        }
+
         let contentTypeIds = [];
         switch (interaction.commandName) {
           case "equip":
-            if (interaction.options.get("hero")) {
-              contentTypeIds = interaction.client.heroes
-                .find((x) => x.Code == interaction.options.get("hero").value)
-                .HeroEquips.map((x) => x.nc_16ql__content_type_id);
+            {
+              if (hero) {
+                contentTypeIds = hero.HeroEquips.map(
+                  (x) => x.nc_16ql__content_type_id
+                );
+              }
             }
             break;
           case "trait":
-            if (interaction.options.get("hero")) {
-              contentTypeIds = interaction.client.heroes
-                .find((x) => x.Code == interaction.options.get("hero").value)
-                .Traits.map((x) => x.nc_16ql__content_type_id);
+            {
+              if (hero) {
+                contentTypeIds = hero.Traits.map(
+                  (x) => x.nc_16ql__content_type_id
+                );
+              }
             }
             break;
           case "lineup":

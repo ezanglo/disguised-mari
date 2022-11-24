@@ -59,7 +59,6 @@ client.ContentLineups = [];
 api.get('ContentLineup?limit=100&fields=Id,Code,ContentTypeRead,ContentPhaseRead,UpdatedAt').then((response) => {
     if(response.status == 200){
         client.ContentLineups = response.data.list
-        console.log(client.ContentLineups);
     }
 })
 
