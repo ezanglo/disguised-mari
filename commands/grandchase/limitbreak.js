@@ -1,4 +1,4 @@
-const { EmbedBuilder, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { EmbedBuilder, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, Collection } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -52,15 +52,6 @@ module.exports = {
 
         const limitbreakCode = [heroCode, contentCode].join(".");
 
-        /*await api
-            .get(`HeroSkillUpgrade?where=(Code,eq,${limitbreakCode})` +
-            "&nested[HeroRead][fields]=Id,DisplayName,Code,AttributeTypeRead,HeroClassRead,Image,HeroEquips" +
-            "&nested[Skills][fields]=Id,Name,Code,HeroRead,SkillTypeRead" +
-            "&nested[ContentTypeRead][fields]=Id,Name,Code" +
-            "&nested[HeroClassRead][fields]=Id,DiscordEmote" +
-            "&nested[AttributeTypeRead][fields]=Id,DiscordEmote" +
-            "&nested[HeroEquips][fields]=Id,Code,ContentTypeRead"
-            )*/
         selectedHero = selectedHero.shift();
         await api
             .get(
@@ -70,7 +61,7 @@ module.exports = {
               "&nested[AttributeTypeRead][fields]=Id,Name,Code,Image,DiscordEmote" +
               "&nested[HeroEquips][fields]=Id,Code,ContentTypeRead" +
               "&nested[ContentTypeRead][fields]=Id,Name,Code" +
-              "&nested[SkillUpgrade][fields]=Id,Skills,Code" +
+              "&nested[SkillUpgrade][fields]=Id,Skills,Code,ContentTypeRead" +
               "&nested[Skills][fields]=Id,SkillTypeRead,Name" +
               "&nested[Contents][fields]=Id,Name,Code" +
               "&nested[SkillTypeRead][fields]=Id,Name,Code"
@@ -104,6 +95,41 @@ module.exports = {
                 embeds: limitbreak.embeds,
                 components: limitbreak.components ? limitbreak.components : [],
             });
+
+            const reply = await interaction.editReply({
+              embeds: limitbreak.embeds,
+              components: limitbreak.components ? limitbreak.components : [],
+            });
+            
+          reply
+          .awaitMessageComponent({
+            componentType: ComponentType.Button,
+            time: 60000,
+          })
+          .then(async (int) => {
+            if (int.user.id !== interaction.user.id) {
+              return int.reply({
+                content: `You don't have access to this interaction ${int.user}... ❌`,
+                ephemeral: true,
+              });
+            }
+
+            await int.deferUpdate();
+
+            const args = int.customId.split("_");
+
+            int.options = new Collection();
+            int.options.set("hero", { name: "hero", value: args.shift() });
+            int.options.set("content", {
+              name: "content",
+              value: args.shift(),
+            });
+
+            await this.execute(int);
+          })
+          .catch((err) => {
+            interaction.editReply({ components: [] });
+          });
         })
         .catch((e) => {
             interaction.editReply(
@@ -121,12 +147,7 @@ module.exports = {
         const s1 = "<:s1:1044371160168661032>";
         const s2 = "<:s2:1044371163113074779>";
         const pass = "<:regional_indicator_p:1044690283419422771>";
-        const content = interaction.options.get("content").value;
         const contentName = hero.Contents.find(x => x.Code === contentCode).Name;
-        let ContentTypeCode = this.getDefaultContent(
-          content,
-          contentName
-        );
         
 
         const embed = new EmbedBuilder()
@@ -151,16 +172,16 @@ module.exports = {
         ])
 
         const row = new ActionRowBuilder();
-        /*const ContentTypeButtons = [
+        const ContentTypeButtons = [
           ...new Map(
-            hero.Contents.map((item) => [
-              console.log(item),
-              item.Code,
-              item.Name,
+            hero.SkillUpgrade.map((item) => [
+              item["ContentTypeRead"]["Code"],
+              item.ContentTypeRead,
             ])
           ).values(),
-        ];*/
-        for (const content of hero.Contents) {
+        ];
+
+        for (const content of ContentTypeButtons) {
           const isCurrentContent = content.Code == contentCode;
           const customId = [hero.Code, content.Code];
           row.addComponents(
@@ -173,34 +194,6 @@ module.exports = {
               disabled: isCurrentContent,
             })
           );
-          console.log(isCurrentContent);
-          console.log(customId);
-          console.log(content);
-        }
-        const filename = `lb-${hero.Code}-${contentName.split(' ').join('_')}.jpg`;
-        const equipImage = `${
-          process.env.AWS_S3_CLOUDFRONT_LINK
-        }equips/${filename}?ts=${Date.now()}`;
-  
-        await api
-          .get(equipImage)
-          .then((response) => {
-            if (response.status == 200) {
-              embed.setImage(equipImage);
-            }
-          })
-          .catch((error) => {
-            console.log(error.response.status, equipImage);
-            refreshImage = true;
-          })
-          .finally(() => {});
-  
-        if (!refreshImage) {
-          return {
-            embed: embed,
-            components: [row],
-            equip: equip,
-          };
         }
 
         let embeds = [];
@@ -208,7 +201,8 @@ module.exports = {
         if (!refreshImage) {
         embeds.push(embed);
         return {
-            embeds: embeds
+            embeds: embeds,
+            components: [row]
         };
         }
         embed.setImage(equipImage);
@@ -218,34 +212,5 @@ module.exports = {
             components: [row],
             refreshImage: true
         };
-    },
-    getDefaultContent(content, defaultContent) {
-      const isPVP = ["pvp", "arena", "gw", "gt", "ht"];
-      const isPVE = [
-        "pve",
-        "gb",
-        "db",
-        "hf",
-        "dr",
-        "wb",
-        "dc",
-        "bl",
-        "ba",
-        "aot",
-        "ah",
-        "nm",
-        "tt",
-      ];
-  
-      if (!content) {
-        return defaultContent;
-      } else if (
-        isPVP.includes(content.toLowerCase()) ||
-        isPVE.includes(content.toLowerCase())
-      ) {
-        return content;
-      } else {
-        return defaultContent;
-      }
     }
 }
