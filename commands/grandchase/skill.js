@@ -52,7 +52,7 @@ module.exports = {
         embeds: [
           new EmbedBuilder({
             color: 0xed4245,
-            description: `Hero not found ${interaction.author}... try again ? ❌`,
+            description: `Hero not found ${interaction.user}... try again ? ❌`,
           }),
         ],
       });
@@ -90,7 +90,7 @@ module.exports = {
             embeds: [
               new EmbedBuilder({
                 color: 0xed4245,
-                description: `Skill not found ${interaction.author}... try again ? ❌`,
+                description: `Skill not found ${interaction.user}... try again ? ❌`,
               }),
             ],
           });
@@ -152,9 +152,14 @@ module.exports = {
           });
       })
       .catch((e) => {
-        interaction.editReply(
-          `An Error has occured ${interaction.author}... try again ? ❌`
-        );
+        interaction.editReply({
+          embeds: [
+            new EmbedBuilder({
+              color: 0xed4245,
+              description: `An Error has occured ${interaction.user}... try again ? ❌`
+            }),
+          ],
+        });
         client.errorLog(e, interaction);
       });
   },

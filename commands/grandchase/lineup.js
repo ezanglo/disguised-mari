@@ -24,7 +24,7 @@ module.exports = {
         embeds: [
           new EmbedBuilder({
             color: 0xed4245,
-            description: `Content not found ${interaction.author}... try again ? ❌`,
+            description: `Content not found ${interaction.user}... try again ? ❌`,
           }),
         ],
       });
@@ -53,7 +53,7 @@ module.exports = {
             embeds: [
               new EmbedBuilder({
                 color: 0xed4245,
-                description: `Content not found ${interaction.author}... try again ? ❌`,
+                description: `Content not found ${interaction.user}... try again ? ❌`,
               }),
             ],
           });
@@ -65,7 +65,7 @@ module.exports = {
             embeds: [
               new EmbedBuilder({
                 color: 0xed4245,
-                description: `Lineup not found ${interaction.author}... try again ? ❌`,
+                description: `Lineup not found ${interaction.user}... try again ? ❌`,
               }),
             ],
           });
@@ -77,9 +77,14 @@ module.exports = {
         });
       })
       .catch((e) => {
-        interaction.editReply(
-          `An Error has occured ${interaction.author}... try again ? ❌`
-        );
+        interaction.editReply({
+          embeds: [
+            new EmbedBuilder({
+              color: 0xed4245,
+              description: `An Error has occured ${interaction.user}... try again ? ❌`
+            }),
+          ],
+        });
 
         interaction.client.errorLog(e, interaction);
       });

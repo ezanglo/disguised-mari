@@ -1,59 +1,44 @@
-const { EmbedBuilder, ButtonBuilder, ActionRowBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 
 module.exports = {
-    name: 'update',
-    aliases: ['up'],
-    showHelp: false,
-    description: 'update hero',
-    type: 'admin',
-    utilisation: '/update mari',
-
-    async execute(client, message, args) {
-
-        if (!args[0]) return message.reply(`Hero name is required ${message.author}... try again ? ❌`);
-        
-        const heroCode = args.shift();
-
-        let selectedHero = client.heroes.filter(x => x.Code.startsWith(heroCode.toLowerCase()));
-        if(selectedHero.length == 0){
-            return message.reply({ embeds: [
-                new EmbedBuilder({
-                    color: 0xED4245,
-                    description: `Hero not found ${message.author}... try again ? ❌`
-                })
-            ]});
-        }
-        else if (selectedHero.length > 1){
-            return message.reply({ 
-                embeds: [new EmbedBuilder({
-                    color: 0xED4245,
-                    description: `Multiple heroes found!\nplease select: [${selectedHero.map(x => {return x.Code}).join(',')}]`
-                })],
-            });
-        }
-
-        selectedHero = selectedHero.shift();
-
-        await api.get('Hero/' + selectedHero.Id)
-        .then(async (response) => {
-            const hero = response.data;
-            const embed = new EmbedBuilder();
-            embed.setThumbnail(hero.Image);
-            embed.setAuthor(hero.Name);
-            embed.setColor(hero.Color);
-
-            const row = new ActionRowBuilder();
-            const customId = ['UPDATE', message.author.id, hero.Id, 'SKILL'];
-            row.addComponents(new ButtonBuilder({
-                label: 'SKILL',
-                customId: customId.join('_'),
-                style: 'PRIMARY'
-            }))
-
-            message.reply({
-                embeds: [embed],
-                components: [row]
-            })
-        });
+  showHelp: false,
+  type: "admin",
+  data: new SlashCommandBuilder()
+    .setName("update")
+    .setDescription("Update configs(Admin Only)")
+    .addStringOption((option) =>
+      option
+        .setName("command")
+        .setDescription("Select a command")
+        .setRequired(true)
+        .addChoices({ name: "trait", value: "trait" })
+    )
+    .addStringOption((option) =>
+      option.setName("code").setDescription("command code").setRequired(true)
+    )
+    .addStringOption((option) =>
+      option.setName("config").setDescription("update config").setRequired(true)
+    ),
+  async execute(interaction) {
+    const GuideChaseBot = interaction.guild.roles.cache.find(x => x.name === 'GuideChaseBot');
+    if (!interaction.member._roles.includes(GuideChaseBot.id)) {
+      return interaction.editReply({
+        embeds: [
+          new EmbedBuilder({
+            color: 0xed4245,
+            description: `This command is reserved for members with the <@&${GuideChaseBot.id}> role on the server ${interaction.member}... try again ? ❌`,
+          }),
+        ],
+      });
     }
+
+    const commandName = interaction.options.getString("command");
+    const commandCode = interaction.options.getString("code");
+    const config = interaction.options.getString("config");
+
+    const command = client.commands.get(commandName);
+    if (command) {
+      command.update(interaction, commandCode, config);
+    }
+  },
 };
