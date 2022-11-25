@@ -1,6 +1,7 @@
 const { Collection } = require("discord.js");
 
 module.exports = async (client, interaction) => {
+  
   try {
     if (interaction.isCommand()) {
       const cmd = client.commands.get(interaction.commandName);
