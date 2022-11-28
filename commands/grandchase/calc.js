@@ -392,12 +392,10 @@ module.exports = {
           case 16:
             goldCost += 18000000;
             essenceCost += soulTraitEssenceCost * 2;
-            goldCost += soulTraitGoldCost;
+            goldCost += soulTraitGoldCost * 2;
             break;
           case 17: // this is supposedly si15
             goldCost += 20000000;
-            // essenceCost = 2470;
-            // goldCost = 71400000;
             essenceCost += soulTraitEssenceCost * 4;
             essenceCost += bodyTraitEssenceCost * 2;
             essenceCost += memTraitEssenceCost * 2;
