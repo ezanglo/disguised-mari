@@ -50,8 +50,6 @@ module.exports = {
             });
         }
 
-        const limitbreakCode = [heroCode, contentCode].join(".");
-
         selectedHero = selectedHero.shift();
         await api
             .get(
@@ -73,19 +71,19 @@ module.exports = {
                   embeds: [
                     new EmbedBuilder({
                       color: 0xed4245,
-                      description: `Content not found ${interaction.author}... try again ? ❌`,
+                      description: `Content not found ${interaction.user}... try again ? ❌`,
                     }),
                   ],
                 });
             }
 
-            const limitbreak = await this.getLimitBreak(hero, interaction, limitbreakCode, contentCode);
+            const limitbreak = await this.getLimitBreak(hero, interaction, heroCode, contentCode);
             if (!limitbreak) {
                 return interaction.editReply({
                   embeds: [
                     new EmbedBuilder({
                       color: 0xed4245,
-                      description: `Limitbreaks not found ${interaction.author}... try again ? ❌`,
+                      description: `Limitbreaks not found ${interaction.user}... try again ? ❌`,
                     }),
                   ],
                 });
@@ -133,12 +131,13 @@ module.exports = {
         })
         .catch((e) => {
             interaction.editReply(
-              `An Error has occured ${interaction.author}... try again ? ❌`
+              `An Error has occured ${interaction.user}... try again ? ❌`
             );
             interaction.client.errorLog(e, interaction);
       });
     },
-    async getLimitBreak(hero, interaction, limitbreakCode, contentCode, refreshImage) {
+    async getLimitBreak(hero, interaction, heroCode, contentCode, refreshImage) {
+        const limitbreakCode = [heroCode, contentCode].join(".");
         const heroClass = hero.HeroClassRead;
         const attributeType = hero.AttributeTypeRead;
         const skills = hero.SkillUpgrade.find(
@@ -147,7 +146,13 @@ module.exports = {
         const s1 = "<:s1:1044371160168661032>";
         const s2 = "<:s2:1044371163113074779>";
         const pass = "<:regional_indicator_p:1044690283419422771>";
-        const contentName = hero.Contents.find(x => x.Code === contentCode).Name;
+        let contentName = "";
+        let skillsValue = "";
+        let nameValue = "";
+        if (skills && hero.Contents.find(x => x.Code === contentCode)) {
+          contentName = hero.Contents.find(x => x.Code === contentCode).Name;
+          skillsValue = `${eval(skills.Skills[0].Code.split(".")[1])} - ${skills.Skills[0].Name} \n ${eval(skills.Skills[1].Code.split(".")[1])} - ${skills.Skills[1].Name}`;
+          nameValue = `${hero.DisplayName} ${heroClass.DiscordEmote} ${attributeType.DiscordEmote}`;
         
 
         const embed = new EmbedBuilder()
@@ -158,7 +163,7 @@ module.exports = {
         .addFields([
             {
                 name: "Hero Name",
-                value: `${hero.DisplayName} ${heroClass.DiscordEmote} ${attributeType.DiscordEmote}`
+                value: nameValue
             },
             {
                 name: "Content",
@@ -166,7 +171,7 @@ module.exports = {
             },
             {
                 name: "Recommended Skills to Limitbreak",
-                value: `${eval(skills.Skills[0].Code.split(".")[1])} - ${skills.Skills[0].Name} \n ${eval(skills.Skills[1].Code.split(".")[1])} - ${skills.Skills[1].Name}`,
+                value: skillsValue,
                 inline: true
             }
         ])
@@ -212,5 +217,6 @@ module.exports = {
             components: [row],
             refreshImage: true
         };
+      }
     }
 }
