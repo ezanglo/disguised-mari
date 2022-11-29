@@ -23,7 +23,8 @@ module.exports = async (client, interaction) => {
 
       if (focusedOption.name == "hero") {
         choices = interaction.client.heroes.map((x) => x.Code);
-      } else if (focusedOption.name == "content") {
+      } 
+      else if (focusedOption.name == "content") {
         choices = interaction.client.contentTypes.map((x) => x.Code);
         let hero;
         if (interaction.options.get("hero")) {
@@ -66,6 +67,13 @@ module.exports = async (client, interaction) => {
             .map((x) => x.Code);
         }
       }
+      else if (focusedOption.name == "phase") {
+        choices = interaction.client.ContentLineups.filter(
+          (x) => x.ContentTypeRead.Code == interaction.options.get("content").value
+        ).map(x => x.ContentPhaseRead.Code.split('.')[1]);
+      }
+
+      choices = [...new Set(choices)];
 
       const filtered = choices.filter((choice) =>
         choice.startsWith(focusedOption.value.toLowerCase())

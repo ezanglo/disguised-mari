@@ -12,7 +12,10 @@ module.exports = {
         .setAutocomplete(true)
     )
     .addStringOption((option) =>
-      option.setName("phase").setDescription("Select a phase")
+      option
+      .setName("phase")
+      .setDescription("Select a phase")
+      .setAutocomplete(true)
     ),
   async execute(interaction) {
     const contentCode = interaction.options.get("content").value;
