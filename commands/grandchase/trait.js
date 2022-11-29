@@ -885,60 +885,86 @@ module.exports = {
   },
   async update(interaction, traitCode, traitConfig)
   {
-      await api.get(`HeroTrait?where=(Code,eq,${traitCode})`).then(async response => {
-          if(response.status == 200){
-              const data = response.data;
-              if(data.pageInfo.totalRows > 0){
-                  const trait = data.list[0];
-                  let configMap = this.getConfigMap(trait.UpgradeTypeRead.Code);
-                  if(trait.UpgradeTypeRead.Code == 'si'){
-                      const code = traitCode.split('.');
-                      configMap = configMap[code[code.length - 1]]
-                  }
+    await api
+      .get(`HeroTrait?where=(Code,eq,${traitCode})`)
+      .then(async (response) => {
+        if (response.status == 200) {
+          const data = response.data;
+          if (data.pageInfo.totalRows > 0) {
+            const trait = data.list[0];
+            let configMap = this.getConfigMap(trait.UpgradeTypeRead.Code);
+            if (!configMap) {
+              interaction.editReply({
+                embeds: [
+                  new EmbedBuilder({
+                    color: 0xed4245,
+                    description: `Wrong Code ${interaction.user}... try again ? ❌`,
+                  }),
+                ],
+              });
+            }
+            if (trait.UpgradeTypeRead.Code == "si") {
+              const code = traitCode.split(".");
+              configMap = configMap[code[code.length - 1]];
+            }
 
-                  let config = [];
-                  for(const c of traitConfig){
-                      config.push(c.split(''))
-                  }
+            let config = [];
+            for (const c of traitConfig.split('-')) {
+              config.push(c.split(''));
+            }
 
-                  let jsonConfig = {};
-                  for(let x = 0; x < configMap.length; x++){
-                      for(let y = 0; y < configMap[x].length; y++){
-                          if(configMap[x][y] && (config[x][y] && config[x][y] != 'x') ){
-                              jsonConfig[configMap[x][y]] = config[x][y];
-                          }
-                      }
-                  }
-                  
-                  await api.patch('HeroTrait/' + trait.Id, { Config: jsonConfig })
-                  
-                  interaction.options = new Collection();
 
-                  const args = traitCode.split('.');
-                  if(args[0]){
-                    interaction.options.set("hero", { name: "hero", value: args[0] });
-                  }
-                  if(args[1]){
-                    interaction.options.set("content", { name: "content", value: args[1] });
-                  }
-                  if(args[2]){
-                    interaction.options.set("type", { name: "type", value: args[2] });
-                  }
-                  if(args[3]){
-                    interaction.options.set("core", { name: "core", value: args[3] });
-                  }
-
-                  this.execute(interaction, true);
+            let jsonConfig = {};
+            for (let x = 0; x < configMap.length; x++) {
+              for (let y = 0; y < configMap[x].length; y++) {
+                if (configMap[x][y] && config[x][y] && config[x][y] != "x") {
+                  jsonConfig[configMap[x][y]] = config[x][y];
+                }
               }
+            }
+
+
+            await api.patch("HeroTrait/" + trait.Id, { Config: jsonConfig });
+
+            interaction.options = new Collection();
+
+            const args = traitCode.split(".");
+            if (args[0]) {
+              interaction.options.set("hero", {
+                name: "hero",
+                value: args[0],
+              });
+            }
+            if (args[1]) {
+              interaction.options.set("content", {
+                name: "content",
+                value: args[1],
+              });
+            }
+            if (args[2]) {
+              interaction.options.set("type", {
+                name: "type",
+                value: args[2],
+              });
+            }
+            if (args[3]) {
+              interaction.options.set("core", {
+                name: "core",
+                value: args[3],
+              });
+            }
+
+            this.execute(interaction, true);
           }
+        }
       })
-      .catch(e => {
+      .catch((e) => {
         client.errorLog(e, interaction);
         interaction.editReply({
           embeds: [
             new EmbedBuilder({
               color: 0xed4245,
-              description: `An Error has occured ${interaction.user}... try again ? ❌`
+              description: `An Error has occured ${interaction.user}... try again ? ❌`,
             }),
           ],
         });
