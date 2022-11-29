@@ -49,7 +49,7 @@ module.exports = {
                 ],
             });
         }
-
+        
         selectedHero = selectedHero.shift();
         await api
             .get(

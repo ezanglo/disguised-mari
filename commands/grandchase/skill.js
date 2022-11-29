@@ -23,13 +23,23 @@ module.exports = {
       option
         .setName("skill")
         .setDescription("Select a skill")
-        .setAutocomplete(true)
+        .addChoices(
+          { name: "s1", value: "s1" },
+          { name: "s2", value: "s2" },
+          { name: "pass", value: "pass" },
+          { name: "cs", value: "cs" },
+          { name: "ss", value: "ss" },
+        )
     )
     .addStringOption((option) =>
       option
-        .setName("upgrade_type")
-        .setDescription("Select an Upgrade Type")
-        .setAutocomplete(true)
+        .setName("type")
+        .setDescription("Select an Upgrade Type") //["base", "lb", "si"];
+        .addChoices(
+          { name: "base", value: "base" },
+          { name: "lb", value: "lb" },
+          { name: "si", value: "si" },
+        )
     ),
   async execute(interaction) {
     const heroCode = interaction.options.get("hero").value;
@@ -42,7 +52,7 @@ module.exports = {
         embeds: [
           new EmbedBuilder({
             color: 0xed4245,
-            description: `Hero not found ${interaction.author}... try again ? ❌`,
+            description: `Hero not found ${interaction.user}... try again ? ❌`,
           }),
         ],
       });
@@ -80,7 +90,7 @@ module.exports = {
             embeds: [
               new EmbedBuilder({
                 color: 0xed4245,
-                description: `Skill not found ${interaction.author}... try again ? ❌`,
+                description: `Skill not found ${interaction.user}... try again ? ❌`,
               }),
             ],
           });
@@ -122,15 +132,15 @@ module.exports = {
 
             const upgradeType = args.shift();
             if (upgradeType) {
-              int.options.set("upgrade_type", {
-                name: "upgrade_type",
+              int.options.set("type", {
+                name: "type",
                 value: upgradeType,
               });
             }
 
             if (int.isSelectMenu()) {
-              int.options.set("upgrade_type", {
-                name: "upgrade_type",
+              int.options.set("type", {
+                name: "type",
                 value: int.values[0],
               });
             }
@@ -142,9 +152,14 @@ module.exports = {
           });
       })
       .catch((e) => {
-        interaction.editReply(
-          `An Error has occured ${interaction.author}... try again ? ❌`
-        );
+        interaction.editReply({
+          embeds: [
+            new EmbedBuilder({
+              color: 0xed4245,
+              description: `An Error has occured ${interaction.user}... try again ? ❌`
+            }),
+          ],
+        });
         client.errorLog(e, interaction);
       });
   },
@@ -167,8 +182,8 @@ module.exports = {
       skillTypeCode = interaction.options.get("skill").value;
     }
 
-    if (interaction.options.get("upgrade_type")) {
-      upgradeTypeCode = interaction.options.get("upgrade_type").value;
+    if (interaction.options.get("type")) {
+      upgradeTypeCode = interaction.options.get("type").value;
     }
 
     let skill = hero.Skills.find(

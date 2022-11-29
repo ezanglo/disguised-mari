@@ -2,6 +2,7 @@ const { EmbedBuilder, SlashCommandBuilder, REST, Routes, PermissionFlagsBits } =
 
 module.exports = {
     showHelp: false,
+    type: 'admin',
     data: new SlashCommandBuilder()
       .setName('slash-deploy')
       .setDescription('Deploy /slash commands (Admin Only)')
@@ -70,7 +71,7 @@ module.exports = {
         }
 
         return {
-            guilds: guilds,
+            guilds: guilds.length,
             commands: client.commands.map(s => s.name).join(','),
             success: success,
             failed: failed
