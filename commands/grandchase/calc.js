@@ -230,7 +230,7 @@ module.exports = {
 
     if (startLvL !== 0) startLvL = (startLvL + 1);
 
-    for (const x = startLvL; x <= endLvL; x++) {
+    for (let x = startLvL; x <= endLvL; x++) {
 
       if (x % 5 == 0) {
         if (x == 0) {
@@ -283,6 +283,7 @@ module.exports = {
     let essenceCost = 0;
     let goldCost = 0;
     let siCubesCost = 0;
+    let essenceCount = 0;
     let memTraitGoldCost = 100000;
     let bodyTraitGoldCost = 500000;
     let soulTraitGoldCost = 2000000;
@@ -322,20 +323,20 @@ module.exports = {
       }
       if (startLvl <= 0 && endLvl >= 1) {
         goldCost += 5000000;
-        essenceCost += 20
+        essenceCost += 20;
       }
       if (startLvl <= 5 && endLvl >= 6) {
         goldCost += 4000000;
         essenceCost += 100;
         siCubesCost += 250;
-      }
+      } 
       if (startLvl <= 10 && endLvl >= 11) {
         goldCost += 10000000;
         essenceCost += 225;
         siCubesCost += 250;
-      }
-
+      } 
       if (endLvl == 15) {
+        siCubesCost += 250;
         goldCost += (memTraitGoldCost * 2) + (bodyTraitGoldCost * 2) + (soulTraitGoldCost * 2);
         essenceCost += (memTraitEssenceCost * 2) + (bodyTraitEssenceCost * 2) + (soulTraitEssenceCost * 2);
       }
