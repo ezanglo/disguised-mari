@@ -34,9 +34,9 @@ module.exports = {
     const end = interaction.options.get("end").value;
 
     switch (contentType) {
-      case 'ht':
+      case 'ht': {
 
-        if (start > end) return interactionFail(interaction);
+        if (start > end) return this.interactionFail(interaction);
 
         const amount = this.calcBoVHT(end) - this.calcBoVHT(start);
 
@@ -62,10 +62,10 @@ module.exports = {
               }),
           ],
         });
-        break;
-      case 'pets':
+      }
+      case 'pets': {
 
-        if (start > end) return interactionFail(interaction);
+        if (start > end) return this.interactionFail(interaction);
 
         let petAmount = 0;
 
@@ -93,14 +93,12 @@ module.exports = {
               }),
           ],
         });
-        break;
-      case 'cs':
+      }
+      case 'cs': {
 
-        if (start > end) return interactionFail(interaction);
+        if (start > end) return this.interactionFail(interaction);
 
-        let csCubeCalc = this.calcCS(parseInt(start), parseInt(end)).cs_cubes;
-        let csGoldCalc = this.calcCS(parseInt(start), parseInt(end)).cs_gold;
-        let csCrystalCalc = this.calcCS(parseInt(start), parseInt(end)).cs_crystals;
+        const csCost = this.calcCS(parseInt(start), parseInt(end));
 
         return interaction.editReply({
           embeds: [
@@ -112,7 +110,7 @@ module.exports = {
                 { name: 'Chaser Calculator' }
               )
               .addFields(
-                { name: '\u200b', value: `Chaser Cubes Cost: ${this.emojiIcons.csCubeIcon} ${csCubeCalc.toLocaleString()}\nChaser Crystals Cost: ${this.emojiIcons.cscIcon} ${csCrystalCalc}\nGold Cost: ${this.emojiIcons.goldIcon} ${csGoldCalc.toLocaleString()}` }
+                { name: '\u200b', value: `Chaser Cubes Cost: ${this.emojiIcons.csCubeIcon} ${csCost.csCubes.toLocaleString()}\nChaser Crystals Cost: ${this.emojiIcons.cscIcon} ${csCost.csCrystals}\nGold Cost: ${this.emojiIcons.goldIcon} ${csCost.csGold.toLocaleString()}` }
               )
               .setThumbnail('https://cdn.discordapp.com/attachments/992459474394677369/993247439685427320/ChaserCube.png')
               .setFooter({
@@ -120,14 +118,12 @@ module.exports = {
               }),
           ],
         });
-        break;
-      case 'si':
+      }
+      case 'si': {
 
-        if (start > end) return interactionFail(interaction);
+        if (start > end) return this.interactionFail(interaction);
 
-        let siCubes = this.calcSI(start, end).si_cube;
-        let soulEssence = this.calcSI(start, end).soul_essence;
-        let siGoldCost = this.calcSI(start, end).si_gold;
+        const siCost = this.calcSI(start, end);
 
         return interaction.editReply({
           embeds: [
@@ -139,15 +135,15 @@ module.exports = {
                 { name: 'Soul Imprint Calculator' }
               )
               .addFields(
-                { name: '\u200b', value: `Soul Imprint Cubes Cost: ${this.emojiIcons.siCubeIcon} ${siCubes.toLocaleString()}\nSoul Essence Cost: ${this.emojiIcons.soulEssenceIcon} ${soulEssence}\nGold Cost: ${this.emojiIcons.goldIcon} ${siGoldCost.toLocaleString()}` }
+                { name: '\u200b', value: `Soul Imprint Cubes Cost: ${this.emojiIcons.siCubeIcon} ${siCost.siCubes.toLocaleString()}\nSoul Essence Cost: ${this.emojiIcons.soulEssenceIcon} ${siCost.soulEssence}\nGold Cost: ${this.emojiIcons.goldIcon} ${siCost.siGold.toLocaleString()}` }
               )
               .setThumbnail('https://cdn.discordapp.com/attachments/992459474394677369/993247440578818219/SoulChaserCube.png')
               .setFooter({
-                text: `Last Updated November 28, 2022`
+                text: `Last Updated December 2, 2022`
               }),
           ],
         });
-        break;
+      }
     }
   },
   interactionFail(failedInteraction) {
@@ -234,7 +230,7 @@ module.exports = {
 
     if (startLvL !== 0) startLvL = (startLvL + 1);
 
-    for (var x = startLvL; x <= endLvL; x++) {
+    for (const x = startLvL; x <= endLvL; x++) {
 
       if (x % 5 == 0) {
         if (x == 0) {
@@ -281,132 +277,70 @@ module.exports = {
         chaserGold += 3000000;
       }
     }
-    return { cs_crystals: chaserCrystals, cs_cubes: chaserCubes, cs_gold: chaserGold };
+    return { csCrystals: chaserCrystals, csCubes: chaserCubes, csGold: chaserGold };
   },
   calcSI(startLvl, endLvl) {
     let essenceCost = 0;
     let goldCost = 0;
     let siCubesCost = 0;
-    let startAmount = startLvl;
-    let endAmount = endLvl;
-    let memTraitEssenceCost = 15;
     let memTraitGoldCost = 100000;
     let bodyTraitGoldCost = 500000;
     let soulTraitGoldCost = 2000000;
+    let memTraitEssenceCost = 15;
     let bodyTraitEssenceCost = 60;
     let soulTraitEssenceCost = 150;
 
-    if (endLvl > 5) endAmount += 1;
-    if (endLvl == 15) endAmount = 17;
-    if (startLvl > 0) startAmount += 1;
+    for (let x = Math.max(startLvl, 1); x <= endLvl; x++) {
+      if (x < 6) {
+        goldCost += 500000 + (500000 * x);
+        essenceCount = 1;
 
-    for (x = startAmount; x <= endAmount; x++) {
+        if (x > 3) {
+          essenceCount += 1;
+        }
+        essenceCost += memTraitEssenceCost * essenceCount;
+        goldCost += memTraitGoldCost * essenceCount;
 
-      if (x >= 0 && x <= 5) {
-        essenceCost += 20;
-        switch (x) {
-          case 0: // unlock
-            goldCost += 5000000
-            break;
-          case 1:
-            goldCost += 1000000
-            essenceCost += memTraitEssenceCost;
-            goldCost += memTraitGoldCost;
-            break;
-          case 2:
-            goldCost += 1500000
-            essenceCost += memTraitEssenceCost;
-            goldCost += memTraitGoldCost;
-            break;
-          case 3:
-            goldCost += 2000000
-            essenceCost += memTraitEssenceCost;
-            goldCost += memTraitGoldCost;
-            break;
-          case 4:
-            goldCost += 2500000
-            essenceCost += memTraitEssenceCost * 2;
-            goldCost += memTraitGoldCost * 2;
-            break;
-          case 5:
-            goldCost += 3000000
-            essenceCost += memTraitEssenceCost * 2;
-            goldCost += memTraitGoldCost * 2;
-            break
+      } else if (x < 11) {
+        goldCost += 4000000 + (1000000 * x);
+        essenceCount = 1;
+
+        if (x > 8) {
+          essenceCount += 1;
         }
-      } else if (x >= 6 && x <= 11) {
+        essenceCost += bodyTraitEssenceCost * essenceCount;
+        goldCost += bodyTraitGoldCost * essenceCount;
+      } else {
+        goldCost += 10000000 + (2000000 * x);
+        essenceCount = 1;
+
+        if (x > 13) {
+          essenceCount += 1;
+        }
+        essenceCost += soulTraitEssenceCost * essenceCount;
+        goldCost += soulTraitGoldCost * essenceCount;
+      }
+      if (startLvl <= 0 && endLvl >= 1) {
+        goldCost += 5000000;
+        essenceCost += 20
+      }
+      if (startLvl <= 5 && endLvl >= 6) {
+        goldCost += 4000000;
+        essenceCost += 100;
         siCubesCost += 250;
-        switch (x) {
-          case 6: // unlock
-            goldCost += 4000000;
-            essenceCost += 100;
-            break;
-          case 7: // this is supposedly si6
-            goldCost += 5000000;
-            essenceCost += bodyTraitEssenceCost;
-            goldCost += bodyTraitGoldCost;
-            break;
-          case 8:
-            goldCost += 6000000;
-            essenceCost += bodyTraitEssenceCost;
-            goldCost += bodyTraitGoldCost;
-            break;
-          case 9:
-            goldCost += 7000000;
-            essenceCost += bodyTraitEssenceCost;
-            goldCost += bodyTraitGoldCost;
-            break;
-          case 10:
-            goldCost += 8000000;
-            essenceCost += bodyTraitEssenceCost * 2;
-            goldCost += bodyTraitGoldCost * 2;
-            break;
-          case 11: // si10
-            goldCost += 9000000;
-            essenceCost += bodyTraitEssenceCost * 2;
-            goldCost += bodyTraitGoldCost * 2;
-            break;
-        }
-      } else if (x >= 12 && x <= 17) {
+      }
+      if (startLvl <= 10 && endLvl >= 11) {
+        goldCost += 10000000;
+        essenceCost += 225;
         siCubesCost += 250;
-        switch (x) {
-          case 12: // unlock
-            goldCost += 10000000;
-            essenceCost += 225;
-            break;
-          case 13: // this is supposedly si11
-            goldCost += 12000000;
-            essenceCost += soulTraitEssenceCost;
-            goldCost += soulTraitGoldCost;
-            break;
-          case 14:
-            goldCost += 14000000;
-            essenceCost += soulTraitEssenceCost;
-            goldCost += soulTraitGoldCost;
-            break;
-          case 15:
-            goldCost += 16000000;
-            essenceCost += soulTraitEssenceCost;
-            goldCost += soulTraitGoldCost;
-            break;
-          case 16:
-            goldCost += 18000000;
-            essenceCost += soulTraitEssenceCost * 2;
-            goldCost += soulTraitGoldCost * 2;
-            break;
-          case 17: // this is supposedly si15
-            goldCost += 20000000;
-            essenceCost += soulTraitEssenceCost * 4;
-            essenceCost += bodyTraitEssenceCost * 2;
-            essenceCost += memTraitEssenceCost * 2;
-            goldCost += soulTraitGoldCost * 4;
-            goldCost += bodyTraitGoldCost * 2;
-            goldCost += memTraitGoldCost * 2;
-            break;
-        }
+      }
+
+      if (endLvl == 15) {
+        goldCost += (memTraitGoldCost * 2) + (bodyTraitGoldCost * 2) + (soulTraitGoldCost * 2);
+        essenceCost += (memTraitEssenceCost * 2) + (bodyTraitEssenceCost * 2) + (soulTraitEssenceCost * 2);
       }
     }
-    return { soul_essence: essenceCost, si_gold: goldCost, si_cube: siCubesCost }
+    return { soulEssence: essenceCost, siGold: goldCost, siCubes: siCubesCost }
   },
   emojiIcons: {
     petIcon: "<:pet:1045020933867450539>",
