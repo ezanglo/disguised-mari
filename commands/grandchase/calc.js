@@ -291,7 +291,7 @@ module.exports = {
     let bodyTraitEssenceCost = 60;
     let soulTraitEssenceCost = 150;
 
-    for (let x = Math.max(startLvl, 1); x <= endLvl; x++) {
+    for (let x = startLvl + 1; x <= endLvl; x++) {
       if (x < 6) {
         goldCost += 500000 + (500000 * x);
         essenceCount = 1;
@@ -299,11 +299,13 @@ module.exports = {
         if (x > 3) {
           essenceCount += 1;
         }
+        //costs 20 essence per level instead of si cubes
+        essenceCost += 20; 
         essenceCost += memTraitEssenceCost * essenceCount;
         goldCost += memTraitGoldCost * essenceCount;
 
       } else if (x < 11) {
-        goldCost += 4000000 + (1000000 * x);
+        goldCost += 4000000 + (1000000 * (x - 5));
         essenceCount = 1;
 
         if (x > 8) {
@@ -311,8 +313,9 @@ module.exports = {
         }
         essenceCost += bodyTraitEssenceCost * essenceCount;
         goldCost += bodyTraitGoldCost * essenceCount;
+        siCubesCost += 250;
       } else {
-        goldCost += 10000000 + (2000000 * x);
+        goldCost += 10000000 + (2000000 * (x - 10));
         essenceCount = 1;
 
         if (x > 13) {
@@ -320,26 +323,26 @@ module.exports = {
         }
         essenceCost += soulTraitEssenceCost * essenceCount;
         goldCost += soulTraitGoldCost * essenceCount;
-      }
-      if (startLvl <= 0 && endLvl >= 1) {
-        goldCost += 5000000;
-        essenceCost += 20;
-      }
-      if (startLvl <= 5 && endLvl >= 6) {
-        goldCost += 4000000;
-        essenceCost += 100;
         siCubesCost += 250;
-      } 
-      if (startLvl <= 10 && endLvl >= 11) {
-        goldCost += 10000000;
-        essenceCost += 225;
-        siCubesCost += 250;
-      } 
-      if (endLvl == 15) {
-        siCubesCost += 250;
-        goldCost += (memTraitGoldCost * 2) + (bodyTraitGoldCost * 2) + (soulTraitGoldCost * 2);
-        essenceCost += (memTraitEssenceCost * 2) + (bodyTraitEssenceCost * 2) + (soulTraitEssenceCost * 2);
       }
+    }
+    if (startLvl <= 0 && endLvl >= 1) {
+      goldCost += 5000000;
+      essenceCost += 20;
+    }
+    if (startLvl <= 5 && endLvl >= 6) {
+      goldCost += 4000000;
+      essenceCost += 100;
+      siCubesCost += 250;
+    } 
+    if (startLvl <= 10 && endLvl >= 11) {
+      goldCost += 10000000;
+      essenceCost += 225;
+      siCubesCost += 250;
+    } 
+    if (endLvl == 15) {
+      goldCost += (memTraitGoldCost * 2) + (bodyTraitGoldCost * 2) + (soulTraitGoldCost * 2);
+      essenceCost += (memTraitEssenceCost * 2) + (bodyTraitEssenceCost * 2) + (soulTraitEssenceCost * 2);
     }
     return { soulEssence: essenceCost, siGold: goldCost, siCubes: siCubesCost }
   },
