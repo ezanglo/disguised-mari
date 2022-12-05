@@ -227,55 +227,43 @@ module.exports = {
     let chaserCubes = 0;
     let chaserCrystals = 0;
     let chaserGold = 0;
-
+    let crystalCost = 0;
+    let goldCost = 0;
+    
     if (startLvL !== 0) startLvL = (startLvL + 1);
 
     for (let x = startLvL; x <= endLvL; x++) {
 
-      if (x % 5 == 0) {
-        if (x == 0) {
-          chaserCubes += 200;
-          chaserCrystals += 150;
-          chaserGold += 5000000;
-        } else if (x == 5) {
-          chaserCubes += 200;
-          chaserCrystals += 40;
-          chaserGold += 1500000;
-        } else if (x == 10) {
-          chaserCubes += 200;
-          chaserCrystals += 76;
-          chaserGold += 3000000;
-        } else if (x == 15) {
-          chaserCubes += 200;
-          chaserCrystals += 142;
-          chaserGold += 6000000;
-        } else if (x == 20) {
-          chaserCubes += 200;
-          chaserCrystals += 238;
-          chaserGold += 7500000;
-        } else if (x == 25) {
-          chaserCubes += 200;
-          chaserCrystals += 364;
-          chaserGold += 15000000;
-        }
+      if (x >= 1 && x < 5) {
+        crystalCost = 40;
+        goldCost = 300000;
+      } else if (x >= 6 && x < 10) {
+        crystalCost = 76;
+        goldCost = 600000;
+      } else if (x >= 11 && x < 15) {
+        crystalCost = 142;
+        goldCost = 1200000;
+      } else if (x >= 16 && x < 20) {
+        crystalCost = 238;
+        goldCost = 1500000;
+      } else if (x >= 21 && x < 25) {
+        crystalCost = 364;
+        goldCost = 3000000;
       }
 
-      if (x >= 1 && x < 5) {
-        chaserCrystals += 40;
-        chaserGold += 300000;
-      } else if (x >= 6 && x < 10) {
-        chaserCrystals += 76;
-        chaserGold += 600000;
-      } else if (x >= 11 && x < 15) {
-        chaserCrystals += 142;
-        chaserGold += 1200000;
-      } else if (x >= 16 && x < 20) {
-        chaserCrystals += 238;
-        chaserGold += 1500000;
-      } else if (x >= 21 && x < 25) {
-        chaserCrystals += 364;
-        chaserGold += 3000000;
+      chaserCrystals += crystalCost;
+      if (x % 5 == 0) {
+        chaserCubes += 200;
+        chaserGold += 5 * goldCost;
+        if(x == 0){
+          chaserCrystals += 150;
+          chaserGold += 5000000;
+        }
       }
+      else {
+        chaserGold += goldCost;
+      }
+
     }
     return { csCrystals: chaserCrystals, csCubes: chaserCubes, csGold: chaserGold };
   },
