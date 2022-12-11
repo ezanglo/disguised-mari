@@ -1,7 +1,6 @@
 const { EmbedBuilder, SlashCommandBuilder } = require('discord.js');
 
 module.exports = {
-    showHelp: false,
     data: new SlashCommandBuilder()
       .setName('botinfo')
       .setDescription('Show bot info')
