@@ -69,7 +69,7 @@ module.exports = async (client, interaction) => {
       }
       else if (focusedOption.name == "phase") {
         choices = interaction.client.ContentLineups.filter(
-          (x) => x.ContentTypeRead.Code == interaction.options.get("content").value
+          (x) => x.ContentTypeRead.Code == interaction.options.get("content")?.value
         ).map(x => x.ContentPhaseRead.Code.split('.')[1]);
       }
 

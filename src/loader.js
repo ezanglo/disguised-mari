@@ -81,7 +81,7 @@ const rest = new REST({ version: '10' }).setToken(process.env.BOT_TOKEN);
 
 (async () => {
 	try {
-		console.log(`Started refreshing ${client.commands.length} application (/) commands.`);
+		console.log(`Started refreshing ${client.commands.size} application (/) commands.`);
 
 		// The put method is used to fully refresh all commands in the guild with the current set
 		const data = await rest.put(

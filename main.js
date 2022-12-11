@@ -44,7 +44,7 @@ client.errorLog = (e, interaction) => {
             { name: 'User', value: `${interaction.user.tag}`, inline: true},
             { name: 'Server', value: `${interaction.channel.guild}`, inline: true},
             { name: 'Channel', value: `${interaction.channel}`, inline: true},
-            { name: 'Command', value: `\`${interaction.content}\``, inline: true},
+            { name: 'Command', value: `\`${interaction.commandName}\``, inline: true},
         ])
         let stackTrace = e.stack;
         if(e.stack.length > 1024){

@@ -106,8 +106,6 @@ module.exports = {
             time: 60000,
           })
           .then(async (int) => {
-            
-            console.log(int.customId);
             if (int.user.id !== interaction.user.id) {
               return int.reply({
                 content: `You don't have access to this interaction ${int.user}... ❌`,
@@ -258,7 +256,7 @@ module.exports = {
           { name: "Cooldown", value: `${skill.Cooldown}s`, inline: true },
         ]);
       }
-      const description = skill.Description.split("[Title]");
+      const description = skill.Description?.split("[Title]");
 
       for (let x = 0; x < description.length; x++) {
         const desc = description[x];
