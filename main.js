@@ -87,15 +87,23 @@ client.commandLog = async (interaction) => {
                 await api.post('User', { 
                     DiscordId: user.id,
                     Username: `${user.username}#${user.discriminator}`,
-                    CommandCount: 1
+                    CommandCount: 1,
+                    Avatar: user.avatar
                 });
             }
             else {
-                const user = data.list[0];
-                const commandCount = parseInt(user.CommandCount ?? 0)
-                await api.patch(`User/${user.Id}`, { 
-                    CommandCount: commandCount + 1
-                });
+                const selectedUser = data.list[0];
+                const commandCount = parseInt(selectedUser.CommandCount ?? 0)
+
+                const options = { 
+                    CommandCount: commandCount + 1,
+                }
+
+                if(selectedUser.Avatar != user.avatar){
+                    options.Avatar = user.avatar
+                }
+
+                await api.patch(`User/${selectedUser.Id}`, options);
             }
         }
     })
