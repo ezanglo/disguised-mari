@@ -90,10 +90,6 @@ module.exports = async (client, interaction) => {
       content: `An Error has occured ${interaction.member.user}... try again ? ❌`,
       ephemeral: true,
     });
-    client.errorLog(e, {
-      user: interaction.member.user,
-      channel: interaction.channel,
-      content: `Interaction`,
-    });
+    client.errorLog(e, interaction);
   }
 };

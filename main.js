@@ -63,6 +63,13 @@ client.errorLog = (e, interaction) => {
 client.commandLog = async (interaction) => {
 
     const commandName = interaction.commandName;
+
+    const command = client.commands.get(commandName);
+    if(command.type == 'admin' || process.env.ENVIRONMENT == 'dev'){
+        return;
+    }
+
+
     const user = interaction.user;
     
     await api.get(`Command?where=(SlashCommand,eq,${commandName})`)
