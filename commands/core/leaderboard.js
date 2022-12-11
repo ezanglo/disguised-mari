@@ -2,7 +2,6 @@ const { EmbedBuilder, SlashCommandBuilder } = require('discord.js');
 
 module.exports = {
     showHelp: false,
-    type: 'admin',
     data: new SlashCommandBuilder()
       .setName('leaderboard')
       .setDescription('Show command usage leaderboards')
@@ -44,7 +43,10 @@ module.exports = {
 
                     const embed = new EmbedBuilder()
                         .setThumbnail(client.user.displayAvatarURL({ size: 1024, dynamic: true }))
-                        .setAuthor({ name: "Disguised Mari Leaderboard | Users" })
+                        .setAuthor({ 
+                            name: "Disguised Mari Leaderboard",
+                            iconURL: client.user.displayAvatarURL({ size: 1024, dynamic: true })
+                        })
                         .setDescription(usersFormatted.join('\n'))
                         .setTimestamp()
                     ;
@@ -74,8 +76,10 @@ module.exports = {
                     }
 
                     const embed = new EmbedBuilder()
-                        .setThumbnail(client.user.displayAvatarURL({ size: 1024, dynamic: true }))
-                        .setAuthor({ name: "Disguised Mari Leaderboard | Commands" })
+                        .setAuthor({ 
+                            name: "Disguised Mari Leaderboard",
+                            iconURL: client.user.displayAvatarURL({ size: 1024, dynamic: true })
+                        })
                         .setDescription(commandsFormatted.join('\n'))
                         .setTimestamp()
                     ;
