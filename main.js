@@ -47,7 +47,7 @@ client.errorLog = (e, interaction) => {
             { name: 'Command', value: `\`${interaction.commandName}\``, inline: true},
         ])
         let stackTrace = e.stack;
-        if(e.stack.length > 1024){
+        if(stackTrace && stackTrace.length > 1024){
             stackTrace = e.stack.substring(0, 1000);
         }
         embed.addFields([
@@ -58,4 +58,45 @@ client.errorLog = (e, interaction) => {
             embeds: [embed]
         });
     }
+}
+
+client.commandLog = async (interaction) => {
+
+    const commandName = interaction.commandName;
+    const user = interaction.user;
+    
+    await api.get(`Command?where=(SlashCommand,eq,${commandName})`)
+    .then(async (response) => {
+        if (response.status == 200) {
+            const data = response.data;
+            if (data.pageInfo.totalRows === 1) {
+                const command = data.list[0];
+                const usageCount = parseInt(command.UsageCount ?? 0)
+                await api.patch(`Command/${command.Id}`, { 
+                    UsageCount: usageCount + 1
+                });
+            }
+        }
+    })
+
+    await api.get(`User?where=(DiscordId,eq,${user.id})`)
+    .then(async (response) => {
+        if (response.status == 200) {
+            const data = response.data;
+            if (data.pageInfo.totalRows != 1) {
+                await api.post('User', { 
+                    DiscordId: user.id,
+                    Username: `${user.username}#${user.discriminator}`,
+                    CommandCount: 1
+                });
+            }
+            else {
+                const user = data.list[0];
+                const commandCount = parseInt(user.CommandCount ?? 0)
+                await api.patch(`User/${user.Id}`, { 
+                    CommandCount: commandCount + 1
+                });
+            }
+        }
+    })
 }

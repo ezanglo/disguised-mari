@@ -8,6 +8,9 @@ module.exports = async (client, interaction) => {
       await interaction.deferReply();
       // await interaction.deferReply({ ephemeral: true });
       await cmd.execute(interaction);
+
+      await client.commandLog(interaction);
+
     } else if (interaction.isAutocomplete()) {
       const command = interaction.client.commands.get(interaction.commandName);
 
