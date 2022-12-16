@@ -27,6 +27,7 @@ module.exports = {
       option
         .setName("end")
         .setDescription("Provide the end level")
+        .setMinValue(0)
         .setRequired(true)
     ),
   async execute(interaction) {
