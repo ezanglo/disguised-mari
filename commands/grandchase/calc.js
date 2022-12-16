@@ -20,6 +20,7 @@ module.exports = {
       option
         .setName("start")
         .setDescription("Provide the start level")
+        .setMinValue(0)
         .setRequired(true)
     )
     .addIntegerOption(option =>
@@ -30,13 +31,15 @@ module.exports = {
     ),
   async execute(interaction) {
     const contentType = interaction.options.get("type").value;
-    const start = interaction.options.get("start").value;
-    const end = interaction.options.get("end").value;
+    let start = interaction.options.get("start").value;
+    let end = interaction.options.get("end").value;
 
     switch (contentType) {
       case 'ht': {
 
         if (start > end) return this.interactionFail(interaction);
+
+        if (end > 560) end = 560;
 
         const amount = this.calcBoVHT(end) - this.calcBoVHT(start);
 
@@ -69,6 +72,8 @@ module.exports = {
 
         let petAmount = 0;
 
+        if (end > 70) end = 70;
+
         for (let x = start; x <= end; x++) {
           petAmount += this.calcPet(x);
         }
@@ -98,6 +103,8 @@ module.exports = {
 
         if (start > end) return this.interactionFail(interaction);
 
+        if (end > 25) end = 25;
+
         const csCost = this.calcCS(parseInt(start), parseInt(end));
 
         return interaction.editReply({
@@ -122,6 +129,8 @@ module.exports = {
       case 'si': {
 
         if (start > end) return this.interactionFail(interaction);
+
+        if (end > 15) end = 15;
 
         const siCost = this.calcSI(start, end);
 
