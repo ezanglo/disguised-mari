@@ -43,7 +43,8 @@ module.exports = {
         "&nested[Heroes][fields]=Id,DisplayName,Code,AttributeTypeRead,HeroClassRead,DiscordEmote" +
         "&nested[ContentTypeRead][fields]=Id,Name,Code,Image,Icon" +
         "&nested[ContentPhaseRead][fields]=Id,Name,Code,Description,Image,AttributeTypeRead,HeroClassRead,Enemies" +
-        "&nested[HeroPetRead][fields]=Id,Name,Code,Image,HeroRead"
+        "&nested[HeroPetRead][fields]=Id,Name,Code,Image,HeroRead" +
+        "&nested[PartySkills][fields]=Name,Code,Image,DiscordEmote"
       )
       .then(async (response) => {
         const data = response.data;
@@ -102,20 +103,33 @@ module.exports = {
     if (Array.isArray(data)) {
       const embed = new EmbedBuilder()
         .setThumbnail(data[0].ContentTypeRead.Icon)
-        .setTitle(data[0].ContentTypeRead.Name);
+        .setTitle(data[0].ContentTypeRead.Name)
 
       for (var i = 0; i < data.length; i++) {
 
-        embed.addFields([
-          {
-            name: `Phase ${i + 1} ${data[i].ContentPhaseRead.AttributeTypeRead.DiscordEmote}`,
-            value: data[i].Heroes.map(
-              (h) =>
-                `${h.DiscordEmote}`
-            )
-              .join("") + " " + data[i].PartySkills.Name + " " + data[i].HeroPetRead.Name
-          }
-        ]);
+        if (data[i].PartySkills.length != 1) {
+          embed.addFields([
+            {
+              name: `Phase ${i + 1} ${data[i].ContentPhaseRead.AttributeTypeRead.DiscordEmote}`,
+              value: data[i].Heroes.map(
+                (h) =>
+                  `${h.DiscordEmote}`
+              )
+                .join("") + " " + data[i].PartySkills.map(x => x.Name).join("/") + " " + data[i].HeroPetRead.Name
+            }
+          ]);
+        } else {
+          embed.addFields([
+            {
+              name: `Phase ${i + 1} ${data[i].ContentPhaseRead.AttributeTypeRead.DiscordEmote}`,
+              value: data[i].Heroes.map(
+                (h) =>
+                  `${h.DiscordEmote}`
+              )
+                .join("") + " " + data[i].PartySkills[0].Name + " " + data[i].HeroPetRead.Name
+            }
+          ]);
+        }
       }
       let embeds = [];
       embeds.push(embed);
