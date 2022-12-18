@@ -113,7 +113,7 @@ module.exports = {
               (h) =>
                 `${h.DiscordEmote}`
             )
-              .join("") + " " + data[i].PartySkills.map(x => x.Name).join("/") + " " + data[i].HeroPetRead.Name
+              .join("") + " " + data[i].PartySkills.map(x => x.DiscordEmote).join("/") + " " + data[i].HeroPetRead.Name
           }
         ]);
       } else {
@@ -124,7 +124,7 @@ module.exports = {
               (h) =>
                 `${h.DiscordEmote}`
             )
-              .join("") + " " + data[i].PartySkills[0].Name + " " + data[i].HeroPetRead.Name
+              .join("") + " " + data[i].PartySkills[0].DiscordEmote + " " + data[i].HeroPetRead.Name
           }
         ]);
       }
