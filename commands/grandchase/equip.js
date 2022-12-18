@@ -126,7 +126,7 @@ module.exports = {
           embeds: [
             new EmbedBuilder({
               color: 0xed4245,
-              description: `An Error has occured ${interaction.user}... try again ? ❌`
+              description: `An Error has occured ${interaction.user}... try again ? ❌`,
             }),
           ],
         });
@@ -141,7 +141,7 @@ module.exports = {
     const contentCode = interaction.options.get("content").value;
     let ContentTypeCode = this.getDefaultContent(
       contentCode,
-      hero.HeroEquips[0].ContentTypeRead.Code
+      hero.HeroEquips[0]?.ContentTypeRead.Code
     );
     let EquipCode = ["equip", hero.Code, ContentTypeCode];
     let equip = hero.HeroEquips.find(
