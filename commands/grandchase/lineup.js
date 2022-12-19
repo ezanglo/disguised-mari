@@ -51,11 +51,30 @@ module.exports = {
 
         if (data.pageInfo.totalRows > 1) {
 
-          const lineup = await this.getContentOverall(data.list, interaction);
+          if (contentCode == 'hf' && data.list[0].Code == lineUpCode) {
+            const lineup = await this.getContentLineup(data.list[0], interaction);
+            if (!lineup) {
+              return interaction.editReply({
+                embeds: [
+                  new EmbedBuilder({
+                    color: 0xed4245,
+                    description: `Lineup not found ${interaction.user}... try again ? ❌`,
+                  }),
+                ],
+              });
+            }
 
-          await interaction.editReply({
-            embeds: lineup
-          });
+            await interaction.editReply({
+              embeds: lineup.embeds,
+              components: lineup.components ? lineup.components : [],
+            });
+          } else {
+            const lineup = await this.getContentOverall(data.list, interaction);
+
+            await interaction.editReply({
+              embeds: lineup
+            });
+          }
         } else if (data.pageInfo.totalRows == 1) {
 
           const lineup = await this.getContentLineup(data.list[0], interaction);
@@ -327,6 +346,15 @@ module.exports = {
           value: rows.map((row) => `` + row.join(" ")).join("\n"),
           inline: true,
         },
+      ]);
+    }
+
+    if (data.Notes) {
+      embed.addFields([
+        {
+          name: "Notes:",
+          value: `\`\`\`${data.Notes}\`\`\``
+        }
       ]);
     }
 
