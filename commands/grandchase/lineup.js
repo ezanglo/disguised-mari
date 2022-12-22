@@ -13,9 +13,9 @@ module.exports = {
     )
     .addStringOption((option) =>
       option
-      .setName("phase")
-      .setDescription("Select a phase")
-      .setAutocomplete(true)
+        .setName("phase")
+        .setDescription("Select a phase")
+        .setAutocomplete(true)
     ),
   async execute(interaction) {
     const contentCode = interaction.options.get("content").value;
@@ -33,37 +33,67 @@ module.exports = {
       });
     }
 
-    let phaseCode = interaction.options.getString("phase");
-    if (!phaseCode) {
-      phaseCode = "p1";
-    }
+    let phaseCode = interaction.options.getString("phase") ?? '';
 
     const lineUpCode = ["lu", contentCode, phaseCode].join(".");
 
     await api
       .get(
-        `ContentLineup?where=(Code,eq,${lineUpCode})` +
-          "&nested[Heroes][fields]=Id,DisplayName,Code,AttributeTypeRead,HeroClassRead,DiscordEmote" +
-          "&nested[ContentTypeRead][fields]=Id,Name,Code,Image,Icon" +
-          "&nested[ContentPhaseRead][fields]=Id,Name,Code,Description,Image,AttributeTypeRead,HeroClassRead,Enemies" +
-          "&nested[HeroPetRead][fields]=Id,Name,Code,Image,HeroRead"
+        `ContentLineup?where=(Code,like,${lineUpCode}%)` +
+        "&nested[Heroes][fields]=Id,DisplayName,Code,AttributeTypeRead,HeroClassRead,DiscordEmote" +
+        "&nested[ContentTypeRead][fields]=Id,Name,Code,Image,Icon" +
+        "&nested[ContentPhaseRead][fields]=Id,Name,Code,Description,Image,AttributeTypeRead,HeroClassRead,Enemies" +
+        "&nested[HeroPetRead][fields]=Id,Name,Code,Image,HeroRead" +
+        "&nested[PartySkills][fields]=Name,Code,Image,DiscordEmote"
       )
       .then(async (response) => {
         const data = response.data;
 
-        if (data.pageInfo.totalRows != 1) {
-          return interaction.editReply({
-            embeds: [
-              new EmbedBuilder({
-                color: 0xed4245,
-                description: `Content not found ${interaction.user}... try again ? ❌`,
-              }),
-            ],
-          });
-        }
+        if (data.pageInfo.totalRows > 1) {
 
-        const lineup = await this.getContentLineup(data.list[0], interaction);
-        if (!lineup) {
+          if (contentCode == 'hf' && data.list[0].Code == lineUpCode) {
+            const lineup = await this.getContentLineup(data.list[0], interaction);
+            if (!lineup) {
+              return interaction.editReply({
+                embeds: [
+                  new EmbedBuilder({
+                    color: 0xed4245,
+                    description: `Lineup not found ${interaction.user}... try again ? ❌`,
+                  }),
+                ],
+              });
+            }
+
+            await interaction.editReply({
+              embeds: lineup.embeds,
+              components: lineup.components ? lineup.components : [],
+            });
+          } else {
+            const lineup = await this.getContentOverall(data.list, interaction);
+
+            await interaction.editReply({
+              embeds: lineup
+            });
+          }
+        } else if (data.pageInfo.totalRows == 1) {
+
+          const lineup = await this.getContentLineup(data.list[0], interaction);
+          if (!lineup) {
+            return interaction.editReply({
+              embeds: [
+                new EmbedBuilder({
+                  color: 0xed4245,
+                  description: `Lineup not found ${interaction.user}... try again ? ❌`,
+                }),
+              ],
+            });
+          }
+
+          await interaction.editReply({
+            embeds: lineup.embeds,
+            components: lineup.components ? lineup.components : [],
+          });
+        } else {
           return interaction.editReply({
             embeds: [
               new EmbedBuilder({
@@ -73,11 +103,6 @@ module.exports = {
             ],
           });
         }
-
-        await interaction.editReply({
-          embeds: lineup.embeds,
-          components: lineup.components ? lineup.components : [],
-        });
       })
       .catch((e) => {
         interaction.editReply({
@@ -92,10 +117,46 @@ module.exports = {
         interaction.client.errorLog(e, interaction);
       });
   },
+  async getContentOverall(data, interaction) {
+    const embed = new EmbedBuilder()
+      .setThumbnail(data[0].ContentTypeRead.Icon)
+      .setTitle(data[0].ContentTypeRead.Name)
+
+    for (var i = 0; i < data.length; i++) {
+
+      if (data[i].PartySkills.length != 1) {
+        embed.addFields([
+          {
+            name: `Phase ${i + 1} ${data[i].ContentPhaseRead.AttributeTypeRead.DiscordEmote}`,
+            value: data[i].Heroes.map(
+              (h) =>
+                `${h.DiscordEmote}`
+            )
+              .join("") + " " + data[i].PartySkills.map(x => x.DiscordEmote).join("/") + " " + data[i].HeroPetRead.Name
+          }
+        ]);
+      } else {
+        embed.addFields([
+          {
+            name: `Phase ${i + 1} ${data[i].ContentPhaseRead.AttributeTypeRead.DiscordEmote}`,
+            value: data[i].Heroes.map(
+              (h) =>
+                `${h.DiscordEmote}`
+            )
+              .join("") + " " + data[i].PartySkills[0].DiscordEmote + " " + data[i].HeroPetRead.Name
+          }
+        ]);
+      }
+    }
+    let embeds = [];
+    embeds.push(embed);
+
+    return embeds;
+  },
   async getContentLineup(data, interaction, refreshImage) {
     const content = data.ContentTypeRead.Name;
     const phase = data.ContentPhaseRead.Name;
-    let lineupDate = data.UpdatedAt ? data.UpdatedAt : data.CreatedAt;
+    const lineupDate = data.UpdatedAt ? data.UpdatedAt : data.CreatedAt;
 
     const embed = new EmbedBuilder()
       .setThumbnail(data.ContentTypeRead.Icon)
@@ -285,6 +346,15 @@ module.exports = {
           value: rows.map((row) => `` + row.join(" ")).join("\n"),
           inline: true,
         },
+      ]);
+    }
+
+    if (data.Notes) {
+      embed.addFields([
+        {
+          name: "Notes:",
+          value: `\`\`\`${data.Notes}\`\`\``
+        }
       ]);
     }
 

@@ -78,7 +78,7 @@ module.exports = {
 
         if (end > 70) end = 70;
 
-        for (let x = start; x <= end; x++) {
+        for (let x = start+1; x <= end; x++) {
           petAmount += this.calcPet(x);
         }
 
