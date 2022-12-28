@@ -246,8 +246,21 @@ module.exports = {
       {
         name: "Pet",
         value: data.HeroPetRead.Name ? data.HeroPetRead.Name : "None",
+        inline: true,
       },
     ]);
+
+    if (data.PartySkills) {
+      embed.addFields([
+        {
+          name: "Party Skill(s)",
+          value: data.PartySkills.map(x => x.DiscordEmote).join(" "),
+          inline: true,
+        }
+      ]);
+    }
+
+    embed.addFields([{name: "\u200b", value: "\u200b"}]);
 
     if (data.Frequency) {
       const numbers = [
@@ -320,6 +333,7 @@ module.exports = {
             .map((row) => `` + row.join(" "))
             .join("\n"),
           inline: true,
+          
         },
       ]);
     }
