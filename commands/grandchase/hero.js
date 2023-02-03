@@ -7,7 +7,9 @@ module.exports = {
     .addStringOption((option) =>
       option
         .setName("hero")
-        .setDescription("Select a hero. (For Job Change Heroes Example: exelesis)")
+        .setDescription(
+          "Select a hero. (For Job Change Heroes Example: exelesis)"
+        )
         .setRequired(true)
         .setAutocomplete(true)
     ),
@@ -149,6 +151,15 @@ module.exports = {
             },
           ]);
 
+        if (hero.Notes) {
+          embed.addFields([
+            {
+              name: "Note",
+              value: "```" + hero.Notes + "```",
+            },
+          ]);
+        }
+
         interaction.editReply({
           embeds: [embed],
         });
@@ -158,7 +169,7 @@ module.exports = {
           embeds: [
             new EmbedBuilder({
               color: 0xed4245,
-              description: `An Error has occured ${interaction.user}... try again ? ❌`
+              description: `An Error has occured ${interaction.user}... try again ? ❌`,
             }),
           ],
         });
@@ -220,14 +231,19 @@ module.exports = {
         (x) => x.Code == ["acce", "ring", equipPve.RingConfig.type].join(".")
       );
       const neck = client.heroGearTypes.find(
-        (x) => x.Code == ["acce", "neck", equipPve.NecklaceConfig.type].join(".")
+        (x) =>
+          x.Code == ["acce", "neck", equipPve.NecklaceConfig.type].join(".")
       );
       const ear = client.heroGearTypes.find(
         (x) => x.Code == ["acce", "ear", equipPve.EarringConfig.type].join(".")
       );
       pveRecommendation = `**PVE:** ${
         this.equipmentColors[equipPve.RingConfig.color]
-      } ${ring.DiscordEmote} ${equipPve.RingConfig.type.toUpperCase()} ${neck.DiscordEmote} ${equipPve.NecklaceConfig.type.toUpperCase()} ${ear.DiscordEmote} ${equipPve.EarringConfig.type.toUpperCase()}`;
+      } ${ring.DiscordEmote} ${equipPve.RingConfig.type.toUpperCase()} ${
+        neck.DiscordEmote
+      } ${equipPve.NecklaceConfig.type.toUpperCase()} ${
+        ear.DiscordEmote
+      } ${equipPve.EarringConfig.type.toUpperCase()}`;
     }
     if (
       equipPvp &&
@@ -242,14 +258,19 @@ module.exports = {
         (x) => x.Code == ["acce", "ring", equipPvp.RingConfig.type].join(".")
       );
       const neck = client.heroGearTypes.find(
-        (x) => x.Code == ["acce", "neck", equipPvp.NecklaceConfig.type].join(".")
+        (x) =>
+          x.Code == ["acce", "neck", equipPvp.NecklaceConfig.type].join(".")
       );
       const ear = client.heroGearTypes.find(
         (x) => x.Code == ["acce", "ear", equipPvp.EarringConfig.type].join(".")
       );
       pvpRecommendation = `**PVP:** ${
         this.equipmentColors[equipPvp.RingConfig.color]
-      } ${ring.DiscordEmote} ${equipPvp.RingConfig.type.toUpperCase()} ${neck.DiscordEmote} ${equipPvp.NecklaceConfig.type.toUpperCase()} ${ear.DiscordEmote} ${equipPvp.EarringConfig.type.toUpperCase()}`;
+      } ${ring.DiscordEmote} ${equipPvp.RingConfig.type.toUpperCase()} ${
+        neck.DiscordEmote
+      } ${equipPvp.NecklaceConfig.type.toUpperCase()} ${
+        ear.DiscordEmote
+      } ${equipPvp.EarringConfig.type.toUpperCase()}`;
     }
     return `${pveRecommendation}\n${pvpRecommendation}`;
   },
