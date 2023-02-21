@@ -40,43 +40,55 @@ module.exports = {
 
     if (all || type == "hero") {
       await api
-        .get("Hero?limit=100&fields=Id,Code,DiscordEmote,HeroEquips,Traits")
+        .get("Hero?limit=200&fields=Id,Code,DiscordEmote,HeroEquips,Traits")
         .then((response) => {
           if (response.status == 200) {
             client.heroes = response.data.list;
           }
         });
       interaction.editReply({
-        embeds: [new EmbedBuilder({ description: "Updated Heroes" })],
+        embeds: [
+          new EmbedBuilder({
+            description: "Updated Heroes:" + client.heroes.length,
+          }),
+        ],
       });
     }
 
     if (all || type == "content") {
-      await api.get("ContentType?limit=100&fields=Id,Code").then((response) => {
+      await api.get("ContentType?limit=200&fields=Id,Code").then((response) => {
         if (response.status == 200) {
           client.contentTypes = response.data.list;
         }
       });
       interaction.editReply({
-        embeds: [new EmbedBuilder({ description: "Updated ContentTypes" })],
+        embeds: [
+          new EmbedBuilder({
+            description: "Updated ContentTypes:" + client.contentTypes.length,
+          }),
+        ],
       });
     }
 
     if (all || type == "trait") {
-      await api.get("TraitType?limit=100").then((response) => {
+      await api.get("TraitType?limit=200").then((response) => {
         if (response.status == 200) {
           client.traitTypes = response.data.list;
         }
       });
       interaction.editReply({
-        embeds: [new EmbedBuilder({ description: "Updated TraitTypes" })],
+        embeds: [
+          new EmbedBuilder({
+            description: "Updated TraitTypes:" + client.traitTypes.length,
+          }),
+        ],
       });
     }
 
     if (all || type == "herogear") {
       await api
         .get(
-          "HeroGearType?limit=100&fields=Id,Name,Code,EquipTypeRead,HeroClassRead,Image,UpdatedAt,DiscordEmote"
+          "HeroGearType?limit=200&fields=Id,Name,Code,EquipTypeRead,HeroClassRead,Image,UpdatedAt,DiscordEmote"
         )
         .then((response) => {
           if (response.status == 200) {
@@ -84,14 +96,18 @@ module.exports = {
           }
         });
       interaction.editReply({
-        embeds: [new EmbedBuilder({ description: "Updated HeroGearTypes" })],
+        embeds: [
+          new EmbedBuilder({
+            description: "Updated HeroGearTypes:" + client.heroGearTypes.length,
+          }),
+        ],
       });
     }
 
     if (all || type == "equip") {
       await api
         .get(
-          "EquipConfig?limit=100&fields=Id,Code,EquipTypeRead,Config,UpdatedAt"
+          "EquipConfig?limit=200&fields=Id,Code,EquipTypeRead,Config,UpdatedAt"
         )
         .then((response) => {
           if (response.status == 200) {
@@ -99,14 +115,18 @@ module.exports = {
           }
         });
       interaction.editReply({
-        embeds: [new EmbedBuilder({ description: "Updated EquipConfigs" })],
+        embeds: [
+          new EmbedBuilder({
+            description: "Updated EquipConfigs:" + client.EquipConfig.length,
+          }),
+        ],
       });
     }
 
     if (all || type == "lineup") {
       await api
         .get(
-          "ContentLineup?limit=100&fields=Id,Code,ContentTypeRead,ContentPhaseRead,UpdatedAt"
+          "ContentLineup?limit=200&fields=Id,Code,ContentTypeRead,ContentPhaseRead,UpdatedAt"
         )
         .then((response) => {
           if (response.status == 200) {
@@ -114,14 +134,28 @@ module.exports = {
           }
         });
       interaction.editReply({
-        embeds: [new EmbedBuilder({ description: "Updated ContentLineups" })],
+        embeds: [
+          new EmbedBuilder({
+            description:
+              "Updated ContentLineups:" + client.ContentLineups.length,
+          }),
+        ],
       });
     }
 
     if (all) {
       setTimeout(() => {
+        const message = [
+          "Updated Heroes:" + client.heroes.length,
+          "Updated ContentTypes:" + client.contentTypes.length,
+          "Updated TraitTypes:" + client.traitTypes.length,
+          "Updated HeroGearTypes:" + client.heroGearTypes.length,
+          "Updated EquipConfigs:" + client.EquipConfig.length,
+          "Updated ContentLineups:" + client.ContentLineups.length,
+        ].join("\n");
+
         interaction.editReply({
-          embeds: [new EmbedBuilder({ description: "Updates Done" })],
+          embeds: [new EmbedBuilder({ description: message })],
         });
       }, 2000);
     }
