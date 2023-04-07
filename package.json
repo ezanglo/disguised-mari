@@ -23,6 +23,7 @@
     "dotenv": "^16.0.1",
     "ffmpeg-static": "^4.4.0",
     "firebase-admin": "^10.0.2",
+    "html-entities": "^2.3.3",
     "luxon": "^3.0.1",
     "ms": "^3.0.0-canary.1",
     "opusscript": "^0.0.8"
