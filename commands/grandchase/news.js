@@ -36,6 +36,13 @@ module.exports = {
       .setRequired(true)
   ),
   async execute(interaction) {
+    // const newsPosterOnly = new EmbedBuilder()
+    //   .setDescription("Only the person that announce the news can use this command");
+
+    // if (interaction.user.id !== "286713468285878272") return interaction.editReply({
+    //   embeds: [newsPosterOnly]
+    // });
+
     const newsType = interaction.options.get("type")?.value;
 
     newsListFunctionApi(newsType);
@@ -70,7 +77,7 @@ module.exports = {
             }
 
             const encodedText = data2.detailTEXT;
-            const decodedText = Entities.decode(encodedText);
+            let decodedText = Entities.decode(encodedText).replace(/[\r\n]+/gm, "\n");
 
             const date = new Date(data2.lstUpdateDate);
 
