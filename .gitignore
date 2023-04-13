@@ -105,3 +105,6 @@ dist
 
 # Configs
 config.json
+
+#PHP Storm
+.idea
