@@ -122,6 +122,8 @@ module.exports = {
 
         const encodedText = data2.detailTEXT;
         let decodedText = Entities.decode(encodedText).replace(/[\r\n]+/gm, "\n");
+        decodedText = this.replaceDate(decodedText);
+        decodedText = this.replaceDateRange(decodedText);
 
         const date = new Date(data2.lstUpdateDate);
 
@@ -157,5 +159,32 @@ module.exports = {
           }
         }
       });
-  }
+  },
+    replaceDate(text) {
+        const regex = /(\d{4}-\d{2}-\d{2}\s\d{2}:\d{2})\s\(([^)]+)\)/g;
+        const matchDates = text.matchAll(regex);
+        for (const match of matchDates) {
+            const dateString = match[1];
+            const offset = match[2].match(/UTC([+-]\d+)/)[1]
+            const date = new Date(`${dateString} ${offset}`);
+            const timestamp = date.getTime();
+            text = text.replace(match[0], `<t:${timestamp / 1000}:F>`);
+        }
+        return text;
+    },
+    replaceDateRange(text) {
+        const regex = /(\w+ \d{1,2}, \d{4} \([a-zA-Z]{3}\)) (\d{2}:\d{2}) – (\w+ \d{1,2}, \d{4} \([a-zA-Z]{3}\)) (\d{2}:\d{2}) \((Server Time,\s)?(UTC[-+]\d+)\)/g;
+        const matches = [...text.matchAll(regex)];
+        for (const match of matches) {
+            let [_, startDate, startTime, endDate, endTime, _offset, offset] = match;
+            offset = offset.match(/UTC([+-]\d+)/)[1]
+            const startTimestamp = new Date(`${startDate} ${startTime} ${offset}`).getTime();
+            const endTimestamp = new Date(`${endDate} ${endTime} ${offset}`).getTime();
+            text = text.replace(
+                match[0],
+                `<t:${startTimestamp / 1000}:f> - <t:${endTimestamp / 1000}:f>`
+            );
+        }
+        return text;
+    }
 };
