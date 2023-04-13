@@ -25,7 +25,8 @@
     "firebase-admin": "^11.6.0",
     "luxon": "^3.3.0",
     "ms": "^3.0.0-canary.1",
-    "opusscript": "^0.0.8"
+    "opusscript": "^0.0.8",
+    "html-entities": "^2.3.3"
   },
   "devDependencies": {
     "eslint": "^8.38.0",
