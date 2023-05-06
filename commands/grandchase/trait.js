@@ -16,7 +16,9 @@ module.exports = {
     .addStringOption((option) =>
       option
         .setName("hero")
-        .setDescription("Select a hero. (For Job Change Heroes Example: exelesis)")
+        .setDescription(
+          "Select a hero. (For Job Change Heroes Example: exelesis)"
+        )
         .setRequired(true)
         .setAutocomplete(true)
     )
@@ -105,8 +107,10 @@ module.exports = {
           });
         }
 
+        client.attachSupportMessageToEmbed(result.embed);
+
         const reply = await interaction.editReply({
-          embeds: result.embeds,
+          embeds: [result.embed],
           components: result.components ? result.components : [],
         });
 
@@ -182,7 +186,7 @@ module.exports = {
           embeds: [
             new EmbedBuilder({
               color: 0xed4245,
-              description: `An Error has occured ${interaction.user}... try again ? ❌`
+              description: `An Error has occured ${interaction.user}... try again ? ❌`,
             }),
           ],
         });
@@ -339,7 +343,6 @@ module.exports = {
         })
         .finally(() => {});
 
-      let embeds = [];
       let components = [menuRow, buttonsRow];
 
       if (!refreshImage) {
@@ -352,10 +355,8 @@ module.exports = {
           );
         }
 
-        embeds.push(embed);
-
         return {
-          embeds: embeds,
+          embed: embed,
           components: components,
           trait: trait,
         };
@@ -756,10 +757,9 @@ module.exports = {
       }
 
       embed.setImage(traitImageLink);
-      embeds.push(embed);
 
       return {
-        embeds: embeds,
+        embed: embed,
         components: components,
         trait: trait,
         refreshImage: true,
@@ -883,8 +883,7 @@ module.exports = {
         ])
     );
   },
-  async update(interaction, traitCode, traitConfig)
-  {
+  async update(interaction, traitCode, traitConfig) {
     await api
       .get(`HeroTrait?where=(Code,eq,${traitCode})`)
       .then(async (response) => {
@@ -909,10 +908,9 @@ module.exports = {
             }
 
             let config = [];
-            for (const c of traitConfig.split('-')) {
-              config.push(c.split(''));
+            for (const c of traitConfig.split("-")) {
+              config.push(c.split(""));
             }
-
 
             let jsonConfig = {};
             for (let x = 0; x < configMap.length; x++) {
@@ -922,7 +920,6 @@ module.exports = {
                 }
               }
             }
-
 
             await api.patch("HeroTrait/" + trait.Id, { Config: jsonConfig });
 

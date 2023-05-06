@@ -7,7 +7,9 @@ module.exports = {
     .addStringOption((option) =>
       option
         .setName("hero")
-        .setDescription("Select a hero. (For Job Change Heroes Example: exelesis)")
+        .setDescription(
+          "Select a hero. (For Job Change Heroes Example: exelesis)"
+        )
         .setRequired(true)
         .setAutocomplete(true)
     ),
@@ -92,6 +94,8 @@ module.exports = {
               text: `Last updated ${new Date(petDate).toLocaleDateString()}`,
             });
 
+          client.attachSupportMessageToEmbed(embed);
+
           await interaction.editReply({
             embeds: [embed],
           });
@@ -111,7 +115,7 @@ module.exports = {
           embeds: [
             new EmbedBuilder({
               color: 0xed4245,
-              description: `An Error has occured ${interaction.user}... try again ? ❌`
+              description: `An Error has occured ${interaction.user}... try again ? ❌`,
             }),
           ],
         });

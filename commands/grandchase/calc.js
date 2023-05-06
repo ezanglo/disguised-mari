@@ -35,6 +35,10 @@ module.exports = {
     let start = interaction.options.get("start")?.value;
     let end = interaction.options.get("end")?.value;
 
+    const embed = new EmbedBuilder()
+      .setColor(0xed4245)
+      .setTitle(`**Level ${start} -> Level ${end}**`);
+
     switch (contentType) {
       case "ht": {
         if (start > end) return this.interactionFail(interaction);
@@ -47,29 +51,24 @@ module.exports = {
 
         if (wizDays < 1) wizDays = 1;
 
-        return interaction.editReply({
-          embeds: [
-            new EmbedBuilder({
-              color: 0xed4245,
-              title: `**Level ${start} -> Level ${end}**`,
-            })
-              .setAuthor({ name: "Hero Taining Calculator" })
-              .addFields({
-                name: "\u200b",
-                value: `Required BoV: ${
-                  this.emojiIcons.bovIcon
-                } ${amount.toLocaleString()}\nWizard Lab Entry: ${
-                  this.emojiIcons.wizlabIcon
-                } ${wizDays.toLocaleString()}`,
-              })
-              .setThumbnail(
-                "https://cdn.discordapp.com/attachments/992459474394677369/993246962260398270/BlessingsOfValor.png"
-              )
-              .setFooter({
-                text: `Last Updated May 2, 2023`,
-              }),
-          ],
-        });
+        embed
+          .setAuthor({ name: "Hero Taining Calculator" })
+          .addFields({
+            name: "\u200b",
+            value: `Required BoV: ${
+              this.emojiIcons.bovIcon
+            } ${amount.toLocaleString()}\nWizard Lab Entry: ${
+              this.emojiIcons.wizlabIcon
+            } ${wizDays.toLocaleString()}`,
+          })
+          .setThumbnail(
+            "https://cdn.discordapp.com/attachments/992459474394677369/993246962260398270/BlessingsOfValor.png"
+          )
+          .setFooter({
+            text: `Last Updated May 2, 2023`,
+          });
+
+        break;
       }
       case "pets": {
         if (start > end) return this.interactionFail(interaction);
@@ -78,36 +77,31 @@ module.exports = {
 
         if (end > 70) end = 70;
 
-        for (let x = start+1; x <= end; x++) {
+        for (let x = start + 1; x <= end; x++) {
           petAmount += this.calcPet(x);
         }
 
         let goldAmount =
           this.calcPetGold(parseInt(end)) - this.calcPetGold(parseInt(start));
 
-        return interaction.editReply({
-          embeds: [
-            new EmbedBuilder({
-              color: 0xed4245,
-              title: `Level ${start} -> Level ${end}`,
-            })
-              .setAuthor({ name: "Pet Calculator" })
-              .addFields({
-                name: "\u200b",
-                value: `Pet Dupes Cost: ${
-                  this.emojiIcons.petIcon
-                } ${petAmount.toLocaleString()}\nGold Cost: ${
-                  this.emojiIcons.goldIcon
-                } ${goldAmount.toLocaleString()}`,
-              })
-              .setThumbnail(
-                "https://cdn.discordapp.com/attachments/992459474394677369/993247439349886997/PetSelect.png"
-              )
-              .setFooter({
-                text: `Last Updated November 23, 2022`,
-              }),
-          ],
-        });
+        embed
+          .setAuthor({ name: "Pet Calculator" })
+          .addFields({
+            name: "\u200b",
+            value: `Pet Dupes Cost: ${
+              this.emojiIcons.petIcon
+            } ${petAmount.toLocaleString()}\nGold Cost: ${
+              this.emojiIcons.goldIcon
+            } ${goldAmount.toLocaleString()}`,
+          })
+          .setThumbnail(
+            "https://cdn.discordapp.com/attachments/992459474394677369/993247439349886997/PetSelect.png"
+          )
+          .setFooter({
+            text: `Last Updated November 23, 2022`,
+          });
+
+        break;
       }
       case "cs": {
         if (start > end) return this.interactionFail(interaction);
@@ -116,31 +110,26 @@ module.exports = {
 
         const csCost = this.calcCS(parseInt(start), parseInt(end));
 
-        return interaction.editReply({
-          embeds: [
-            new EmbedBuilder({
-              color: 0xed4245,
-              title: `Level ${start} -> Level ${end}`,
-            })
-              .setAuthor({ name: "Chaser Calculator" })
-              .addFields({
-                name: "\u200b",
-                value: `Chaser Cubes Cost: ${
-                  this.emojiIcons.csCubeIcon
-                } ${csCost.csCubes.toLocaleString()}\nChaser Crystals Cost: ${
-                  this.emojiIcons.cscIcon
-                } ${csCost.csCrystals}\nGold Cost: ${
-                  this.emojiIcons.goldIcon
-                } ${csCost.csGold.toLocaleString()}`,
-              })
-              .setThumbnail(
-                "https://cdn.discordapp.com/attachments/992459474394677369/993247439685427320/ChaserCube.png"
-              )
-              .setFooter({
-                text: `Last Updated November 28, 2022`,
-              }),
-          ],
-        });
+        embed
+          .setAuthor({ name: "Chaser Calculator" })
+          .addFields({
+            name: "\u200b",
+            value: `Chaser Cubes Cost: ${
+              this.emojiIcons.csCubeIcon
+            } ${csCost.csCubes.toLocaleString()}\nChaser Crystals Cost: ${
+              this.emojiIcons.cscIcon
+            } ${csCost.csCrystals}\nGold Cost: ${
+              this.emojiIcons.goldIcon
+            } ${csCost.csGold.toLocaleString()}`,
+          })
+          .setThumbnail(
+            "https://cdn.discordapp.com/attachments/992459474394677369/993247439685427320/ChaserCube.png"
+          )
+          .setFooter({
+            text: `Last Updated November 28, 2022`,
+          });
+
+        break;
       }
       case "si": {
         if (start > end) return this.interactionFail(interaction);
@@ -149,33 +138,34 @@ module.exports = {
 
         const siCost = this.calcSI(start, end);
 
-        return interaction.editReply({
-          embeds: [
-            new EmbedBuilder({
-              color: 0xed4245,
-              title: `Level ${start} -> Level ${end}`,
-            })
-              .setAuthor({ name: "Soul Imprint Calculator" })
-              .addFields({
-                name: "\u200b",
-                value: `Soul Imprint Cubes Cost: ${
-                  this.emojiIcons.siCubeIcon
-                } ${siCost.siCubes.toLocaleString()}\nSoul Essence Cost: ${
-                  this.emojiIcons.soulEssenceIcon
-                } ${siCost.soulEssence}\nGold Cost: ${
-                  this.emojiIcons.goldIcon
-                } ${siCost.siGold.toLocaleString()}`,
-              })
-              .setThumbnail(
-                "https://cdn.discordapp.com/attachments/992459474394677369/993247440578818219/SoulChaserCube.png"
-              )
-              .setFooter({
-                text: `Last Updated December 2, 2022`,
-              }),
-          ],
-        });
+        embed
+          .setAuthor({ name: "Soul Imprint Calculator" })
+          .addFields({
+            name: "\u200b",
+            value: `Soul Imprint Cubes Cost: ${
+              this.emojiIcons.siCubeIcon
+            } ${siCost.siCubes.toLocaleString()}\nSoul Essence Cost: ${
+              this.emojiIcons.soulEssenceIcon
+            } ${siCost.soulEssence}\nGold Cost: ${
+              this.emojiIcons.goldIcon
+            } ${siCost.siGold.toLocaleString()}`,
+          })
+          .setThumbnail(
+            "https://cdn.discordapp.com/attachments/992459474394677369/993247440578818219/SoulChaserCube.png"
+          )
+          .setFooter({
+            text: `Last Updated December 2, 2022`,
+          });
+
+        break;
       }
     }
+
+    client.attachSupportMessageToEmbed(embed);
+
+    return interaction.editReply({
+      embeds: [embed],
+    });
   },
   interactionFail(failedInteraction) {
     failedInteraction.editReply({

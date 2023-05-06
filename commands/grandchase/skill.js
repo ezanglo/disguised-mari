@@ -15,7 +15,9 @@ module.exports = {
     .addStringOption((option) =>
       option
         .setName("hero")
-        .setDescription("Select a hero. (For Job Change Heroes Example: exelesis)")
+        .setDescription(
+          "Select a hero. (For Job Change Heroes Example: exelesis)"
+        )
         .setRequired(true)
         .setAutocomplete(true)
     )
@@ -28,7 +30,7 @@ module.exports = {
           { name: "s2", value: "s2" },
           { name: "pass", value: "pass" },
           { name: "cs", value: "cs" },
-          { name: "ss", value: "ss" },
+          { name: "ss", value: "ss" }
         )
     )
     .addStringOption((option) =>
@@ -38,7 +40,7 @@ module.exports = {
         .addChoices(
           { name: "base", value: "base" },
           { name: "lb", value: "lb" },
-          { name: "si", value: "si" },
+          { name: "si", value: "si" }
         )
     ),
   async execute(interaction) {
@@ -95,6 +97,8 @@ module.exports = {
             ],
           });
         }
+
+        client.attachSupportMessageToEmbed(skill.embed);
 
         const reply = await interaction.editReply({
           embeds: [skill.embed],
@@ -154,7 +158,7 @@ module.exports = {
           embeds: [
             new EmbedBuilder({
               color: 0xed4245,
-              description: `An Error has occured ${interaction.user}... try again ? ❌`
+              description: `An Error has occured ${interaction.user}... try again ? ❌`,
             }),
           ],
         });

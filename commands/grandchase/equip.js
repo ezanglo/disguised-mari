@@ -17,7 +17,9 @@ module.exports = {
     .addStringOption((option) =>
       option
         .setName("hero")
-        .setDescription("Select a hero. (For Job Change Heroes Example: exelesis)")
+        .setDescription(
+          "Select a hero. (For Job Change Heroes Example: exelesis)"
+        )
         .setRequired(true)
         .setAutocomplete(true)
     )
@@ -85,6 +87,8 @@ module.exports = {
             ],
           });
         }
+
+        client.attachSupportMessageToEmbed(result.embed);
 
         const reply = await interaction.editReply({
           embeds: [result.embed],

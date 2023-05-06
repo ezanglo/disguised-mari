@@ -15,7 +15,9 @@ module.exports = {
     .addStringOption((option) =>
       option
         .setName("hero")
-        .setDescription("Select a hero. (For Job Change Heroes Example: exelesis)")
+        .setDescription(
+          "Select a hero. (For Job Change Heroes Example: exelesis)"
+        )
         .setRequired(true)
         .setAutocomplete(true)
     )
@@ -80,12 +82,7 @@ module.exports = {
           });
         }
 
-        const limitbreak = await this.getLimitBreak(
-          hero,
-          interaction,
-          heroCode,
-          contentCode
-        );
+        const limitbreak = await this.getLimitBreak(hero, interaction);
         if (!limitbreak) {
           return interaction.editReply({
             embeds: [
@@ -97,13 +94,10 @@ module.exports = {
           });
         }
 
-        await interaction.editReply({
-          embeds: limitbreak.embeds,
-          components: limitbreak.components ? limitbreak.components : [],
-        });
+        client.attachSupportMessageToEmbed(limitbreak.embed);
 
         const reply = await interaction.editReply({
-          embeds: limitbreak.embeds,
+          embeds: [limitbreak.embed],
           components: limitbreak.components ? limitbreak.components : [],
         });
 
@@ -144,7 +138,7 @@ module.exports = {
         interaction.client.errorLog(e, interaction);
       });
   },
-  async getLimitBreak(hero, interaction, refreshImage) {
+  async getLimitBreak(hero, interaction) {
     const heroCode = interaction.options.get("hero").value;
     const contentCode = interaction.options.get("content").value;
     const skillUpgrade = hero.SkillUpgrade.find(
@@ -158,15 +152,19 @@ module.exports = {
       };
 
       const skillContents = skillUpgrade.Skills.map(
-        (x) => `${skillEmoteMap[x.Code.split('.')[1]]} - ${x.Name}`
+        (x) => `${skillEmoteMap[x.Code.split(".")[1]]} - ${x.Name}`
       );
 
-      let skillUpgradeDate = skillUpgrade.UpdatedAt ? skillUpgrade.UpdatedAt : skillUpgrade.CreatedAt;
+      let skillUpgradeDate = skillUpgrade.UpdatedAt
+        ? skillUpgrade.UpdatedAt
+        : skillUpgrade.CreatedAt;
 
       const embed = new EmbedBuilder()
         .setThumbnail(hero.Image)
         .setFooter({
-          text: `Last updated ${new Date(skillUpgradeDate).toLocaleDateString()}`
+          text: `Last updated ${new Date(
+            skillUpgradeDate
+          ).toLocaleDateString()}`,
         })
         .addFields([
           {
@@ -208,18 +206,8 @@ module.exports = {
         );
       }
 
-      let embeds = [];
-
-      if (!refreshImage) {
-        embeds.push(embed);
-        return {
-          embeds: embeds,
-          components: [row],
-        };
-      }
-      embeds.push(embed);
       return {
-        embeds: embeds,
+        embed: embed,
         components: [row],
         refreshImage: true,
       };

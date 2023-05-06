@@ -160,6 +160,8 @@ module.exports = {
           ]);
         }
 
+        client.attachSupportMessageToEmbed(embed);
+
         interaction.editReply({
           embeds: [embed],
         });

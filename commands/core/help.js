@@ -30,6 +30,7 @@ module.exports = {
     embed.addFields([
       { name: "Website", value: "https://disguised-mari.web.app/" },
       { name: "Server", value: "https://discord.gg/H9WseZZ3W9" },
+      { name: "☕ Buy me a coffee!", value: "https://ko-fi.com/disguisedmari" },
     ]);
 
     const userCredits = [
