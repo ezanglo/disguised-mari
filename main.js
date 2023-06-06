@@ -125,8 +125,7 @@ client.attachSupportMessageToEmbed = (embed) => {
   embed.addFields({
     name: "\u200b",
     value: `
-          > <:mari_icon:1044406399066714172>: *"If this helped, please consider buying me coffee"*
-          > *https://ko-fi.com/disguisedmari*
+          > ☕ *https://ko-fi.com/disguisedmari*
         `,
   });
 };
