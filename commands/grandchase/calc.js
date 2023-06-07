@@ -37,7 +37,6 @@ module.exports = {
 
     const embed = new EmbedBuilder()
       .setColor(0xed4245)
-      .setTitle(`**Level ${start} -> Level ${end}**`);
 
     switch (contentType) {
       case "ht": {
@@ -53,6 +52,7 @@ module.exports = {
 
         embed
           .setAuthor({ name: "Hero Taining Calculator" })
+          .setTitle(`**Level ${start} -> Level ${end}**`)
           .addFields({
             name: "\u200b",
             value: `Required BoV: ${
@@ -86,6 +86,7 @@ module.exports = {
 
         embed
           .setAuthor({ name: "Pet Calculator" })
+          .setTitle(`**Level ${start} -> Level ${end}**`)
           .addFields({
             name: "\u200b",
             value: `Pet Dupes Cost: ${
@@ -112,6 +113,7 @@ module.exports = {
 
         embed
           .setAuthor({ name: "Chaser Calculator" })
+          .setTitle(`**Level ${start} -> Level ${end}**`)
           .addFields({
             name: "\u200b",
             value: `Chaser Cubes Cost: ${
@@ -140,6 +142,7 @@ module.exports = {
 
         embed
           .setAuthor({ name: "Soul Imprint Calculator" })
+          .setTitle(`**Level ${start} -> Level ${end}**`)
           .addFields({
             name: "\u200b",
             value: `Soul Imprint Cubes Cost: ${
