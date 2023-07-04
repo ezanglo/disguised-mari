@@ -27,6 +27,9 @@ module.exports = async (client, interaction) => {
       if (focusedOption.name == "hero") {
         choices = interaction.client.heroes.map((x) => x.Code);
       } 
+      else if (focusedOption.name == "class") {
+        choices = interaction.client.heroClasses.map((x) => x.Name.toLowerCase());
+      }
       else if (focusedOption.name == "content") {
         choices = interaction.client.contentTypes.map((x) => x.Code);
         let hero;

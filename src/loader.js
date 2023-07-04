@@ -75,6 +75,18 @@ api
     console.log(`Loaded Content Lineups: ${client.ContentLineups.length}`);
   });
 
+client.heroClasses = [];
+api
+  .get(
+    "HeroClass?limit=200&fields=Id,Name"
+  )
+  .then((response) => {
+    if (response.status == 200) {
+      client.heroClasses = response.data.list;
+    }
+    console.log(`Loaded Hero Classes: ${client.heroClasses.length}`);
+  });
+
 console.log(`Loading commands...`);
 
 readdirSync("./commands/").forEach((dirs) => {
