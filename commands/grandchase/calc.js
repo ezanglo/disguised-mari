@@ -12,7 +12,8 @@ module.exports = {
           { name: "Pets", value: "pets" },
           { name: "Hero Training", value: "ht" },
           { name: "Chaser", value: "cs" },
-          { name: "Soul Imprint", value: "si" }
+          { name: "Soul Imprint", value: "si" },
+          { name: "Relic System", value: "relic"}
         )
         .setRequired(true)
     )
@@ -37,7 +38,6 @@ module.exports = {
 
     const embed = new EmbedBuilder()
       .setColor(0xed4245)
-      .setTitle(`**Level ${start} -> Level ${end}**`);
 
     switch (contentType) {
       case "ht": {
@@ -53,6 +53,7 @@ module.exports = {
 
         embed
           .setAuthor({ name: "Hero Taining Calculator" })
+          .setTitle(`**Level ${start} -> Level ${end}**`)
           .addFields({
             name: "\u200b",
             value: `Required BoV: ${
@@ -86,6 +87,7 @@ module.exports = {
 
         embed
           .setAuthor({ name: "Pet Calculator" })
+          .setTitle(`**Level ${start} -> Level ${end}**`)
           .addFields({
             name: "\u200b",
             value: `Pet Dupes Cost: ${
@@ -112,6 +114,7 @@ module.exports = {
 
         embed
           .setAuthor({ name: "Chaser Calculator" })
+          .setTitle(`**Level ${start} -> Level ${end}**`)
           .addFields({
             name: "\u200b",
             value: `Chaser Cubes Cost: ${
@@ -140,6 +143,7 @@ module.exports = {
 
         embed
           .setAuthor({ name: "Soul Imprint Calculator" })
+          .setTitle(`**Level ${start} -> Level ${end}**`)
           .addFields({
             name: "\u200b",
             value: `Soul Imprint Cubes Cost: ${
@@ -157,6 +161,30 @@ module.exports = {
             text: `Last Updated December 2, 2022`,
           });
 
+        break;
+      }
+      case "relic": {
+        if (start > end) return this.interactionFail(interaction);
+
+        if (end > 90) end = 90;
+
+        const endLvL = this.calcRelic(parseInt(end));
+        const startLvL = this.calcRelic(parseInt(start));
+        const lostFragmentCost = endLvL.lostFragment - startLvL.lostFragment;
+        const vesselConsecrationCost = endLvL.vesselConsecration - startLvL.vesselConsecration;
+
+
+        embed
+          .setAuthor({ name: "Relic System Calculator" })
+          .setTitle(`**Level ${start} -> Level ${end}**`)
+          .addFields({
+            name: "\u200b",
+            value: `*This is only a rough estimate, RNG\n\nAny levels past 15 will have reduced success rate! \n\n**YOU BEEN WARNED***\n\n\nLost Grace Fragment Cost: ${
+              this.emojiIcons.graceFragmentIcon
+            } ${lostFragmentCost.toLocaleString()}\nVessel of Consecration Cost: ${
+              this.emojiIcons.vesselFragmentIcon
+            } ${vesselConsecrationCost.toLocaleString()}`
+          });
         break;
       }
     }
@@ -348,6 +376,93 @@ module.exports = {
     }
     return { soulEssence: essenceCost, siGold: goldCost, siCubes: siCubesCost };
   },
+  calcRelic(lvl) {
+    let vesselConsecrationCost = 0;
+    let val = 0;
+
+    if (lvl > 79) lvl = 79;
+
+    for (let x = 0; x <= lvl; x++) {
+      if (x < 3) {
+        val += x * 200;
+      } else if (x == 3) {
+        val += 1000;
+      } else if (x == 4) {
+        vesselConsecrationCost += 4;
+      } else if (x > 4 && x < 9) {
+        if (x == 8) {
+          val += 800;
+        } else {
+        val += (x - 4) * 100 + 300;
+        }
+      } else if (x == 9) {
+        val += 1200;
+      } else if (x == 10) {
+        vesselConsecrationCost += 10;
+      } else if (x > 10 && x < 15) {
+        val += (x - 10) * 100 + 600;
+      } else if (x == 15) {
+        val += 1400;
+      } else if (x == 16) {
+        vesselConsecrationCost += 10;
+      } else if (x > 16 && x < 23) {
+        val += Math.floor((x + 1) / 2) * 100 + 100;
+      } else if (x == 23) {
+        val += 2000;
+      } else if (x == 24) {
+        vesselConsecrationCost += 53;
+      } else if (x > 24 && x < 31) {
+        val += Math.floor((x - 1) / 3) * 200 - 200; 
+      } else if (x == 31) {
+        val += 2200;
+      } else if (x == 32) {
+        vesselConsecrationCost += 65;
+      } else if (x > 32 && x < 39) {
+        val += Math.floor(x / 3) * 200 - 500;
+      } else if (x == 39) {
+        val += 2600;
+      } else if (x == 40) {
+        vesselConsecrationCost += 81;
+      } else if (x > 40 && x < 47) {
+        val += Math.floor((x + 1) / 3) * 300 - 2400;
+      } else if (x == 47) {
+        val += 3100;
+      } else if (x == 48) {
+        vesselConsecrationCost += 351;
+      } else if (x > 48 && x < 55) {
+        val += Math.floor((x - 1) / 3) * 200 - 1200;
+      } else if (x == 55) {
+        val += 3400;
+      } else if (x == 56) {
+        vesselConsecrationCost += 380;
+      } else if (x > 56 && x < 63) {
+        val += Math.floor(x / 3) * 200 - 1500;
+      } else if (x == 63) {
+        val += 4000;
+      } else if (x == 64) {
+        vesselConsecrationCost += 585;
+      } else if (x > 64 && x < 71) {
+        val += Math.floor((x - 2) / 3) * 200 - 1700;
+      } else if (x == 71) {
+        val += 4200;
+      } else if (x == 72) {
+        vesselConsecrationCost += 609;
+      } else if (x > 72 && x < 79) {
+        val += Math.floor((x - 1) / 3) * 300 - 4500;
+      } else if (x == 79) {
+        val += 0;
+      } else if (x == 80) {
+        vesselConsecrationCost += 0;
+      } else if (x > 80 && x < 89) {
+        val += 0;
+      } else if (x == 89) {
+        val += 0;
+      } else if (x == 90) {
+        vesselConsecrationCost += 0
+      }
+    }
+    return {lostFragment: val, vesselConsecration: vesselConsecrationCost};
+  },
   emojiIcons: {
     petIcon: "<:pet:1045020933867450539>",
     siCubeIcon: "<:si_cube:1046833548805546014>",
@@ -357,5 +472,7 @@ module.exports = {
     goldIcon: "<:gold:1045020932416229488>",
     wizlabIcon: "<:wizlab_tix:1044675274110939138>",
     bovIcon: "<:bov:1044675273355968612>",
+    graceFragmentIcon: "<:fragmentCoin:1115193765422956644>",
+    vesselFragmentIcon: "<:goldCoin:1115193766366691421>"
   },
 };
