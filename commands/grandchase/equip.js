@@ -12,70 +12,65 @@ const { DateTime } = require("luxon");
 
 module.exports = {
   data: new SlashCommandBuilder()
-      .setName("equip")
-      .setDescription("Show hero equip recommendations")
-      .addSubcommand(subcommand =>
-          subcommand
-              .setName("hero")
-              .setDescription(
-                  "Select a hero. (For Job Change Heroes Example: exelesis)"
-              )
-              .addStringOption((option) =>
-                  option
-                      .setName("hero")
-                      .setDescription(
-                          "Select a hero. (For Job Change Heroes Example: exelesis)"
-                      )
-                      .setRequired(true)
-                      .setAutocomplete(true)
-              )
-              .addStringOption((option) =>
-                  option
-                      .setName("content")
-                      .setDescription("Select a content")
-                      .setRequired(true)
-                      .setAutocomplete(true)
-              ),
-      )
-      .addSubcommand(subcommand =>
-          subcommand
-              .setName("preset")
-              .setDescription(
-                  "Select an equip preset for a class"
-              )
-              .addStringOption((option) =>
-                  option
-                      .setName("class")
-                      .setDescription(
-                          "Select a class (ex. Assault)"
-                      )
-                      .setRequired(true)
-                      .setAutocomplete(true)
-              )
-      ),
+    .setName("equip")
+    .setDescription("Show hero equip recommendations")
+    .addSubcommand((subcommand) =>
+      subcommand
+        .setName("hero")
+        .setDescription(
+          "Select a hero. (For Job Change Heroes Example: exelesis)"
+        )
+        .addStringOption((option) =>
+          option
+            .setName("hero")
+            .setDescription(
+              "Select a hero. (For Job Change Heroes Example: exelesis)"
+            )
+            .setRequired(true)
+            .setAutocomplete(true)
+        )
+        .addStringOption((option) =>
+          option
+            .setName("content")
+            .setDescription("Select a content")
+            .setRequired(true)
+            .setAutocomplete(true)
+        )
+    )
+    .addSubcommand((subcommand) =>
+      subcommand
+        .setName("preset")
+        .setDescription("Select an equip preset for a class")
+        .addStringOption((option) =>
+          option
+            .setName("class")
+            .setDescription("Select a class (ex. Assault)")
+            .setRequired(true)
+            .setAutocomplete(true)
+        )
+    ),
   async execute(interaction) {
-
     let result;
     const subCommand = interaction.options.getSubcommand();
-    if(subCommand === 'preset'){
+    if (subCommand === "preset") {
       const classCode = interaction.options.get("class").value;
       let selectedClass = interaction.client.heroClasses.find((x) =>
-          x.Name.toLowerCase().startsWith(classCode.toLowerCase())
+        x.Name.toLowerCase().startsWith(classCode.toLowerCase())
       );
 
       const response = await api
-          // .get(`HeroClass/${selectedClass.Id}`)
-          .get(`HeroClass/${selectedClass.Id}?nested[EquipPresets][fields]=Code,WeaponConfig,SubWeaponConfig,ArmorConfig,SubArmor1Config,SubArmor2Config,Image,Notes,Credits`)
+        // .get(`HeroClass/${selectedClass.Id}`)
+        .get(
+          `HeroClass/${selectedClass.Id}?nested[EquipPresets][fields]=Name,Code,OrderBy,WeaponConfig,SubWeaponConfig,ArmorConfig,SubArmor1Config,SubArmor2Config,Image,Notes,Credits`
+        );
 
       const heroClass = response.data;
       result = await this.getEquipPreset(heroClass, interaction);
-    }
-    else if(subCommand === 'hero') {
-
+    } else if (subCommand === "hero") {
       const heroCode = interaction.options.get("hero").value;
 
       let selectedHero = interaction.client.heroes.filter((x) =>
-          x.Code.startsWith(heroCode.toLowerCase())
+        x.Code.startsWith(heroCode.toLowerCase())
       );
       if (selectedHero.length === 0) {
         return interaction.editReply({
@@ -92,10 +87,10 @@ module.exports = {
             new EmbedBuilder({
               color: 0xed4245,
               description: `Multiple heroes found!\nplease select: [${selectedHero
-                  .map((x) => {
-                    return x.Code;
-                  })
-                  .join(", ")}]`,
+                .map((x) => {
+                  return x.Code;
+                })
+                .join(", ")}]`,
             }),
           ],
         });
@@ -103,17 +98,16 @@ module.exports = {
 
       selectedHero = selectedHero.shift();
 
-      const response = await api
-          .get(
-              "Hero/" +
-              selectedHero.Id +
-              "?nested[HeroClassRead][fields]=Id,Name,Image,DiscordEmote" +
-              "&nested[AttributeTypeRead][fields]=Id,Name,Code,Image,DiscordEmote" +
-              "&nested[HeroEquips][fields]=" +
-              "Id,Code,ContentTypeRead,WeaponConfig,SubWeaponConfig,ArmorConfig," +
-              "SubArmor1Config,SubArmor2Config,ExclusiveWeaponConfig,RingConfig," +
-              "NecklaceConfig,EarringConfig,Image,Artifact,Credits,Notes,CreatedAt,UpdatedAt"
-          )
+      const response = await api.get(
+        "Hero/" +
+          selectedHero.Id +
+          "?nested[HeroClassRead][fields]=Id,Name,Image,DiscordEmote" +
+          "&nested[AttributeTypeRead][fields]=Id,Name,Code,Image,DiscordEmote" +
+          "&nested[HeroEquips][fields]=" +
+          "Id,Code,ContentTypeRead,WeaponConfig,SubWeaponConfig,ArmorConfig," +
+          "SubArmor1Config,SubArmor2Config,ExclusiveWeaponConfig,RingConfig," +
+          "NecklaceConfig,EarringConfig,Image,Artifact,Credits,Notes,CreatedAt,UpdatedAt"
+      );
 
       const hero = response.data;
       result = await this.getHeroEquip(hero, interaction);
@@ -129,8 +123,6 @@ module.exports = {
       //   interaction.client.errorLog(e, interaction);
       // });
     }
-
-    console.log('result', result);
 
     if (!result) {
       return interaction.editReply({
@@ -151,37 +143,141 @@ module.exports = {
     });
 
     reply
-        .awaitMessageComponent({
-          componentType: ComponentType.Button,
-          time: 60000,
-        })
-        .then(async (int) => {
-          if (int.user.id !== interaction.user.id) {
-            return int.reply({
-              content: `You don't have access to this interaction ${int.user}... ❌`,
-              ephemeral: true,
-            });
-          }
-
-          await int.deferUpdate();
-
-          const args = int.customId.split("_");
-
-          int.options = new Collection();
-          int.options.set("hero", { name: "hero", value: args.shift() });
-          int.options.set("content", {
-            name: "content",
-            value: args.shift(),
+      .awaitMessageComponent({
+        componentType: ComponentType.Button,
+        time: 60000,
+      })
+      .then(async (int) => {
+        if (int.user.id !== interaction.user.id) {
+          return int.reply({
+            content: `You don't have access to this interaction ${int.user}... ❌`,
+            ephemeral: true,
           });
+        }
 
-          await this.execute(int);
-        })
-        .catch((err) => {
-          interaction.editReply({ components: [] });
+        await int.deferUpdate();
+
+        const args = int.customId.split("_");
+
+        int.options = new Collection();
+        int.options.set("hero", { name: "hero", value: args.shift() });
+        int.options.set("content", {
+          name: "content",
+          value: args.shift(),
         });
-  },
-  async getEquipPreset(heroClass, interaction, refreshImage){
 
+        await this.execute(int);
+      })
+      .catch((err) => {
+        interaction.editReply({ components: [] });
+      });
+  },
+  async getEquipPreset(heroClass, interaction, refreshImage) {
+    const embed = new EmbedBuilder()
+      .setColor(heroClass.Color)
+    heroClass.EquipPresets.sort((a, b) => a.OrderBy - b.OrderBy);
+
+    const fileName = `equip-preset-${heroClass.Name.toLowerCase()}-${Date.now()}.jpg`;
+
+    const equipImage = `${
+      process.env.AWS_S3_CLOUDFRONT_LINK
+    }equips/${fileName}?ts=${Date.now()}`;
+
+    // await api
+    //   .get(equipImage)
+    //   .then((response) => {
+    //     if (response.status == 200) {
+    //       embed.setImage(equipImage);
+    //     }
+    //   })
+    //   .catch((error) => {
+    //     console.log(error.response.status, equipImage);
+    //     refreshImage = true;
+    //   })
+    //   .finally(() => {});
+
+    // if (!refreshImage) {
+    //   return { embed };
+    // }
+
+    const heroGearList = ["index", "weap", "subweap", "armor", "subarmor1", "subarmor2"];
+
+    const padding = 20;
+    const canvasHeaderHeight = 100;
+    const headerHeight = 50;
+    const itemHeight = 200;
+    const itemWidth = 200;
+    const canvasPadding = padding * 2;
+
+    const yCount = heroClass.EquipPresets.length;
+    const xCount = heroGearList.length
+    const xPadding = (xCount + 1) * padding;
+    const yPadding = (yCount + 1) * padding;
+
+    const canvasHeight = ((itemHeight + headerHeight + padding) * yCount) + yPadding + canvasPadding + canvasHeaderHeight;
+    const canvasWidth = (itemWidth * xCount) + xPadding + canvasPadding;
+
+    const canvas = createCanvas(canvasWidth, canvasHeight);
+    const ctx = canvas.getContext("2d");
+
+    let top = canvasPadding;
+
+    const classImageSize = canvasHeaderHeight;
+    await loadImage(heroClass.Image).then((img) => {
+      ctx.drawImage(img, canvasPadding, canvasPadding, classImageSize, classImageSize);
+    });
+
+    top+=canvasPadding;
+    this.drawStrokedText(ctx, `${heroClass.Name} Equip Presets`, "start", canvasPadding + classImageSize + 5, top + 35, `${headerHeight+20}px`);
+    
+    top+=canvasPadding + canvasPadding;
+    for(let y = 1; y <= yCount; y++){
+      const preset = heroClass.EquipPresets[y - 1];
+      let left = canvasPadding;
+      top += canvasPadding;
+      this.drawStrokedText(ctx, preset.Name ?? preset.Code, "end", canvasWidth - canvasPadding, top, `${headerHeight}px`);
+
+      top += padding;
+      for (const heroGear of heroGearList) {
+
+        if(heroGear === 'index'){
+          this.drawStrokedText(ctx, y, "center", left + (itemWidth / 2), top + 150, '150px');
+        }
+        else {
+          const gearConfig = this.getGearConfig(preset, heroGear);
+
+          await loadImage(this.getEquipColor(gearConfig.color)).then((img) => {
+            ctx.drawImage(img, left, top, itemWidth, itemHeight);
+          });
+  
+          const weaponCode = [
+            heroClass.Name.toLowerCase(),
+            "gear",
+            heroGear,
+          ].join(".");
+          const gear = client.heroGearTypes.find((x) => x.Code == weaponCode);
+          await loadImage(gear.Image).then((img) => {
+            ctx.drawImage(img, left + 10, top + 10, itemWidth - 20, itemHeight - 20);
+          });
+        }
+
+        left += padding + itemWidth;
+      }
+      top += padding + itemHeight;
+    }
+
+    // this.addWaterMark(ctx, canvas, -70);
+    await s3
+      .upload({
+        Bucket: process.env.AWS_S3_BUCKET_NAME,
+        Key: `equips/${fileName}`,
+        Body: canvas.toBuffer("image/jpeg"),
+      })
+      .promise();
+
+    embed.setImage(equipImage);
+
+    return { embed };
   },
   async getHeroEquip(hero, interaction, refreshImage) {
     const embed = new EmbedBuilder().setColor(hero.Color);
