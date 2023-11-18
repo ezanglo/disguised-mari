@@ -12,8 +12,8 @@ module.exports = {
           { name: "Pets", value: "pets" },
           { name: "Hero Training", value: "ht" },
           { name: "Chaser", value: "cs" },
-          { name: "Soul Imprint", value: "si" },
-          { name: "Relic System", value: "relic"}
+          { name: "Soul Imprint", value: "si" }
+          // { name: "Relic System", value: "relic"}
         )
         .setRequired(true)
     )
@@ -43,7 +43,7 @@ module.exports = {
       case "ht": {
         if (start > end) return this.interactionFail(interaction);
 
-        if (end > 600) end = 600;
+        if (end > 640) end = 640;
 
         const amount = this.calcBoVHT(end) - this.calcBoVHT(start);
 
@@ -66,7 +66,7 @@ module.exports = {
             "https://cdn.discordapp.com/attachments/992459474394677369/993246962260398270/BlessingsOfValor.png"
           )
           .setFooter({
-            text: `Last Updated May 2, 2023`,
+            text: `Last Updated November 8, 2023`,
           });
 
         break;
@@ -450,13 +450,11 @@ module.exports = {
       } else if (x > 72 && x < 79) {
         val += Math.floor((x - 1) / 3) * 300 - 4500;
       } else if (x == 79) {
-        val += 0;
+        val += 4600;
       } else if (x == 80) {
         vesselConsecrationCost += 0;
-      } else if (x > 80 && x < 89) {
-        val += 0;
-      } else if (x == 89) {
-        val += 0;
+      } else if (x > 80 && x < 89) {  // Level 87 -> 89 is 3600 || Level 84 -> 86 3200 || Level 81 -> 83 2800
+        val += Math.floor(x / 3) * 400 - 8000;
       } else if (x == 90) {
         vesselConsecrationCost += 0
       }
