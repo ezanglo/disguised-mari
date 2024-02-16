@@ -43,7 +43,7 @@ module.exports = {
       case "ht": {
         if (start > end) return this.interactionFail(interaction);
 
-        if (end > 600) end = 600;
+        if (end > 660) end = 660;
 
         const amount = this.calcBoVHT(end) - this.calcBoVHT(start);
 
@@ -76,7 +76,7 @@ module.exports = {
 
         let petAmount = 0;
 
-        if (end > 70) end = 70;
+        if (end > 80) end = 80;
 
         for (let x = start + 1; x <= end; x++) {
           petAmount += this.calcPet(x);
@@ -450,15 +450,13 @@ module.exports = {
       } else if (x > 72 && x < 79) {
         val += Math.floor((x - 1) / 3) * 300 - 4500;
       } else if (x == 79) {
-        val += 0;
+        val += 4600;
       } else if (x == 80) {
-        vesselConsecrationCost += 0;
-      } else if (x > 80 && x < 89) {
-        val += 0;
-      } else if (x == 89) {
-        val += 0;
+        vesselConsecrationCost += 896;
+      } else if (x > 80 && x < 89) {  // Level 87 -> 89 is 3600 || Level 84 -> 86 3200 || Level 81 -> 83 2800
+        val += Math.floor(x / 3) * 400 - 8000;
       } else if (x == 90) {
-        vesselConsecrationCost += 0
+        vesselConsecrationCost += 1095;
       }
     }
     return {lostFragment: val, vesselConsecration: vesselConsecrationCost};
