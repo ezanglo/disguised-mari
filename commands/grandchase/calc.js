@@ -43,7 +43,7 @@ module.exports = {
       case "ht": {
         if (start > end) return this.interactionFail(interaction);
 
-        if (end > 660) end = 660;
+        if (end > 640) end = 640;
 
         const amount = this.calcBoVHT(end) - this.calcBoVHT(start);
 
@@ -66,7 +66,7 @@ module.exports = {
             "https://cdn.discordapp.com/attachments/992459474394677369/993246962260398270/BlessingsOfValor.png"
           )
           .setFooter({
-            text: `Last Updated May 2, 2023`,
+            text: `Last Updated November 8, 2023`,
           });
 
         break;
