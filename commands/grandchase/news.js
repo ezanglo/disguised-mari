@@ -127,15 +127,47 @@ module.exports = {
 
         const date = new Date(data2.lstUpdateDate);
 
-        const embed = new EmbedBuilder()
-          .setDescription(decodedText)
-          .setTitle(data2.subject)
-          .setFooter({ text: `Last Posted: ${date.toLocaleDateString()}` })
-
-        await interaction.editReply({
-          embeds: [embed],
+        await interaction.channel.send({
           files: [fileArray[0]]
         });
+
+        let embedArray = [];
+        
+        while (decodedText.length > 0) {
+
+          if (decodedText.length >= 2000) {
+            let textSlice = decodedText.slice(0, 2000);
+
+            const embed = new EmbedBuilder()
+              .setTitle(data2.subject)
+              .setFooter({ text: `Last Posted: ${date.toLocaleDateString()}` })
+              .setDescription(textSlice)
+
+            embedArray.push(embed);
+
+            decodedText = decodedText.slice(2000, decodedText.length);
+
+            if (embedArray.length >= 2) {
+              await interaction.channel.send({
+                embeds: embedArray
+              });
+              embedArray = embedArray.splice(2, embedArray);
+            }
+          } else {
+            const embed = new EmbedBuilder()
+              .setTitle(data2.subject)
+              .setFooter({ text: `Last Posted: ${date.toLocaleDateString()}` })
+              .setDescription(decodedText)
+
+            embedArray.push(embed);
+
+            await interaction.channel.send({
+              embeds: embedArray
+            });
+
+            break;
+          }
+        }
 
         fileArray.shift();
 
