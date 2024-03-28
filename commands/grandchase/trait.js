@@ -368,9 +368,7 @@ module.exports = {
           const canvas = createCanvas(883, 784 + offset);
           const ctx = canvas.getContext("2d");
 
-          const bg = await loadImage(
-            "https://cdn.discordapp.com/attachments/992458789234163713/995058917224743043/trait-lvl-base.png?ex=65eb7055&is=65d8fb55&hm=f2447da55c90a2f68558e3fcbc85e6328adbbfb0bf115a78f73969ad572a4186&"
-          );
+          const bg = await loadImage('../../images/lvl-trait-base.png');
           ctx.drawImage(bg, 0, 0, canvas.width, canvas.height - offset);
 
           ctx.font = "italic bold 36px Arial";
@@ -453,9 +451,7 @@ module.exports = {
           const canvas = createCanvas(900, 781 + offset);
           const ctx = canvas.getContext("2d");
 
-          const bg = await loadImage(
-            "https://cdn.discordapp.com/attachments/992458789234163713/995059038746333194/1bg0oWo.png?ex=65eb7072&is=65d8fb72&hm=c84e07400b519353f45fe7abe5e64ba55d93eb2c74f7ab1bbeb196ad97d744c9&"
-          );
+          const bg = await loadImage('../../images/chaser-trait-base.png');
 
           ctx.drawImage(bg, 0, 0, canvas.width, canvas.height - offset);
 
@@ -543,9 +539,7 @@ module.exports = {
           const canvas = createCanvas(883, 831 + offset);
           const ctx = canvas.getContext("2d");
 
-          const bg = await loadImage(
-            "https://cdn.discordapp.com/attachments/992458789234163713/995059104643022848/R0QvvKK.png?ex=65eb7081&is=65d8fb81&hm=aa1f253b2897d95b84db848da6033ca872a1c42a585d6f3ff1a866687d1419e8&"
-          );
+          const bg = await loadImage('../../images/trans-trait-base.png');
 
           ctx.drawImage(bg, 0, 0, canvas.width, canvas.height - offset);
 
@@ -626,8 +620,7 @@ module.exports = {
 
           const core_config = {
             mem: {
-              image:
-                "https://cdn.discordapp.com/attachments/992458789234163713/995059380552744960/memory_core_gray.png?ex=65eb70c3&is=65d8fbc3&hm=7bd22f757f51e7e058165f6496987924a27d705275985ed2af0d1848f278230e&",
+              image: '../../images/memory-trait-base.png',
               top: 40,
               topInc: 160,
               left: 60,
@@ -641,8 +634,7 @@ module.exports = {
               ],
             },
             body: {
-              image:
-                "https://cdn.discordapp.com/attachments/992458789234163713/995059537356787742/body_core_gray.png?ex=65eb70e9&is=65d8fbe9&hm=5791a900e91c27e6ac9fc3ada6fb9c14cb366c8eeda5a82f1f4e7522943cd3c0&",
+              image: '../../images/body-trait-base.png',
               top: 40,
               topInc: 160,
               left: 240,
@@ -656,8 +648,7 @@ module.exports = {
               ],
             },
             soul: {
-              image:
-                "https://cdn.discordapp.com/attachments/992458789234163713/995059596160929803/soul_core_gray.png?ex=65eb70f7&is=65d8fbf7&hm=70214a7844d140b72796f5d9b0ba70e6f26a64c5c4b8b37a4bd6e1e11f0f65f6&",
+              image: '../../images/soul-trait-base.png',
               top: 207,
               topInc: 160,
               left: 59,
