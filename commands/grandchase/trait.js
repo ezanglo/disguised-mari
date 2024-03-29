@@ -368,7 +368,7 @@ module.exports = {
           const canvas = createCanvas(883, 784 + offset);
           const ctx = canvas.getContext("2d");
 
-          const bg = await loadImage('../../images/lvl-trait-base.png');
+          const bg = await loadImage(`${process.env.AWS_S3_CLOUDFRONT_LINK}base/lvl-trait-base.png`);
           ctx.drawImage(bg, 0, 0, canvas.width, canvas.height - offset);
 
           ctx.font = "italic bold 36px Arial";
@@ -451,7 +451,7 @@ module.exports = {
           const canvas = createCanvas(900, 781 + offset);
           const ctx = canvas.getContext("2d");
 
-          const bg = await loadImage('../../images/chaser-trait-base.png');
+          const bg = await loadImage(`${process.env.AWS_S3_CLOUDFRONT_LINK}base/chaser-trait-base.png`);
 
           ctx.drawImage(bg, 0, 0, canvas.width, canvas.height - offset);
 
@@ -539,7 +539,7 @@ module.exports = {
           const canvas = createCanvas(883, 831 + offset);
           const ctx = canvas.getContext("2d");
 
-          const bg = await loadImage('../../images/trans-trait-base.png');
+          const bg = await loadImage(`${process.env.AWS_S3_CLOUDFRONT_LINK}base/trans-trait-base.png`);
 
           ctx.drawImage(bg, 0, 0, canvas.width, canvas.height - offset);
 
@@ -620,7 +620,7 @@ module.exports = {
 
           const core_config = {
             mem: {
-              image: '../../images/memory-trait-base.png',
+              image: `${process.env.AWS_S3_CLOUDFRONT_LINK}base/memory-trait-base.png`,
               top: 40,
               topInc: 160,
               left: 60,
@@ -634,7 +634,7 @@ module.exports = {
               ],
             },
             body: {
-              image: '../../images/body-trait-base.png',
+              image: `${process.env.AWS_S3_CLOUDFRONT_LINK}base/body-trait-base.png`,
               top: 40,
               topInc: 160,
               left: 240,
@@ -648,7 +648,7 @@ module.exports = {
               ],
             },
             soul: {
-              image: '../../images/soul-trait-base.png',
+              image: `${process.env.AWS_S3_CLOUDFRONT_LINK}base/soul-trait-base.png`,
               top: 207,
               topInc: 160,
               left: 59,
