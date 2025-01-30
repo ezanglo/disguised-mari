@@ -59,7 +59,7 @@ module.exports = {
 
         switch (newsType) {
           case 'notice':
-            latestPost = data.datalist[0];
+            latestPost = data.datalist[2];
             break;
           case 'update':
             latestPost = data.datalist[0];
@@ -121,21 +121,55 @@ module.exports = {
         }
 
         const encodedText = data2.detailTEXT;
-        let decodedText = Entities.decode(encodedText).replace(/[\r\n]+/gm, "\n");
+        let decodedText = Entities.decode(encodedText).replace(/[\r]/ + "(Tentative)", "\n"); // .replace(/[\r]+/gm, "\n");
         decodedText = this.replaceDate(decodedText);
         decodedText = this.replaceDateRange(decodedText);
 
+        console.log(decodedText);
+        return;
         const date = new Date(data2.lstUpdateDate);
 
-        const embed = new EmbedBuilder()
-          .setDescription(decodedText)
-          .setTitle(data2.subject)
-          .setFooter({ text: `Last Posted: ${date.toLocaleDateString()}` })
-
-        await interaction.editReply({
-          embeds: [embed],
+        await interaction.channel.send({
           files: [fileArray[0]]
         });
+
+        let embedArray = [];
+        
+        while (decodedText.length > 0) {
+
+          if (decodedText.length >= 1900) {
+            let textSlice = decodedText.slice(0, 1900);
+
+            const embed = new EmbedBuilder()
+              .setTitle(data2.subject)
+              .setFooter({ text: `Last Posted: ${date.toLocaleDateString()}` })
+              .setDescription(textSlice)
+
+            embedArray.push(embed);
+
+            decodedText = decodedText.slice(1900, decodedText.length);
+
+            if (embedArray.length >= 2) {
+              await interaction.channel.send({
+                embeds: embedArray
+              });
+              embedArray = embedArray.splice(2, embedArray);
+            }
+          } else {
+            const embed = new EmbedBuilder()
+              .setTitle(data2.subject)
+              .setFooter({ text: `Last Posted: ${date.toLocaleDateString()}` })
+              .setDescription(decodedText)
+
+            embedArray.push(embed);
+
+            await interaction.channel.send({
+              embeds: embedArray
+            });
+
+            break;
+          }
+        }
 
         fileArray.shift();
 

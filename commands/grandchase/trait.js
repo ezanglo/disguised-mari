@@ -51,9 +51,9 @@ module.exports = {
         )
     ),
   async execute(interaction, refresh) {
-    const heroCode = interaction.options.get("hero").value;
+    const heroCode = interaction.options.get("hero").value.toLowerCase();
     let selectedHero = client.heroes.filter((x) =>
-      x.Code.startsWith(heroCode.toLowerCase())
+      x.Code.startsWith(heroCode)
     );
     if (selectedHero.length == 0) {
       return interaction.editReply({
@@ -84,18 +84,22 @@ module.exports = {
     await api
       .get(
         "Hero/" +
-          selectedHero.Id +
-          "?nested[Upgrades][fields]=Id,Name,Code" +
-          "&nested[HeroClassRead][fields]=DiscordEmote" +
-          "&nested[AttributeTypeRead][fields]=DiscordEmote" +
-          "&nested[Skills][fields]=Code,Image,UpgradeTypeRead,SkillTypeRead" +
-          "&nested[Traits][fields]=Id,Code,UpgradeTypeRead,ContentTypeRead,Config," +
-          "Image,Notes,Credits,CreatedAt,UpdatedAt"
+        selectedHero.Id +
+        "?nested[Upgrades][fields]=Id,Name,Code" +
+        "&nested[HeroClassRead][fields]=Name,DiscordEmote" +
+        "&nested[AttributeTypeRead][fields]=DiscordEmote" +
+        "&nested[Skills][fields]=Code,Image,UpgradeTypeRead,SkillTypeRead" +
+        "&nested[Traits][fields]=Id,Code,UpgradeTypeRead,ContentTypeRead,Config," +
+        "Image,Notes,Credits,CreatedAt,UpdatedAt"
       )
       .then(async (response) => {
         const hero = response.data;
 
-        const result = await this.getHeroTrait(hero, interaction, refresh);
+        if (refresh == null || refresh == true) {
+          result = await this.getHeroTrait(hero, interaction);
+        } else if (refresh == false) {
+          result = await this.getHeroTrait(hero, interaction, true);
+        }
         if (!result) {
           return interaction.editReply({
             embeds: [
@@ -208,11 +212,11 @@ module.exports = {
     }
 
     if (interaction.options.get("content")) {
-      contentTypeCode = interaction.options.get("content").value;
+      contentTypeCode = interaction.options.get("content").value.toLowerCase();
     }
 
     if (interaction.options.get("type")) {
-      upgradeTypeCode = interaction.options.get("type").value;
+      upgradeTypeCode = interaction.options.get("type").value.toLowerCase();
     }
 
     let traitCommands = [heroCode, contentTypeCode, upgradeTypeCode];
@@ -326,22 +330,23 @@ module.exports = {
 
       const menuRow = new ActionRowBuilder().addComponents(selectMenu);
 
-      const traitImageLink = `${
-        process.env.AWS_S3_CLOUDFRONT_LINK
-      }traits/${fileName}?ts=${Date.now()}`;
+      const traitImageLink = `${process.env.AWS_S3_CLOUDFRONT_LINK
+        }traits/${fileName}?ts=${Date.now()}`;
 
       await api
         .get(traitImageLink)
         .then((response) => {
-          if (response.status == 200) {
-            embed.setImage(traitImageLink);
+          if (!refreshImage) {
+            if (response.status == 200) {
+              embed.setImage(traitImageLink);
+            }
           }
         })
         .catch((error) => {
           console.log(error.response.status, traitImageLink);
           refreshImage = true;
         })
-        .finally(() => {});
+        .finally(() => { });
 
       let components = [menuRow, buttonsRow];
 
@@ -460,7 +465,7 @@ module.exports = {
           ctx.textAlign = "end";
           ctx.fillText(
             `${hero.DisplayName} | ${trait.UpgradeTypeRead.Name} Traits | ${trait.ContentTypeRead.Name}`,
-            canvas.width,
+            canvas.width - 10,
             canvas.height - 10
           );
 
@@ -534,77 +539,74 @@ module.exports = {
 
           break;
         }
+
         case "trans": {
           const offset = 0;
-          const canvas = createCanvas(883, 831 + offset);
+          const canvas = createCanvas(713, 926 + offset); createCanvas()
           const ctx = canvas.getContext("2d");
+          let bg;
 
-          const bg = await loadImage(`${process.env.AWS_S3_CLOUDFRONT_LINK}base/trans-trait-base.png`);
+          let transTraitTypes;
 
+          const transTraitType = trait.UpgradeTypeRead.Name;
+          const heroClass = hero.HeroClassRead.Name;
+
+          if (transTraitType.includes("Guardian")) {
+            bg = await loadImage(this.addTransTraitTemplate(heroClass, "Guardian"));
+            transTraitTypes = "Guard";
+            console.log("loaded");
+
+          } else if (transTraitType.includes("Helper")) {
+            bg = await loadImage(this.addTransTraitTemplate(heroClass, "Helper"));
+            transTraitTypes = "Helper";
+            console.log("loaded");
+
+          } else if (transTraitType.includes("Executor")) {
+            bg = await loadImage(this.addTransTraitTemplate(heroClass, "Executor"));
+            transTraitTypes = "Executor";
+            console.log("loaded");
+          }
           ctx.drawImage(bg, 0, 0, canvas.width, canvas.height - offset);
 
-          ctx.font = "italic bold 36px Arial";
+          ctx.font = "italic bold 28px Arial";
           ctx.fillStyle = "white";
+          ctx.textAlign = "end";
           ctx.fillText(
-            `${hero.DisplayName} | ${trait.UpgradeTypeRead.Name} Traits | ${trait.ContentTypeRead.Name}`,
-            30,
-            70
+            `${hero.DisplayName} | Transcendence Traits | ${trait.ContentTypeRead.Name}`,
+            canvas.width - 10,
+            canvas.height - 10,
           );
-
-          this.addWaterMark(ctx, canvas, -70);
-
-          const height = 133;
-          const width = 133;
+          ctx.fillText()
+          this.addWaterMark(ctx, canvas, -60);
 
           const transTraits = [
-            ["bdi", "bdr", "sdi"],
-            ["sdr", "pvp", "def"],
-            ["cs", "si"],
+            ["tankT31", "tankT32", "tankT33", "assaultT31", "assaultT32", "assaultT33", "healerT31", "healerT32", "healerT33", "rangerT31", "rangerT32", "rangerT33", "mageT31", "mageT32", "mageT33"],
+            ["tankT61", "tankT62", "tankT63", "assaultT61", "assaultT62", "assaultT63", "healerT61", "healerT62", "healerT63", "rangerT61", "rangerT62", "rangerT63", "mageT61", "mageT62", "mageT63"],
           ];
 
-          let top = 159;
+
+          let width = 110;
+          let height = 110;
+
+          let top = 295;
+          let left = 535;
+
           for (const rowTraits of transTraits) {
-            let left = 83;
             for (const rowTrait of rowTraits) {
               if (trait.Config[rowTrait]) {
                 let traitConfig = client.traitTypes.find(
-                  (x) => x.Code == `${trait.UpgradeTypeRead.Code}.${rowTrait}`
+                  (x) => x.Code == `${trait.UpgradeTypeRead.Code + transTraitTypes}.${rowTrait}`
                 );
                 if (traitConfig) {
                   const traitImage = await loadImage(traitConfig.Image);
                   ctx.drawImage(traitImage, left, top, width, height);
 
-                  const heightOffset = height / 3;
-                  ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
-                  ctx.beginPath();
-                  ctx.moveTo(left + width, top + heightOffset);
-                  ctx.lineTo(left + heightOffset, top + height);
-                  ctx.lineTo(left + width, top + height);
-                  ctx.lineTo(left + width, top + heightOffset);
-                  ctx.fill();
-                  ctx.closePath();
-
-                  ctx.textAlign = "end";
-                  ctx.fillStyle = "white";
-                  ctx.strokeStyle = "black";
-                  ctx.font = "italic bold 60px Arial";
-                  ctx.fillText(
-                    trait.Config[rowTrait],
-                    left + width - 10,
-                    top + height - 10
-                  );
-                  ctx.strokeText(
-                    trait.Config[rowTrait],
-                    left + width - 10,
-                    top + height - 10
-                  );
+                  top += 450;
+                  left -= 295;
                 }
               }
-              left += 289;
             }
-            top += 236;
           }
-
           await s3
             .upload({
               Bucket: process.env.AWS_S3_BUCKET_NAME,
@@ -615,6 +617,7 @@ module.exports = {
 
           break;
         }
+
         case "si": {
           const core = traitCommands[traitCommands.length - 1];
 
@@ -757,10 +760,74 @@ module.exports = {
       };
     }
   },
+  addTransTraitTemplate(heroClass, transTraitType) {
+
+    switch (heroClass) {
+      case "Assault":
+        if (transTraitType == "Guardian") {
+          return "https://d3mc4o4mvp1yzj.cloudfront.net/base/protectorTransTraitBase_assault.png";
+        }
+        if (transTraitType == "Helper") {
+          return "https://d3mc4o4mvp1yzj.cloudfront.net/base/helperTransTraitBase_assault.png"
+        }
+        if (transTraitType == "Executor") {
+          return "https://d3mc4o4mvp1yzj.cloudfront.net/base/exeTransTraitBase_assault.png"
+        }
+        break;
+
+      case "Tank":
+        if (transTraitType == "Guardian") {
+          return "https://d3mc4o4mvp1yzj.cloudfront.net/base/protectorTransTraitBase_tank.png";
+        }
+        if (transTraitType == "Helper") {
+          return "https://d3mc4o4mvp1yzj.cloudfront.net/base/helperTransTraitBase_tank.png"
+        }
+        if (transTraitType == "Executor") {
+          return "https://d3mc4o4mvp1yzj.cloudfront.net/base/exeTransTraitBase_tank.png"
+        }
+        break;
+
+      case "Healer":
+        if (transTraitType == "Guardian") {
+          return "https://d3mc4o4mvp1yzj.cloudfront.net/base/protectorTransTraitBase_healer.png";
+        }
+        if (transTraitType == "Helper") {
+          return "https://d3mc4o4mvp1yzj.cloudfront.net/base/helperTransTraitBase_healer.png"
+        }
+        if (transTraitType == "Executor") {
+          return "https://d3mc4o4mvp1yzj.cloudfront.net/base/exeTransTraitBase_healer.png"
+        }
+        break;
+
+      case "Ranger":
+        if (transTraitType == "Guardian") {
+          return "https://d3mc4o4mvp1yzj.cloudfront.net/base/protectorTransTraitBase_rangerMage.png";
+        }
+        if (transTraitType == "Helper") {
+          return "https://d3mc4o4mvp1yzj.cloudfront.net/base/helperTransTraitBase_ranger.png"
+        }
+        if (transTraitType == "Executor") {
+          return "https://d3mc4o4mvp1yzj.cloudfront.net/base/exeTransTraitBase_ranger.png"
+        }
+        break;
+
+      case "Mage":
+        if (transTraitType == "Guardian") {
+          return "https://d3mc4o4mvp1yzj.cloudfront.net/base/protectorTransTraitBase_rangerMage.png";
+        }
+        if (transTraitType == "Helper") {
+          return "https://d3mc4o4mvp1yzj.cloudfront.net/base/helperTransTraitBase_mage.png"
+        }
+        if (transTraitType == "Executor") {
+          return "https://d3mc4o4mvp1yzj.cloudfront.net/base/exeTransTraitBase_mage.png"
+        }
+        break;
+    }
+  },
   addWaterMark(ctx, canvas, heightOffset) {
     ctx.save();
     ctx.textAlign = "center";
-    ctx.font = "italic bold 200px Arial";
+    ctx.font = "italic bold 180px Arial";
     ctx.fillStyle = "rgba(256, 256, 256, 0.1)";
     ctx.fillText(
       "GUIDE\nCHASE",
@@ -790,9 +857,8 @@ module.exports = {
       }
       case "trans": {
         return [
-          ["bdi", "bdr", "sdi"],
-          ["sdr", "pvp", "def"],
-          ["cs", "si"],
+          ["tankT31", "tankT32", "tankT33", "assaultT31", "assaultT32", "assaultT33", "healerT31", "healerT32", "healerT33", "rangerT31", "rangerT32", "rangerT33", "mageT31", "mageT32", "mageT33"],
+          ["tankT61", "tankT62", "tankT63", "assaultT61", "assaultT62", "assaultT63", "healerT61", "healerT62", "healerT63", "rangerT61", "rangerT62", "rangerT63", "mageT61", "mageT62", "mageT63"],
         ];
       }
       case "si": {
@@ -875,87 +941,169 @@ module.exports = {
     );
   },
   async update(interaction, traitCode, traitConfig) {
-    await api
-      .get(`HeroTrait?where=(Code,eq,${traitCode})`)
-      .then(async (response) => {
-        if (response.status == 200) {
-          const data = response.data;
-          if (data.pageInfo.totalRows > 0) {
-            const trait = data.list[0];
-            let configMap = this.getConfigMap(trait.UpgradeTypeRead.Code);
-            if (!configMap) {
-              interaction.editReply({
-                embeds: [
-                  new EmbedBuilder({
-                    color: 0xed4245,
-                    description: `Wrong Code ${interaction.user}... try again ? ❌`,
-                  }),
-                ],
-              });
-            }
-            if (trait.UpgradeTypeRead.Code == "si") {
-              const code = traitCode.split(".");
-              configMap = configMap[code[code.length - 1]];
-            }
+    if (traitCode == "all") {
+      for (var x = 0; x < client.heroes.length - 2; x++) {
+        traitCode = client.heroes[x].Code;
+        interaction.options = new Collection();
 
-            let config = [];
-            for (const c of traitConfig.split("-")) {
-              config.push(c.split(""));
-            }
+        interaction.options.set("hero", {
+          name: "hero",
+          value: traitCode
+        });
+        interaction.options.set("content", {
+          name: "content",
+          value: traitConfig
+        });
 
-            let jsonConfig = {};
-            for (let x = 0; x < configMap.length; x++) {
-              for (let y = 0; y < configMap[x].length; y++) {
-                if (configMap[x][y] && config[x][y] && config[x][y] != "x") {
-                  jsonConfig[configMap[x][y]] = config[x][y];
+        interaction.options.set("type", {
+          name: "type",
+          value: "trans",
+        });
+
+        await this.execute(interaction, false)
+          .catch((e) => {
+            client.errorLog(e, interaction);
+            interaction.editReply({
+              embeds: [
+                new EmbedBuilder({
+                  color: 0xed4245,
+                  description: `An Error has occured ${interaction.user}... try again ? ❌`,
+                }),
+              ],
+            });
+          });
+      }
+    } else {
+      await api
+        .get(`HeroTrait?where=(Code,eq,${traitCode})`)
+        .then(async (response) => {
+          if (response.status == 200) {
+            const data = response.data;
+            if (data.pageInfo.totalRows > 0) {
+              const trait = data.list[0];
+              let configMap = this.getConfigMap(trait.UpgradeTypeRead.Code);
+              if (!configMap) {
+                interaction.editReply({
+                  embeds: [
+                    new EmbedBuilder({
+                      color: 0xed4245,
+                      description: `Wrong Code ${interaction.user}... try again ? ❌`,
+                    }),
+                  ],
+                });
+              }
+              if (trait.UpgradeTypeRead.Code == "si") {
+                const code = traitCode.split(".");
+                configMap = configMap[code[code.length - 1]];
+              }
+
+              let config = [];
+              let jsonConfig = {};
+
+              if (trait.UpgradeTypeRead.Code != "trans") {
+
+                for (const c of traitConfig.split('-')) {
+                  config.push(c.split(''));
+                }
+
+                for (let x = 0; x < configMap.length; x++) {
+                  for (let y = 0; y < configMap[x].length; y++) {
+                    if (configMap[x][y] && config[x][y] && config[x][y] != "x") {
+                      jsonConfig[configMap[x][y]] = config[x][y];
+                    }
+                  }
+                }
+              } else {
+                config = traitConfig.split("-");
+                for (let x = 0; x < configMap.length; x++) {
+                  for (let y = 0; y < configMap[x].length; y++) {
+                    if (traitConfig.includes(configMap[x][y]) == true) {
+                      jsonConfig[configMap[x][y]] = "1";
+                    }
+                  }
                 }
               }
-            }
 
-            await api.patch("HeroTrait/" + trait.Id, { Config: jsonConfig });
+              await api.patch("HeroTrait/" + trait.Id, { Config: jsonConfig });
 
-            interaction.options = new Collection();
+              interaction.options = new Collection();
 
-            const args = traitCode.split(".");
-            if (args[0]) {
-              interaction.options.set("hero", {
-                name: "hero",
-                value: args[0],
-              });
-            }
-            if (args[1]) {
-              interaction.options.set("content", {
-                name: "content",
-                value: args[1],
-              });
-            }
-            if (args[2]) {
-              interaction.options.set("type", {
-                name: "type",
-                value: args[2],
-              });
-            }
-            if (args[3]) {
-              interaction.options.set("core", {
-                name: "core",
-                value: args[3],
-              });
-            }
+              const args = traitCode.split(".");
+              if (args[0]) {
+                interaction.options.set("hero", {
+                  name: "hero",
+                  value: args[0],
+                });
+              }
+              if (args[1]) {
+                interaction.options.set("content", {
+                  name: "content",
+                  value: args[1],
+                });
+              }
+              if (args[2]) {
+                interaction.options.set("type", {
+                  name: "type",
+                  value: args[2],
+                });
+              }
+              if (args[3]) {
+                interaction.options.set("core", {
+                  name: "core",
+                  value: args[3],
+                });
+              }
 
-            this.execute(interaction, true);
+              this.execute(interaction, true);
+            }
           }
-        }
-      })
-      .catch((e) => {
-        client.errorLog(e, interaction);
-        interaction.editReply({
-          embeds: [
-            new EmbedBuilder({
-              color: 0xed4245,
-              description: `An Error has occured ${interaction.user}... try again ? ❌`,
-            }),
-          ],
+        })
+        .catch((e) => {
+          client.errorLog(e, interaction);
+          interaction.editReply({
+            embeds: [
+              new EmbedBuilder({
+                color: 0xed4245,
+                description: `An Error has occured ${interaction.user}... try again ? ❌`,
+              }),
+            ],
+          });
         });
-      });
+    }
+  },
+  async updateAll(interaction, allHeroes, contentType) {
+    if (allHeroes == "all") {
+      for (var x = 0; x < client.heroes.length - 2; x++) {
+        allHeroes = client.heroes[x].Code;
+        interaction.options = new Collection();
+
+        interaction.options.set("hero", {
+          name: "hero",
+          value: allHeroes
+        });
+        interaction.options.set("content", {
+          name: "content",
+          value: contentType
+        });
+
+        interaction.options.set("type", {
+          name: "type",
+          value: "trans",
+        });
+
+        await this.execute(interaction, false)
+          .catch((e) => {
+            client.errorLog(e, interaction);
+            interaction.editReply({
+              embeds: [
+                new EmbedBuilder({
+                  color: 0xed4245,
+                  description: `An Error has occured ${interaction.user}... try again ? ❌`,
+                }),
+              ],
+            });
+          });
+      }
+    }
   },
 };

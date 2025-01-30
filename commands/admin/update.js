@@ -12,6 +12,7 @@ module.exports = {
         .setDescription("Select a command")
         .setRequired(true)
         .addChoices({ name: "trait", value: "trait" })
+        .addChoices({ name: "equip", value: "equip" })
     )
     .addStringOption((option) =>
       option.setName("code").setDescription("command code").setRequired(true)
@@ -37,8 +38,21 @@ module.exports = {
     const config = interaction.options.getString("config");
 
     const command = client.commands.get(commandName);
-    if (command) {
-      command.update(interaction, commandCode, config);
+    switch (commandName) {
+      case "trait":
+        if (command) {
+          if (commandCode != "all") {
+            command.update(interaction, commandCode, config);
+          } else {
+            command.updateAll(interaction, commandCode, config);
+          }
+        }
+        return;
+      case "equip":
+        if (command) {
+          command.updateEquip(interaction, commandCode, config);
+        }
+        return;
     }
   },
 };

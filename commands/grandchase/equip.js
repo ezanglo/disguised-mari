@@ -30,7 +30,7 @@ module.exports = {
         .setRequired(true)
         .setAutocomplete(true)
     ),
-  async execute(interaction) {
+  async execute(interaction, imageRefresh) {
     const heroCode = interaction.options.get("hero").value;
 
     let selectedHero = interaction.client.heroes.filter((x) =>
@@ -65,18 +65,23 @@ module.exports = {
     await api
       .get(
         "Hero/" +
-          selectedHero.Id +
-          "?nested[HeroClassRead][fields]=Id,Name,Image,DiscordEmote" +
-          "&nested[AttributeTypeRead][fields]=Id,Name,Code,Image,DiscordEmote" +
-          "&nested[HeroEquips][fields]=" +
-          "Id,Code,ContentTypeRead,WeaponConfig,SubWeaponConfig,ArmorConfig," +
-          "SubArmor1Config,SubArmor2Config,ExclusiveWeaponConfig,RingConfig," +
-          "NecklaceConfig,EarringConfig,Image,Artifact,Credits,Notes,CreatedAt,UpdatedAt"
+        selectedHero.Id +
+        "?nested[HeroClassRead][fields]=Id,Name,Image,DiscordEmote" +
+        "&nested[AttributeTypeRead][fields]=Id,Name,Code,Image,DiscordEmote" +
+        "&nested[HeroEquips][fields]=" +
+        "Id,Code,ContentTypeRead,WeaponConfig,SubWeaponConfig,ArmorConfig," +
+        "SubArmor1Config,SubArmor2Config,ExclusiveWeaponConfig,RingConfig," +
+        "NecklaceConfig,EarringConfig,Image,Artifact,Credits,Notes,CreatedAt,UpdatedAt"
       )
       .then(async (response) => {
         const hero = response.data;
 
-        const result = await this.getHeroEquip(hero, interaction);
+        var result;
+        if (imageRefresh == null) {
+          result = await this.getHeroEquip(hero, interaction);
+        } else if (imageRefresh == false) {
+          result = await this.getHeroEquip(hero, interaction, true);
+        }
         if (!result) {
           return interaction.editReply({
             embeds: [
@@ -210,22 +215,23 @@ module.exports = {
         );
       }
 
-      const equipImage = `${
-        process.env.AWS_S3_CLOUDFRONT_LINK
-      }equips/${fileName}?ts=${Date.now()}`;
+      const equipImage = `${process.env.AWS_S3_CLOUDFRONT_LINK
+        }equips/${fileName}?ts=${Date.now()}`;
 
       await api
         .get(equipImage)
         .then((response) => {
-          if (response.status == 200) {
-            embed.setImage(equipImage);
+          if (!refreshImage) {
+            if (response.status == 200) {
+              embed.setImage(equipImage);
+            }
           }
         })
         .catch((error) => {
-          console.log(error.response.status, equipImage);
           refreshImage = true;
         })
-        .finally(() => {});
+        .finally(() => { });
+
 
       if (!refreshImage) {
         return {
@@ -240,7 +246,7 @@ module.exports = {
       const ctx = canvas.getContext("2d");
 
       const bg = await loadImage(
-        "https://media.discordapp.net/attachments/992459267292528710/994804060572111013/equip-base-clear.png"
+        "https://d3mc4o4mvp1yzj.cloudfront.net/base/equip-clear-base.png"
       );
       ctx.drawImage(bg, 0, 0, canvas.width, canvas.height - offset);
 
@@ -406,6 +412,7 @@ module.exports = {
         "ew",
         hero.Code,
       ].join(".");
+
       const exclusiveWeap = client.heroGearTypes.find((x) => x.Code == ewCode);
       if (exclusiveWeap) {
         await loadImage(exclusiveWeap.Image).then((img) => {
@@ -718,35 +725,35 @@ module.exports = {
   },
   getEquipColor(color) {
     let color_url =
-      "https://media.discordapp.net/attachments/992459267292528710/994738968774049882/gray.png";
+      "https://d3mc4o4mvp1yzj.cloudfront.net/template/colors/grey.png"; // Grey
     switch (color) {
       case "orange":
         color_url =
-          "https://media.discordapp.net/attachments/992459267292528710/994738968539177000/orange.png";
+          "https://d3mc4o4mvp1yzj.cloudfront.net/template/colors/orange.png";
         break;
       case "green":
         color_url =
-          "https://media.discordapp.net/attachments/992459267292528710/994738970485334086/green.png";
+          "https://d3mc4o4mvp1yzj.cloudfront.net/template/colors/green.png";
         break;
       case "blue":
         color_url =
-          "https://media.discordapp.net/attachments/992459267292528710/994738970183356546/blue.png";
+          "https://d3mc4o4mvp1yzj.cloudfront.net/template/colors/blue.png";
         break;
       case "pink":
         color_url =
-          "https://media.discordapp.net/attachments/992459267292528710/994738969822634135/pink.png";
+          "https://d3mc4o4mvp1yzj.cloudfront.net/template/colors/pink.png";
         break;
       case "red":
         color_url =
-          "https://media.discordapp.net/attachments/992459267292528710/994738969554194512/red.png";
+          "https://d3mc4o4mvp1yzj.cloudfront.net/template/colors/red.png";
         break;
       case "cyan":
         color_url =
-          "https://media.discordapp.net/attachments/992459267292528710/994738969105408021/cyan.png";
+          "https://d3mc4o4mvp1yzj.cloudfront.net/template/colors/cyan.png";
         break;
       case "purple":
         color_url =
-          "https://media.discordapp.net/attachments/992459267292528710/994738969323524126/purple.png";
+          "https://d3mc4o4mvp1yzj.cloudfront.net/template/colors/purple.png";
         break;
     }
 
@@ -758,66 +765,66 @@ module.exports = {
       switch (rune) {
         case "matk":
           url =
-            "https://media.discordapp.net/attachments/992459474394677369/994059676645867530/unknown.png";
+            "https://d3mc4o4mvp1yzj.cloudfront.net/template/runes/matk_normal.png";
           break;
         case "mdef":
           url =
-            "https://media.discordapp.net/attachments/992459474394677369/994059676918485082/unknown.png";
+            "https://d3mc4o4mvp1yzj.cloudfront.net/template/runes/mdef_normal.png";
           break;
         case "patk":
           url =
-            "https://media.discordapp.net/attachments/992459474394677369/994059677342117928/unknown.png";
+            "https://d3mc4o4mvp1yzj.cloudfront.net/template/runes/patk_normal.png";
           break;
         case "pdef":
           url =
-            "https://media.discordapp.net/attachments/992459474394677369/994059677514080287/unknown.png";
+            "https://d3mc4o4mvp1yzj.cloudfront.net/template/runes/pdef_normal.png";
           break;
         case "hp":
           url =
-            "https://media.discordapp.net/attachments/992459474394677369/994059677115633716/unknown.png";
+            "https://d3mc4o4mvp1yzj.cloudfront.net/template/runes/hp_normal.png";
           break;
       }
     } else {
       switch (rune) {
         case "reddmg":
           url =
-            "https://cdn.discordapp.com/attachments/992459267292528710/996801150877700126/Icon_Equip_eRune_02_eRedAtk.png";
+            "https://d3mc4o4mvp1yzj.cloudfront.net/template/runes/reddmg_special.png";
           break;
         case "reddef":
           url =
-            "https://cdn.discordapp.com/attachments/992459267292528710/996801151104209018/Icon_Equip_eRune_02_eRedDef.png";
+            "https://d3mc4o4mvp1yzj.cloudfront.net/template/runes/reddef_special.png";
           break;
         case "greendmg":
           url =
-            "https://cdn.discordapp.com/attachments/992459267292528710/996801149954957462/Icon_Equip_eRune_02_eGreenAtk.png";
+            "https://d3mc4o4mvp1yzj.cloudfront.net/template/runes/greendmg_special.png";
           break;
         case "greendef":
           url =
-            "https://cdn.discordapp.com/attachments/992459267292528710/996801150185640056/Icon_Equip_eRune_02_eGreenDef.png";
+            "https://d3mc4o4mvp1yzj.cloudfront.net/template/runes/greendef_special.png";
           break;
         case "bluedmg":
           url =
-            "https://cdn.discordapp.com/attachments/992459267292528710/996801149569085440/Icon_Equip_eRune_02_eBlueAtk.png";
+            "https://d3mc4o4mvp1yzj.cloudfront.net/template/runes/bluedmg_special.png";
           break;
         case "bluedef":
           url =
-            "https://cdn.discordapp.com/attachments/992459267292528710/996801149770420334/Icon_Equip_eRune_02_eBlueDef.png";
+            "https://d3mc4o4mvp1yzj.cloudfront.net/template/runes/bluedef_special.png";
           break;
         case "darkdmg":
           url =
-            "https://cdn.discordapp.com/attachments/992459267292528710/996801150382788648/Icon_Equip_eRune_02_ePurpleAtk.png";
+            "https://d3mc4o4mvp1yzj.cloudfront.net/template/runes/darkdmg_special.png";
           break;
         case "darkdef":
           url =
-            "https://cdn.discordapp.com/attachments/992459267292528710/996801150647009361/Icon_Equip_eRune_02_ePurpleDef.png";
+            "https://d3mc4o4mvp1yzj.cloudfront.net/template/runes/darkdef_special.png";
           break;
         case "lightdmg":
           url =
-            "https://cdn.discordapp.com/attachments/992459267292528710/996801151334875227/Icon_Equip_eRune_02_eYellowAtk.png";
+            "https://d3mc4o4mvp1yzj.cloudfront.net/template/runes/lightdmg_special.png";
           break;
         case "lightdef":
           url =
-            "https://cdn.discordapp.com/attachments/992459267292528710/996801151548788746/Icon_Equip_eRune_02_eYellowDef.png";
+            "https://d3mc4o4mvp1yzj.cloudfront.net/template/runes/lightdef_special.png";
           break;
       }
     }
@@ -1062,7 +1069,38 @@ module.exports = {
         break;
       }
     }
-
     return isUpdated;
+  },
+  updateEquip(interaction, heroName, heroCode) {
+    if (heroName == "all") {
+      for (var x = 0; x < client.heroes.length - 2; x++) {
+        heroName = client.heroes[x].Code;
+        interaction.options = new Collection();
+
+        interaction.options.set("hero", {
+          name: "hero",
+          value: heroName
+        });
+        interaction.options.set("content", {
+          name: "content",
+          value: heroCode
+        });
+
+        this.execute(interaction, false);
+      }
+    } else {
+      interaction.options = new Collection();
+
+      interaction.options.set("hero", {
+        name: "hero",
+        value: heroName
+      });
+      interaction.options.set("content", {
+        name: "content",
+        value: heroCode
+      });
+
+      this.execute(interaction, false);
+    }
   },
 };
