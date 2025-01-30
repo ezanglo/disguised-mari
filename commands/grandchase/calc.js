@@ -43,11 +43,15 @@ module.exports = {
       case "ht": {
         if (start > end) return this.interactionFail(interaction);
 
-        if (end > 600) end = 600;
+        if (end > 720) end = 720;
+        let bovFragAmount = 0;
 
-        const amount = this.calcBoVHT(end) - this.calcBoVHT(start);
-
-        let wizDays = Math.round(amount / 604);
+        const bovAmount = this.calcBoVHT(end).bov - this.calcBoVHT(start).bov;
+        if (end > 400 && start <= 400) {
+          end = 400;
+          bovFragAmount = this.calcBoVHT(end).bovFragment - this.calcBoVHT(start).bovFragment;
+        }
+        let wizDays = Math.round(bovAmount / 710) + Math.round(bovFragAmount / (710 / 5));
 
         if (wizDays < 1) wizDays = 1;
 
@@ -55,9 +59,11 @@ module.exports = {
           .setAuthor({ name: "Hero Taining Calculator" })
           .addFields({
             name: "\u200b",
-            value: `Required BoV: ${
+            value: `Required BoV Fragment: ${
+              this.emojiIcons.bovFragIcon
+            } ${bovFragAmount.toLocaleString()}\nRequired BoV: ${
               this.emojiIcons.bovIcon
-            } ${amount.toLocaleString()}\nWizard Lab Entry: ${
+            } ${bovAmount.toLocaleString()}\nWizard Lab Entry: ${
               this.emojiIcons.wizlabIcon
             } ${wizDays.toLocaleString()}`,
           })
@@ -65,7 +71,7 @@ module.exports = {
             "https://cdn.discordapp.com/attachments/992459474394677369/993246962260398270/BlessingsOfValor.png"
           )
           .setFooter({
-            text: `Last Updated May 2, 2023`,
+            text: `Last Updated January 31, 2025`,
           });
 
         break;
@@ -75,7 +81,7 @@ module.exports = {
 
         let petAmount = 0;
 
-        if (end > 70) end = 70;
+        if (end > 80) end = 80;
 
         for (let x = start + 1; x <= end; x++) {
           petAmount += this.calcPet(x);
@@ -98,7 +104,7 @@ module.exports = {
             "https://cdn.discordapp.com/attachments/992459474394677369/993247439349886997/PetSelect.png"
           )
           .setFooter({
-            text: `Last Updated November 23, 2022`,
+            text: `Last Updated January 30, 2025`,
           });
 
         break;
@@ -114,19 +120,19 @@ module.exports = {
           .setAuthor({ name: "Chaser Calculator" })
           .addFields({
             name: "\u200b",
-            value: `Chaser Cubes Cost: ${
-              this.emojiIcons.csCubeIcon
-            } ${csCost.csCubes.toLocaleString()}\nChaser Crystals Cost: ${
-              this.emojiIcons.cscIcon
-            } ${csCost.csCrystals}\nGold Cost: ${
+            value: `Growth Cubes Cost: ${
+              this.emojiIcons.growthCubeIcon
+            } ${csCost.csCubes.toLocaleString()}\n Growth Essence Cost: ${
+              this.emojiIcons.growthEssenceIcon
+            } ${csCost.csEssence}\nGold Cost: ${
               this.emojiIcons.goldIcon
             } ${csCost.csGold.toLocaleString()}`,
           })
           .setThumbnail(
-            "https://cdn.discordapp.com/attachments/992459474394677369/993247439685427320/ChaserCube.png"
+            "https://d3mc4o4mvp1yzj.cloudfront.net/template/materials/growth_cube.png"
           )
           .setFooter({
-            text: `Last Updated November 28, 2022`,
+            text: `Last Updated January 31, 2025`,
           });
 
         break;
@@ -142,19 +148,19 @@ module.exports = {
           .setAuthor({ name: "Soul Imprint Calculator" })
           .addFields({
             name: "\u200b",
-            value: `Soul Imprint Cubes Cost: ${
-              this.emojiIcons.siCubeIcon
-            } ${siCost.siCubes.toLocaleString()}\nSoul Essence Cost: ${
-              this.emojiIcons.soulEssenceIcon
-            } ${siCost.soulEssence}\nGold Cost: ${
+            value: `Growth Cubes Cost: ${
+              this.emojiIcons.growthCubeIcon
+            } ${siCost.growthCubes.toLocaleString()}\nGrowth Essence Cost: ${
+              this.emojiIcons.growthEssenceIcon
+            } ${siCost.growthEssence}\nGold Cost: ${
               this.emojiIcons.goldIcon
             } ${siCost.siGold.toLocaleString()}`,
           })
           .setThumbnail(
-            "https://cdn.discordapp.com/attachments/992459474394677369/993247440578818219/SoulChaserCube.png"
+            "https://d3mc4o4mvp1yzj.cloudfront.net/template/materials/growth_cube.png"
           )
           .setFooter({
-            text: `Last Updated December 2, 2022`,
+            text: `Last Updated January 31, 2025`,
           });
 
         break;
@@ -178,8 +184,15 @@ module.exports = {
     });
   },
   calcBoVHT(level) {
-    level = ((parseInt(level) + 1) / 2) * (parseInt(level) * 2);
-    return level;
+    let bovValue = 0;
+    let bovFrag = 0;
+    if (level < 401) {
+      bovFrag += ((parseInt(level) + 1) / 2) * (parseInt(level) * 2);
+    } 
+    if (level > 401) {
+      bovValue += ((parseInt(level) + 1) / 2) * (parseInt(level) * 2);
+    }
+    return {bov: bovValue, bovFragment: bovFrag};
   },
   calcPetGold(lvl) {
     let costOverall = 0;
@@ -197,7 +210,7 @@ module.exports = {
       } else if (x > 36 && x <= 47) {
         goldCost += 100000;
         costOverall += goldCost;
-      } else if (x > 47 && x <= 70) {
+      } else if (x > 47 && x <= 80) {
         goldCost += 150000;
         costOverall += goldCost;
       }
@@ -206,7 +219,7 @@ module.exports = {
   },
   calcPet(lvl) {
     let val = 1;
-    if (lvl > 70) lvl = 70;
+    if (lvl > 80) lvl = 80;
 
     for (let x = 1; x <= lvl; x++) {
       if (x <= 21 && x % 2 == 0) {
@@ -227,72 +240,73 @@ module.exports = {
         val = val + 20;
       } else if (x > 65 && x <= 69) {
         val = val + 5;
-      } else if (x == 70) {
+      } else if (x == 70 || x == 71) {
         val = val + 10;
+      } else if (x > 71 && x <= 80) {
+        val = val + 5;
       }
     }
     return val;
   },
   calcCS(startLvL, endLvL) {
-    let chaserCubes = 0;
-    let chaserCrystals = 0;
+    let growthCubes = 0;
+    let growthEssence = 0;
     let chaserGold = 0;
-    let crystalCost = 0;
+    let essenceCost = 0;
     let goldCost = 0;
 
     if (startLvL !== 0) startLvL = startLvL + 1;
 
     for (let x = startLvL; x <= endLvL; x++) {
       if (x >= 1 && x < 5) {
-        crystalCost = 40;
-        goldCost = 300000;
+        essenceCost = 8;
+        goldCost = 100000;
       } else if (x >= 6 && x < 10) {
-        crystalCost = 76;
-        goldCost = 600000;
+        essenceCost = 15;
+        goldCost = 200000;
       } else if (x >= 11 && x < 15) {
-        crystalCost = 142;
-        goldCost = 1200000;
+        essenceCost = 28;
+        goldCost = 300000;
       } else if (x >= 16 && x < 20) {
-        crystalCost = 238;
-        goldCost = 1500000;
+        essenceCost = 47;
+        goldCost = 400000;
       } else if (x >= 21 && x < 25) {
-        crystalCost = 364;
-        goldCost = 3000000;
+        essenceCost = 72;
+        goldCost = 500000;
       }
 
-      chaserCrystals += crystalCost;
+      growthEssence += essenceCost;
       if (x % 5 == 0) {
-        chaserCubes += 200;
-        chaserGold += 5 * goldCost;
+        growthCubes += 100;
+        chaserGold += (x / 5 * 200000) + 1000000;
         if (x == 0) {
-          chaserCrystals += 150;
-          chaserGold += 5000000;
+          growthEssence += 30;
         }
       } else {
         chaserGold += goldCost;
       }
     }
     return {
-      csCrystals: chaserCrystals,
-      csCubes: chaserCubes,
+      csEssence: growthEssence,
+      csCubes: growthCubes,
       csGold: chaserGold,
     };
   },
   calcSI(startLvl, endLvl) {
     let essenceCost = 0;
     let goldCost = 0;
-    let siCubesCost = 0;
+    let growthCubesCost = 0;
     let essenceCount = 0;
     let memTraitGoldCost = 100000;
-    let bodyTraitGoldCost = 500000;
-    let soulTraitGoldCost = 2000000;
+    let bodyTraitGoldCost = 400000;
+    let soulTraitGoldCost = 800000;
     let memTraitEssenceCost = 15;
     let bodyTraitEssenceCost = 60;
     let soulTraitEssenceCost = 150;
 
     for (let x = startLvl + 1; x <= endLvl; x++) {
       if (x < 6) {
-        goldCost += 500000 + 500000 * x;
+        goldCost += 800000 * x;
         essenceCount = 1;
 
         if (x > 3) {
@@ -303,7 +317,7 @@ module.exports = {
         essenceCost += memTraitEssenceCost * essenceCount;
         goldCost += memTraitGoldCost * essenceCount;
       } else if (x < 11) {
-        goldCost += 4000000 + 1000000 * (x - 5);
+        goldCost += 1000000 * (x - 5);
         essenceCount = 1;
 
         if (x > 8) {
@@ -311,9 +325,9 @@ module.exports = {
         }
         essenceCost += bodyTraitEssenceCost * essenceCount;
         goldCost += bodyTraitGoldCost * essenceCount;
-        siCubesCost += 250;
+        growthCubesCost += 250;
       } else {
-        goldCost += 10000000 + 2000000 * (x - 10);
+        goldCost += 1500000 * (x - 10);
         essenceCount = 1;
 
         if (x > 13) {
@@ -321,41 +335,41 @@ module.exports = {
         }
         essenceCost += soulTraitEssenceCost * essenceCount;
         goldCost += soulTraitGoldCost * essenceCount;
-        siCubesCost += 250;
+        growthCubesCost += 250;
       }
     }
     if (startLvl <= 0 && endLvl >= 1) {
-      goldCost += 5000000;
+      goldCost += 1500000;
       essenceCost += 20;
     }
     if (startLvl <= 5 && endLvl >= 6) {
-      goldCost += 4000000;
+      goldCost += 2000000;
       essenceCost += 100;
-      siCubesCost += 250;
+      growthCubesCost += 250;
     }
     if (startLvl <= 10 && endLvl >= 11) {
-      goldCost += 10000000;
+      goldCost += 3000000;
       essenceCost += 225;
-      siCubesCost += 250;
+      growthCubesCost += 250;
     }
     if (endLvl == 15) {
-      goldCost +=
+       goldCost +=
         memTraitGoldCost * 2 + bodyTraitGoldCost * 2 + soulTraitGoldCost * 2;
       essenceCost +=
         memTraitEssenceCost * 2 +
         bodyTraitEssenceCost * 2 +
         soulTraitEssenceCost * 2;
     }
-    return { soulEssence: essenceCost, siGold: goldCost, siCubes: siCubesCost };
+    goldCost /= 2;
+    return { growthEssence: essenceCost, siGold: goldCost, growthCubes: growthCubesCost };
   },
   emojiIcons: {
     petIcon: "<:pet:1045020933867450539>",
-    siCubeIcon: "<:si_cube:1046833548805546014>",
-    soulEssenceIcon: "<:soul_essence:1046833547442405458>",
-    csCubeIcon: "<:cs_cube:1045626245376909332>",
-    cscIcon: "<:chaser_crystal:1046833546238632098>",
+    growthCubeIcon: "<:growth_cube:1334586225025093703>",
+    growthEssenceIcon: "<:growth_essence:1334586261750419517>",
     goldIcon: "<:gold:1045020932416229488>",
     wizlabIcon: "<:wizlab_tix:1044675274110939138>",
     bovIcon: "<:bov:1044675273355968612>",
+    bovFragIcon: "<:bov_fragment:1334585835265327256>",
   },
 };
