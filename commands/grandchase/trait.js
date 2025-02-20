@@ -575,6 +575,7 @@ module.exports = {
             `${hero.DisplayName} | Transcendence Traits | ${trait.ContentTypeRead.Name}`,
             canvas.width - 10,
             canvas.height - 20,
+
           );
           ctx.fillText()
           this.addWaterMark(ctx, canvas, -60);
@@ -1053,7 +1054,6 @@ module.exports = {
                   value: args[3],
                 });
               }
-
               this.execute(interaction, false);
             }
           }
