@@ -36,8 +36,7 @@ module.exports = {
     let end = interaction.options.get("end")?.value;
 
     const embed = new EmbedBuilder()
-      .setColor(0xed4245)
-      .setTitle(`**Level ${start} -> Level ${end}**`);
+      .setColor(0xed4245);
 
     switch (contentType) {
       case "ht": {
@@ -46,17 +45,27 @@ module.exports = {
         if (end > 720) end = 720;
         let bovFragAmount = 0;
 
-        const bovAmount = this.calcBoVHT(end).bov - this.calcBoVHT(start).bov;
-        if (end > 400 && start <= 400) {
-          end = 400;
-          bovFragAmount = this.calcBoVHT(end).bovFragment - this.calcBoVHT(start).bovFragment;
+        if (start < 400) {
+          let endBov = end;
+          if (end >= 400) endBov = 400;
+          bovFragAmount = this.calcBoVHT(endBov).bovFragment - this.calcBoVHT(start).bovFragment;
         }
-        let wizDays = Math.round(bovAmount / 710) + Math.round(bovFragAmount / (710 / 5));
+
+        let bovAmount = 0;
+        
+        if (end > 400) {
+          let startBov = start;
+          if (start < 400) startBov = 400;
+          bovAmount = this.calcBoVHT(end).bov - this.calcBoVHT(startBov).bov;
+        }
+
+        let wizDays = Math.round(bovAmount / 710) + Math.round(Math.round(bovFragAmount / 5) / 710);
 
         if (wizDays < 1) wizDays = 1;
 
         embed
           .setAuthor({ name: "Hero Taining Calculator" })
+          .setTitle(`**Level ${start} -> Level ${end}**`)
           .addFields({
             name: "\u200b",
             value: `Required BoV Fragment: ${
@@ -92,6 +101,7 @@ module.exports = {
 
         embed
           .setAuthor({ name: "Pet Calculator" })
+          .setTitle(`**Level ${start} -> Level ${end}**`)
           .addFields({
             name: "\u200b",
             value: `Pet Dupes Cost: ${
@@ -118,6 +128,7 @@ module.exports = {
 
         embed
           .setAuthor({ name: "Chaser Calculator" })
+          .setTitle(`**Level ${start} -> Level ${end}**`)
           .addFields({
             name: "\u200b",
             value: `Growth Cubes Cost: ${
@@ -146,6 +157,7 @@ module.exports = {
 
         embed
           .setAuthor({ name: "Soul Imprint Calculator" })
+          .setTitle(`**Level ${start} -> Level ${end}**`)
           .addFields({
             name: "\u200b",
             value: `Growth Cubes Cost: ${
@@ -189,9 +201,8 @@ module.exports = {
     if (level < 401) {
       bovFrag += ((parseInt(level) + 1) / 2) * (parseInt(level) * 2);
     } 
-    if (level > 401) {
-      bovValue += ((parseInt(level) + 1) / 2) * (parseInt(level) * 2);
-    }
+    bovValue += ((parseInt(level) + 1) / 2) * (parseInt(level) * 2);
+    
     return {bov: bovValue, bovFragment: bovFrag};
   },
   calcPetGold(lvl) {
