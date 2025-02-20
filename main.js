@@ -2,6 +2,7 @@ require("dotenv").config();
 
 const AWS = require("aws-sdk");
 
+
 const { Client, GatewayIntentBits, EmbedBuilder } = require("discord.js");
 const axios = require("axios");
 
