@@ -125,8 +125,6 @@ module.exports = {
         decodedText = this.replaceDate(decodedText);
         decodedText = this.replaceDateRange(decodedText);
 
-        console.log(decodedText);
-        return;
         const date = new Date(data2.lstUpdateDate);
 
         await interaction.channel.send({

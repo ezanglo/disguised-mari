@@ -48,7 +48,7 @@ module.exports = {
       )
       .then(async (response) => {
         const data = response.data;
-
+        
         let lineup = null;
 
         if (phaseCode === "") {
@@ -96,7 +96,7 @@ module.exports = {
       if (data[i].PartySkills.length != 1) {
         embed.addFields([
           {
-            name: `Phase ${i + 1} ${
+            name: `${data[i].ContentPhaseRead.Name} ${
               data[i].ContentPhaseRead.AttributeTypeRead.DiscordEmote
             }`,
             value:
@@ -110,7 +110,7 @@ module.exports = {
       } else {
         embed.addFields([
           {
-            name: `Phase ${i + 1} ${
+            name: `${data[i].ContentPhaseRead.Name} ${
               data[i].ContentPhaseRead.AttributeTypeRead.DiscordEmote
             }`,
             value:
