@@ -53,7 +53,7 @@ module.exports = {
           "&nested[HeroClassRead][fields]=DiscordEmote" +
           "&nested[AttributeTypeRead][fields]=DiscordEmote" +
           "&nested[Skills][fields]=Name,UpgradeTypeRead,SkillTypeRead" +
-          "&nested[Traits][fields]=Id,Code,Config," +
+          "&nested[Traits][fields]=Id,UpgradeTypeRead,Code,Config," +
           "&nested[HeroMMList][fields]=Heroes,ContentTypeRead,ContentPhaseRead" +
           "&nested[HeroEquips][fields]=" +
           "Id,Code,ContentTypeRead,WeaponConfig,SubWeaponConfig,ArmorConfig," +
@@ -82,6 +82,27 @@ module.exports = {
             { name: "Content `/lineup`", value: contentDetails },
           ]);
 
+        //Transcendence
+        let TransCode = [hero.Code, "pve", "trans"];
+        let transPve = hero.Traits.find(
+          (x) => x.Code == TransCode.join(".").toLowerCase()
+        );
+        TransCode[1] = "pvp";
+        let transPvp = hero.Traits.find(
+          (x) => x.Code == TransCode.join(".").toLowerCase()
+        );
+        TransCode[1] = "wb";
+        let transWb = hero.Traits.find(
+          (x) => x.Code == TransCode.join(".").toLowerCase()
+        );
+        if ((transPve && transPve.Config) || (transPvp && transPvp.Config) || (transWb && transWb.Config))
+          embed.addFields([
+            {
+              name: "Transcendence `/trait`",
+              value: this.getTraitTransRecommendation(transPve, transPvp, transWb),
+            },
+          ]);
+
         // Equipment
         let EquipCode = ["equip", hero.Code, "pve"];
         let equipPve = hero.HeroEquips.find(
@@ -91,29 +112,33 @@ module.exports = {
         let equipPvp = hero.HeroEquips.find(
           (x) => x.Code == EquipCode.join(".").toLowerCase()
         );
-        if (equipPve || equipPvp)
+        EquipCode[2] = "wb";
+        let equipWb = hero.HeroEquips.find(
+          (x) => x.Code == EquipCode.join(".").toLowerCase()
+        );
+        if (equipPve || equipPvp || equipWb)
           embed.addFields([
             {
               name: "Equipment `/equip`",
-              value: this.getEquipRecommendation(equipPve, equipPvp),
+              value: this.getEquipRecommendation(equipPve, equipPvp, equipWb),
             },
           ]);
 
         // Enchants
-        if (equipPve || equipPvp)
+        if (equipPve || equipPvp || equipWb)
           embed.addFields([
             {
               name: "Enchants `/equip`",
-              value: this.getEnchantRecommendation(equipPve, equipPvp),
+              value: this.getEnchantRecommendation(equipPve, equipPvp, equipWb),
             },
           ]);
 
         // Accessories
-        if (equipPve || equipPvp)
+        if (equipPve || equipPvp || equipWb)
           embed.addFields([
             {
               name: "Accessories `/equip`",
-              value: this.getAccessoryRecommendation(equipPve, equipPvp),
+              value: this.getAccessoryRecommendation(equipPve, equipPvp, equipWb),
             },
           ]);
 
@@ -126,11 +151,15 @@ module.exports = {
         let traitPvp = hero.Traits.find(
           (x) => x.Code == traitCommands.join(".").toLowerCase()
         );
-        if ((traitPve && traitPve.Config) || (traitPvp && traitPvp.Config))
+        traitCommands[1] = "wb";
+        let traitWb = hero.Traits.find(
+          (x) => x.Code == traitCommands.join(".").toLowerCase()
+        );
+        if ((traitPve && traitPve.Config) || (traitPvp && traitPvp.Config) || (traitWb && traitWb.Config))
           embed.addFields([
             {
               name: "Traits `/trait`",
-              value: this.getTraitRecommendation(traitPve, traitPvp),
+              value: this.getTraitRecommendation(traitPve, traitPvp, traitWb),
             },
           ]);
 
@@ -187,9 +216,11 @@ module.exports = {
       .join("\n");
   },
 
-  getEnchantRecommendation(equipPve, equipPvp) {
+  getEnchantRecommendation(equipPve, equipPvp, equipWb) {
     let pveRecommendation = "";
     let pvpRecommendation = "";
+    let wbRecommendation = "";
+    let recommendation = [];
     const greyEnchant = "<:greyenchant:1043324859037536329>";
     const pinkEnchant = "<:pinkenchant:1043324859968663603>";
     const blueEnchant = "<:blueenchant:1043324861814161419>";
@@ -213,12 +244,34 @@ module.exports = {
     ) {
       pvpRecommendation = `**PVP:** ${greyEnchant} ${equipPvp.WeaponConfig.enchant1.toUpperCase()} ${pinkEnchant}  ${equipPvp.WeaponConfig.enchant2.toUpperCase()} ${blueEnchant}  ${equipPvp.SubArmor1Config.enchant2.toUpperCase()}`;
     }
-    return `${pveRecommendation}\n${pvpRecommendation}`;
+
+    if (
+      equipWb &&
+      equipWb.WeaponConfig &&
+      equipWb.WeaponConfig.enchant1 &&
+      equipWb.WeaponConfig.enchant2 &&
+      equipWb.SubArmor1Config &&
+      equipWb.SubArmor1Config.enchant2
+    ) {
+      wbRecommendation = `**WB:** ${greyEnchant} ${equipWb.WeaponConfig.enchant1.toUpperCase()} ${pinkEnchant}  ${equipWb.WeaponConfig.enchant2.toUpperCase()} ${blueEnchant}  ${equipWb.SubArmor1Config.enchant2.toUpperCase()}`;
+    }
+    if (pveRecommendation.length !== 0) {
+      recommendation.push(pveRecommendation);
+    }
+    if (pvpRecommendation.length !== 0) {
+      recommendation.push(pvpRecommendation);
+    }
+    if (wbRecommendation.length !== 0) {
+      recommendation.push(wbRecommendation);
+    }
+    return recommendation.join("\n");
   },
 
-  getAccessoryRecommendation(equipPve, equipPvp) {
+  getAccessoryRecommendation(equipPve, equipPvp, equipWb) {
     let pveRecommendation = "";
     let pvpRecommendation = "";
+    let wbRecommendation = "";
+    let recommendation = [];
 
     if (
       equipPve &&
@@ -274,12 +327,109 @@ module.exports = {
         ear.DiscordEmote
       } ${equipPvp.EarringConfig.type.toUpperCase()}`;
     }
-    return `${pveRecommendation}\n${pvpRecommendation}`;
+
+    if (
+      equipWb &&
+      equipWb.RingConfig &&
+      equipWb.RingConfig.color &&
+      equipWb.NecklaceConfig &&
+      equipWb.NecklaceConfig.color &&
+      equipWb.EarringConfig &&
+      equipWb.EarringConfig.color
+    ) {
+      const ring = client.heroGearTypes.find(
+        (x) => x.Code == ["acce", "ring", equipWb.RingConfig.type].join(".")
+      );
+      const neck = client.heroGearTypes.find(
+        (x) =>
+          x.Code == ["acce", "neck", equipWb.NecklaceConfig.type].join(".")
+      );
+      const ear = client.heroGearTypes.find(
+        (x) => x.Code == ["acce", "ear", equipWb.EarringConfig.type].join(".")
+      );
+      wbRecommendation = `**WB:** ${
+        this.equipmentColors[equipWb.RingConfig.color]
+      } ${ring.DiscordEmote} ${equipWb.RingConfig.type.toUpperCase()} ${
+        neck.DiscordEmote
+      } ${equipWb.NecklaceConfig.type.toUpperCase()} ${
+        ear.DiscordEmote
+      } ${equipWb.EarringConfig.type.toUpperCase()}`;
+    }
+
+    if (pveRecommendation.length !== 0) {
+      recommendation.push(pveRecommendation);
+    }
+    if (pvpRecommendation.length !== 0) {
+      recommendation.push(pvpRecommendation);
+    }
+    if (wbRecommendation.length !== 0) {
+      recommendation.push(wbRecommendation);
+    }
+    return recommendation.join("\n");
   },
 
-  getTraitRecommendation(traitPve, traitPVP) {
+  getTraitTransRecommendation(transPve, transPvp, transWb) {
     let pveRecommendation = "";
     let pvpRecommendation = "";
+    let wbRecommendation = "";
+    let recommendation = [];
+    if (transPve && transPve.Config) {
+      let traits = [];
+      let keys = Object.keys(transPve.Config);
+      keys.map(x => {
+        let wordSplit = x.split("T");
+        let transType = wordSplit[1].slice(0,1);
+        let transTraitType = wordSplit[1].slice(1,2);
+        traits.push(`T${transType}: ${transTraitType}`);
+      });
+      let transFullName = transPve.UpgradeTypeRead.Name;
+      let transName = transFullName.substr(10, transFullName.length);
+
+      pveRecommendation = `**PVE:** ${transName} ${traits.join(", ")}`
+    }
+    if (transPvp && transPvp.Config) {
+      let traits = [];
+      let keys = Object.keys(transPvp.Config);
+      keys.map(x => {
+        let wordSplit = x.split("T");
+        let transType = wordSplit[1].slice(0,1);
+        let transTraitType = wordSplit[1].slice(1,2);
+        traits.push(`T${transType}: ${transTraitType}`);
+      });
+      let transFullName = transPvp.UpgradeTypeRead.Name;
+      let transName = transFullName.substr(10, transFullName.length);
+
+      pvpRecommendation = `**PVP:** ${transName} ${traits.join(", ")}`
+    }
+    if (transWb && transWb.Config) {
+      let traits = [];
+      let keys = Object.keys(transWb.Config);
+      keys.map(x => {
+        let wordSplit = x.split("T");
+        let transType = wordSplit[1].slice(0,1);
+        let transTraitType = wordSplit[1].slice(1,2);
+        traits.push(`T${transType}: ${transTraitType}`);
+      });
+      let transFullName = transWb.UpgradeTypeRead.Name;
+      let transName = transFullName.substr(10, transFullName.length);
+
+      wbRecommendation = `**WB:** ${transName} ${traits.join(", ")}`
+    }
+    if (pveRecommendation.length !== 0) {
+      recommendation.push(pveRecommendation);
+    }
+    if (pvpRecommendation.length !== 0) {
+      recommendation.push(pvpRecommendation);
+    }
+    if (wbRecommendation.length !== 0) {
+      recommendation.push(wbRecommendation);
+    }
+    return recommendation.join("\n");  },
+  getTraitRecommendation(traitPve, traitPVP, traitWb) {
+    let pveRecommendation = "";
+    let pvpRecommendation = "";
+    let wbRecommendation = "";
+    let recommendation = [];
     if (traitPve && traitPve.Config) {
       let traits = [];
       let keys = Object.keys(traitPve.Config);
@@ -304,12 +454,35 @@ module.exports = {
         pvpRecommendation = `**PVP:** ${traits.join(", ")}`;
       }
     }
-    return `${pveRecommendation}\n${pvpRecommendation}`;
+    if (traitWb && traitWb.Config) {
+      let traits = [];
+      let keys = Object.keys(traitWb.Config);
+      keys.map((trait) =>
+        traitWb.Config[trait] < 5
+          ? traits.push(trait.toUpperCase())
+          : traits.unshift(trait.toUpperCase())
+      );
+      if (traits.length > 0) {
+        wbRecommendation = `**WB:** ${traits.join(", ")}`;
+      }
+    }
+    if (pveRecommendation.length !== 0) {
+      recommendation.push(pveRecommendation);
+    }
+    if (pvpRecommendation.length !== 0) {
+      recommendation.push(pvpRecommendation);
+    }
+    if (wbRecommendation.length !== 0) {
+      recommendation.push(wbRecommendation);
+    }
+    return recommendation.join("\n");
   },
 
-  getEquipRecommendation(equipPve, equipPvp) {
+  getEquipRecommendation(equipPve, equipPvp, equipWb) {
     let pveRecommendation = "";
     let pvpRecommendation = "";
+    let wbRecommendation = "";
+    let recommendation = [];
     let items = [
       "WeaponConfig",
       "ArmorConfig",
@@ -344,7 +517,30 @@ module.exports = {
           .join("")}`;
       }
     }
-    return `${pveRecommendation}\n${pvpRecommendation}`;
+    if (equipWb) {
+      let gear = [];
+      items.map(
+        (item) =>
+          equipWb[item] &&
+        equipWb[item].color &&
+          gear.push(equipWb[item].color)
+      );
+      if (gear.length > 0) {
+        wbRecommendation = `**WB:** ${gear
+          .map((color) => `${this.equipmentColors[color]} `)
+          .join("")}`;
+      }
+    }
+    if (pveRecommendation.length !== 0) {
+      recommendation.push(pveRecommendation);
+    }
+    if (pvpRecommendation.length !== 0) {
+      recommendation.push(pvpRecommendation);
+    }
+    if (wbRecommendation.length !== 0) {
+      recommendation.push(wbRecommendation);
+    }
+    return recommendation.join("\n");
   },
 
   getChaserRecommendation(traitPve, traitPvp) {

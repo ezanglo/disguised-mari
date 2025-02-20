@@ -542,7 +542,7 @@ module.exports = {
 
         case "trans": {
           const offset = 0;
-          const canvas = createCanvas(713, 926 + offset); createCanvas()
+          const canvas = createCanvas(713, 926 + offset); 
           const ctx = canvas.getContext("2d");
           let bg;
 
@@ -574,7 +574,8 @@ module.exports = {
           ctx.fillText(
             `${hero.DisplayName} | Transcendence Traits | ${trait.ContentTypeRead.Name}`,
             canvas.width - 10,
-            canvas.height - 10,
+            canvas.height - 20,
+
           );
           ctx.fillText()
           this.addWaterMark(ctx, canvas, -60);
@@ -1053,8 +1054,7 @@ module.exports = {
                   value: args[3],
                 });
               }
-
-              this.execute(interaction, true);
+              this.execute(interaction, false);
             }
           }
         })
