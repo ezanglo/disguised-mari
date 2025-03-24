@@ -60,7 +60,6 @@ client.errorLog = (e, interaction) => {
     embed.addFields([
       { name: "Stack Trace", value: "```" + stackTrace + "```" },
     ]);
-
     channel.send({
       embeds: [embed],
     });
