@@ -4,6 +4,12 @@ module.exports = async (client, interaction) => {
   
   try {
     if (interaction.isCommand()) {
+
+      return interaction.channel.send({
+        content: `Test`,
+        ephemeral: true,
+      });
+
       const cmd = client.commands.get(interaction.commandName);
       await interaction.deferReply();
       // await interaction.deferReply({ ephemeral: true });
