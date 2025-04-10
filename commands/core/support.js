@@ -6,6 +6,14 @@ module.exports = {
     .setDescription("Show how you can support Disguised Mari"),
   async execute(interaction) {
 
+      const developers = [
+          "Ezwa#3117",
+          "Aonyx#7851",
+          "FallenTaco#0120",
+          "jocker#2022",
+          "シャイロ#2182",
+      ];
+
       const embed = new EmbedBuilder()
           .setTitle("Disguised Mari is shutting down...")
           .setThumbnail(client.user.displayAvatarURL({ size: 1024, dynamic: true }))
@@ -22,7 +30,7 @@ module.exports = {
               },
               {
                   name: "Contact me",
-                  value: "> if you have any questions, you can DM me or contact me via https://ezraanglo.com",
+                  value: "> if you have any questions, you can DM me @ezwaa or contact me via https://ezraanglo.com",
               },
               {
                   name: "Where can I find guides now????",
@@ -32,7 +40,7 @@ module.exports = {
           .setImage(
               `https://media.discordapp.net/attachments/857764145298145291/1359768122147733524/bye.png?ex=67f8ae3f&is=67f75cbf&hm=7d650241b1e931ae693acab041b4dbc024c3fc593c09f72975c3b29bd00cfc52&=&format=webp&quality=lossless`
           ).setFooter({
-              text: `Developers: ${developers.join(" | ")}`,
+              text: `Big thanks to the developers: ${developers.join(" | ")}`,
           });
 
     // const embed = new EmbedBuilder()
