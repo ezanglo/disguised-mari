@@ -19,7 +19,7 @@ module.exports = async (client, interaction) => {
           .addFields([
             {
               name: "Announcement",
-              value: `> Hi everyone! Thanks a lot for using Disguised Mari! If you want to know more, please read this announcement https://discord.com/channels/857706068292665394/857768768029458432/1359745226478059550`,
+              value: `> Hi everyone! Thanks a lot for using Disguised Mari! If you want to know more, join maribot server https://discord.gg/H9WseZZ3W9 and please read this announcement https://discord.com/channels/857706068292665394/857768768029458432/1359745226478059550`,
             },
             {
               name: "Project is now open-sourced",
