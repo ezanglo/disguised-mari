@@ -42,7 +42,8 @@ module.exports = async (client, interaction) => {
             text: `Big thanks to the supporters and developers: ${developers.join(" | ")}`,
           });
 
-      return interaction.editReply({
+      await interaction.deferReply();
+      return await interaction.editReply({
         embeds: [embed],
         ephemeral: true,
       });
