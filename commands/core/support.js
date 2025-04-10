@@ -11,23 +11,17 @@ module.exports = {
           .setThumbnail(client.user.displayAvatarURL({ size: 1024, dynamic: true }))
           .addFields([
               {
-                  name: "\u200b",
-                  value: `> *
-              Hey there! Thanks a lot for using Disguised Mari! 
-              If you want to know more, please read this announcement https://discord.com/channels/857706068292665394/857768768029458432/1359745226478059550
-              *
-              `,
+                  name: "Announcement",
+                  value: `> * Hey there! Thanks a lot for using Disguised Mari! If you want to know more, please read this announcement https://discord.com/channels/857706068292665394/857768768029458432/1359745226478059550*`,
               },
-              // {
-              //     name: "\u200b",
-              //     value: "I have open-sourced the project, if you want to learn how it's made or if you want to make your own" +
-              //         "Here is the actual bot's code\n" +
-              //         "https://github.com/ezanglo/disguised-mari\n" +
-              //         "Here is the new admin portal that I was working on\n" +
-              //         "https://github.com/ezanglo/disguised-mari-bot",
-              // },
               {
-                  name: "\u200b",
+                  name: "Project is now open-sourced",
+                  value: `I have open-sourced the project, if you want to learn how it's made or if you want to make your own 
+                  Here is the actual bot's code https://github.com/ezanglo/disguised-mari 
+                  Here is the new admin portal that I was working on https://github.com/ezanglo/disguised-mari-bot`,
+              },
+              {
+                  name: "Contact me",
                   value: "if you have any questions, you can DM me or contact me via https://ezraanglo.com",
               },
               {
